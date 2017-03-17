@@ -1,0 +1,20 @@
+{
+    "name": "7_mars_jquery_ajax",
+    "version": "1.0.0",
+    "description": "",
+    "main": "main.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "Jesper Engström",
+    "license": "ISC",
+    "devDependencies": {
+        "autoprefixer": "^6.7.6",
+        "babel-preset-latest": "^6.22.0",
+        "browser-sync": "^2.18.8",
+        "gulp": "^3.9.1",
+        "gulp-babel": "^6.1.2",
+        "gulp-postcss": "^6.3.0",
+        "gulp-sass": "^3.1.0"
+    }
+}
