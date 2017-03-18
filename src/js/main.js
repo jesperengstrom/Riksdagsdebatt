@@ -12,14 +12,15 @@ function getAllMPs() {
     fetch("http://data.riksdagen.se/personlista/?iid=&fnamn=&enamn=&f_ar=&kn=&parti=&valkrets=&rdlstatus=&org=&utformat=json&termlista=")
         .then(response => response.json())
         .then(data => makeMPObject(data));
-
 }
 
-//making allmp:s an array of objects
+//making allmp:s an array of objects. MUST NOT BE GLOBAL
+let allMPs = [];
+
 function makeMPObject(MPs) {
     let personlista = MPs.personlista.person;
-    let allMPs = [];
-    console.log(personlista);
+
+    //console.log(personlista);
     for (let i in personlista) {
         allMPs.push({
             id: personlista[i].intressent_id,
@@ -37,12 +38,13 @@ function calcDebateChamp(allMPs) {
     for (let i = 0; i < allMPs.length; i++) {
         fetch(`http://data.riksdagen.se/anforandelista/?rm=2016%2F17&anftyp=Nej&d=${fromDate}&ts=&parti=&iid=${allMPs[i].id}&sz=200&utformat=json`)
             .then(response => response.json())
-            .then(data => print(data));
+            .then(data => print(data, i));
     }
 }
 
-function print(data) {
-    console.log(data.anforandelista["@antal"]);
+function print(data, index) {
+    allMPs[index].anforande = data.anforandelista["@antal"];
+    console.log(allMPs[index]);
 }
 
 function oneMonthBack() {

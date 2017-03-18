@@ -15,11 +15,13 @@ function getAllMPs() {
     });
 }
 
-//making allmp:s an array of objects
+//making allmp:s an array of objects. MUST NOT BE GLOBAL
+var allMPs = [];
+
 function makeMPObject(MPs) {
     var personlista = MPs.personlista.person;
-    var allMPs = [];
-    console.log(personlista);
+
+    //console.log(personlista);
     for (var i in personlista) {
         allMPs.push({
             id: personlista[i].intressent_id,
@@ -34,17 +36,23 @@ function makeMPObject(MPs) {
 
 function calcDebateChamp(allMPs) {
     var fromDate = oneMonthBack();
-    for (var i = 0; i < allMPs.length; i++) {
+
+    var _loop = function _loop(i) {
         fetch("http://data.riksdagen.se/anforandelista/?rm=2016%2F17&anftyp=Nej&d=" + fromDate + "&ts=&parti=&iid=" + allMPs[i].id + "&sz=200&utformat=json").then(function (response) {
             return response.json();
         }).then(function (data) {
-            return print(data);
+            return print(data, i);
         });
+    };
+
+    for (var i = 0; i < allMPs.length; i++) {
+        _loop(i);
     }
 }
 
-function print(data) {
-    console.log(data.anforandelista["@antal"]);
+function print(data, index) {
+    allMPs[index].anforande = data.anforandelista["@antal"];
+    console.log(allMPs[index]);
 }
 
 function oneMonthBack() {
