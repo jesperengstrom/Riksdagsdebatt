@@ -9,7 +9,7 @@ function start() {}
 
 //fetched from: http://data.riksdagen.se/personlista/?iid=&fnamn=&enamn=&f_ar=&kn=&parti=&valkrets=&rdlstatus=&org=&utformat=json&termlista=
 function fetchAllMPs() {
-    fetch("mps.json").then(function (response) {
+    fetch("json/rawMPs.json").then(function (response) {
         return response.json();
     }).then(function (data) {
         return makeMyMPObjects(data);
@@ -36,9 +36,10 @@ function makeMyMPObjects(MPs) {
 function fetchDebates(allMPs) {
     var fetchObj;
     var fromDate = oneMonthBack();
+    var countComebacks = "Nej";
 
     var _loop = function _loop(i) {
-        fetchObj = fetch("http://data.riksdagen.se/anforandelista/?rm=2016%2F17&anftyp=Nej&d=" + fromDate + "&ts=&parti=&iid=" + allMPs[i].id + "&sz=200&utformat=json").then(function (response) {
+        fetchObj = fetch("http://data.riksdagen.se/anforandelista/?rm=2016%2F17&anftyp=" + countComebacks + "&d=" + fromDate + "&ts=&parti=&iid=" + allMPs[i].id + "&sz=200&utformat=json").then(function (response) {
             return response.json();
         }).then(function (data) {
             return addSpeechToObj(data, i);
@@ -63,7 +64,7 @@ function addSpeechToObj(data, index) {
 }
 
 /**
- * WORKING. SORTS - MAKES THE TOP LIST
+ * WORKING. SORTS: MAKES THE TOP LIST
  * @param {array} mps - mp array of objects
  */
 function sortNumberOfSpeeches(mps) {
@@ -71,12 +72,20 @@ function sortNumberOfSpeeches(mps) {
         return a.numberofspeeches > b.numberofspeeches ? -1 : 1;
     });
     console.log(sortedMPs);
+    printTopList(sortedMPs);
+}
+
+function printTopList(mps) {
+    var top = 10;
+    var toplist = document.getElementById("toplist");
+    for (var i = 0; i <= top; i++) {
+        toplist.innerHTML += "\n        <tr data-id=\"" + mps[i].id + "\">\n            <td>" + (i + 1) + "</td>\n            <td>\n                <div class=\"mp-img-container\">\n                    <img src=\"" + mps[i].image + "\" class=\"mp-img\" alt=\"" + mps[i].firstname + " " + mps[i].lastname + "\">\n                </div>\n            </td>\n            <td>" + mps[i].firstname + " " + mps[i].lastname + " " + mps[i].party + "</td>\n            <td>" + mps[i].numberofspeeches + " anf\xF6randen</td>\n        </tr>\n        ";
+    }
 }
 
 /**
  * REVERTS CURRENT DATE ONE MONTH. NEEDS REMAKE (DEC BECOMES -1 INST OF 12)
  */
-
 function oneMonthBack() {
     var date = new Date();
     return date.getFullYear() + "-" + date.getMonth() + "-" + date.getDate();

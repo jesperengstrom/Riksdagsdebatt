@@ -10,7 +10,7 @@ function start() {
 
 //fetched from: http://data.riksdagen.se/personlista/?iid=&fnamn=&enamn=&f_ar=&kn=&parti=&valkrets=&rdlstatus=&org=&utformat=json&termlista=
 function fetchAllMPs() {
-    fetch("mps.json")
+    fetch("json/rawMPs.json")
         .then(response => response.json())
         .then(data => makeMyMPObjects(data));
 }
@@ -35,8 +35,9 @@ function makeMyMPObjects(MPs) {
 function fetchDebates(allMPs) {
     var fetchObj;
     let fromDate = oneMonthBack();
+    let countComebacks = "Nej";
     for (let i = 0; i < allMPs.length; i++) {
-        fetchObj = fetch(`http://data.riksdagen.se/anforandelista/?rm=2016%2F17&anftyp=Nej&d=${fromDate}&ts=&parti=&iid=${allMPs[i].id}&sz=200&utformat=json`)
+        fetchObj = fetch(`http://data.riksdagen.se/anforandelista/?rm=2016%2F17&anftyp=${countComebacks}&d=${fromDate}&ts=&parti=&iid=${allMPs[i].id}&sz=200&utformat=json`)
             .then(response => response.json())
             .then(data => addSpeechToObj(data, i));
     }
@@ -55,19 +56,40 @@ function addSpeechToObj(data, index) {
 }
 
 /**
- * WORKING. SORTS - MAKES THE TOP LIST
+ * WORKING. SORTS: MAKES THE TOP LIST
  * @param {array} mps - mp array of objects
  */
 function sortNumberOfSpeeches(mps) {
     const sortedMPs = mps.sort((a, b) => a.numberofspeeches > b.numberofspeeches ? -1 : 1);
     console.log(sortedMPs);
+    printTopList(sortedMPs);
+}
+
+function printTopList(mps) {
+    let top = 10;
+    var toplist = document.getElementById("toplist");
+    for (let i = 0; i <= top; i++) {
+        toplist.innerHTML += `
+        <tr data-id="${mps[i].id}">
+            <td>${i + 1}</td>
+            <td>
+                <div class="mp-img-container">
+                    <img src="${mps[i].image}" class="mp-img" alt="${mps[i].firstname} ${mps[i].lastname}">
+                </div>
+            </td>
+            <td>${mps[i].firstname} ${mps[i].lastname} ${mps[i].party}</td>
+            <td>${mps[i].numberofspeeches} anföranden</td>
+        </tr>
+        `
+
+    }
+
 }
 
 
 /**
  * REVERTS CURRENT DATE ONE MONTH. NEEDS REMAKE (DEC BECOMES -1 INST OF 12)
  */
-
 function oneMonthBack() {
     let date = new Date();
     return date.getFullYear() + "-" + date.getMonth() + "-" + date.getDate();
