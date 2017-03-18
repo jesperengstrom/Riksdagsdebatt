@@ -25,28 +25,48 @@ function makeMyMPObjects(MPs) {
             id: personlista[i].intressent_id,
             firstname: personlista[i].tilltalsnamn,
             lastname: personlista[i].efternamn,
-            party: "(" + personlista[i].parti + ")"
+            party: "(" + personlista[i].parti + ")",
+            image: personlista[i].bild_url_192
         });
     }
     fetchDebates(allMPs);
 }
 
 function fetchDebates(allMPs) {
+    var fetchObj;
     let fromDate = oneMonthBack();
     for (let i = 0; i < allMPs.length; i++) {
-        fetch(`http://data.riksdagen.se/anforandelista/?rm=2016%2F17&anftyp=Nej&d=${fromDate}&ts=&parti=&iid=${allMPs[i].id}&sz=200&utformat=json`)
+        fetchObj = fetch(`http://data.riksdagen.se/anforandelista/?rm=2016%2F17&anftyp=Nej&d=${fromDate}&ts=&parti=&iid=${allMPs[i].id}&sz=200&utformat=json`)
             .then(response => response.json())
             .then(data => addSpeechToObj(data, i));
     }
     console.log(allMPs);
+
+    fetchObj.then(function() {
+        sortNumberOfSpeeches(allMPs);
+    });
 }
 
 function addSpeechToObj(data, index) {
-    allMPs[index].numberofspeeches = data.anforandelista["@antal"];
+    allMPs[index].numberofspeeches = parseInt(data.anforandelista["@antal"]);
     if (data.anforandelista["@antal"] !== "0") {
         allMPs[index].speeches = data.anforandelista.anforande;
     }
 }
+
+/**
+ * WORKING. SORTS - MAKES THE TOP LIST
+ * @param {array} mps - mp array of objects
+ */
+function sortNumberOfSpeeches(mps) {
+    const sortedMPs = mps.sort((a, b) => a.numberofspeeches > b.numberofspeeches ? -1 : 1);
+    console.log(sortedMPs);
+}
+
+
+/**
+ * REVERTS CURRENT DATE ONE MONTH. NEEDS REMAKE (DEC BECOMES -1 INST OF 12)
+ */
 
 function oneMonthBack() {
     let date = new Date();
@@ -54,33 +74,11 @@ function oneMonthBack() {
 }
 
 
-
-//making allmp:s an object literal of objects
-// function makeMyMPObjects(MPs) {
-//     let personlista = MPs.personlista.person;
-//     let allMPs = {}
-//     console.log(personlista);
-//     for (let i in personlista) {
-//         allMPs[personlista[i].intressent_id] = {
-//             id: personlista[i].intressent_id,
-//             fornamn: personlista[i].tilltalsnamn,
-//             efternamn: personlista[i].efternamn,
-//             parti: personlista[i].parti
-//         };
-//     }
-//     console.log(allMPs);
+/**
+ * FOO FOR CALC ALL SPEECHES
+ */
+// function totalNumberOfSpeeches(array) {
+//     const totalSpeeches = array.reduce(function(prev, cur) {
+//         return prev + cur.numberofspeeches;
+//     }, 0);
 // }
-
-/* function callRiksdagen() {
-    fetch("http://data.riksdagen.se/anforandelista/?rm=2016%2F17&anftyp=Nej&d=2017-01-01&ts=&parti=&iid=0273506284025&sz=2000&utformat=json")
-        .then(response => response.json())
-        .then(data => display(data));
-}
-
-function display(data) {
-    console.log(data);
-    let number = data.anforandelista["@antal"];
-    let name = data.anforandelista.anforande[0].talare;
-    document.getElementById("displayP").innerText = `${name}: ${number}`;
-
-}*/
