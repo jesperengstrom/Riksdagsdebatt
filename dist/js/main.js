@@ -1,26 +1,26 @@
-(function() {
+"use strict";
+
+(function () {
     document.addEventListener("DOMContentLoaded", start);
     document.getElementById("getButton").addEventListener("click", getAllMPs);
-
 })();
 
-function start() {
-
-}
+function start() {}
 
 function getAllMPs() {
-    fetch("http://data.riksdagen.se/personlista/?iid=&fnamn=&enamn=&f_ar=&kn=&parti=&valkrets=&rdlstatus=&org=&utformat=json&termlista=")
-        .then(response => response.json())
-        .then(data => makeMPObject(data));
-
+    fetch("http://data.riksdagen.se/personlista/?iid=&fnamn=&enamn=&f_ar=&kn=&parti=&valkrets=&rdlstatus=&org=&utformat=json&termlista=").then(function (response) {
+        return response.json();
+    }).then(function (data) {
+        return makeMPObject(data);
+    });
 }
 
 //making allmp:s an array of objects
 function makeMPObject(MPs) {
-    let personlista = MPs.personlista.person;
-    let allMPs = [];
+    var personlista = MPs.personlista.person;
+    var allMPs = [];
     console.log(personlista);
-    for (let i in personlista) {
+    for (var i in personlista) {
         allMPs.push({
             id: personlista[i].intressent_id,
             fornamn: personlista[i].tilltalsnamn,
@@ -33,11 +33,13 @@ function makeMPObject(MPs) {
 }
 
 function calcDebateChamp(allMPs) {
-    let fromDate = oneMonthBack();
-    for (let i = 0; i < allMPs.length; i++) {
-        fetch(`http://data.riksdagen.se/anforandelista/?rm=2016%2F17&anftyp=Nej&d=${fromDate}&ts=&parti=&iid=${allMPs[i].id}&sz=200&utformat=json`)
-            .then(response => response.json())
-            .then(data => print(data));
+    var fromDate = oneMonthBack();
+    for (var i = 0; i < allMPs.length; i++) {
+        fetch("http://data.riksdagen.se/anforandelista/?rm=2016%2F17&anftyp=Nej&d=" + fromDate + "&ts=&parti=&iid=" + allMPs[i].id + "&sz=200&utformat=json").then(function (response) {
+            return response.json();
+        }).then(function (data) {
+            return print(data);
+        });
     }
 }
 
@@ -46,11 +48,9 @@ function print(data) {
 }
 
 function oneMonthBack() {
-    let date = new Date();
+    var date = new Date();
     return date.getFullYear() + "-" + date.getMonth() + "-" + date.getDate();
 }
-
-
 
 //making allmp:s an object literal of objects
 // function makeMPObject(MPs) {
