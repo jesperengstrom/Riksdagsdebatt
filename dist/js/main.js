@@ -2,57 +2,58 @@
 
 (function () {
     document.addEventListener("DOMContentLoaded", start);
-    document.getElementById("getButton").addEventListener("click", getAllMPs);
+    document.getElementById("getButton").addEventListener("click", fetchAllMPs);
 })();
 
 function start() {}
 
-function getAllMPs() {
-    fetch("http://data.riksdagen.se/personlista/?iid=&fnamn=&enamn=&f_ar=&kn=&parti=&valkrets=&rdlstatus=&org=&utformat=json&termlista=").then(function (response) {
+//fetched from: http://data.riksdagen.se/personlista/?iid=&fnamn=&enamn=&f_ar=&kn=&parti=&valkrets=&rdlstatus=&org=&utformat=json&termlista=
+function fetchAllMPs() {
+    fetch("mps.json").then(function (response) {
         return response.json();
     }).then(function (data) {
-        return makeMPObject(data);
+        return makeMyMPObjects(data);
     });
 }
 
 //making allmp:s an array of objects. MUST NOT BE GLOBAL
 var allMPs = [];
 
-function makeMPObject(MPs) {
+function makeMyMPObjects(MPs) {
     var personlista = MPs.personlista.person;
-
-    //console.log(personlista);
     for (var i in personlista) {
         allMPs.push({
             id: personlista[i].intressent_id,
-            fornamn: personlista[i].tilltalsnamn,
-            efternamn: personlista[i].efternamn,
-            parti: "(" + personlista[i].parti + ")"
+            firstname: personlista[i].tilltalsnamn,
+            lastname: personlista[i].efternamn,
+            party: "(" + personlista[i].parti + ")"
         });
     }
-    console.log(allMPs);
-    calcDebateChamp(allMPs);
+    fetchDebates(allMPs);
 }
 
-function calcDebateChamp(allMPs) {
+function fetchDebates(allMPs) {
     var fromDate = oneMonthBack();
 
     var _loop = function _loop(i) {
         fetch("http://data.riksdagen.se/anforandelista/?rm=2016%2F17&anftyp=Nej&d=" + fromDate + "&ts=&parti=&iid=" + allMPs[i].id + "&sz=200&utformat=json").then(function (response) {
             return response.json();
         }).then(function (data) {
-            return print(data, i);
+            return addSpeechToObj(data, i);
         });
     };
 
     for (var i = 0; i < allMPs.length; i++) {
         _loop(i);
     }
+    console.log(allMPs);
 }
 
-function print(data, index) {
-    allMPs[index].anforande = data.anforandelista["@antal"];
-    console.log(allMPs[index]);
+function addSpeechToObj(data, index) {
+    allMPs[index].numberofspeeches = data.anforandelista["@antal"];
+    if (data.anforandelista["@antal"] !== "0") {
+        allMPs[index].speeches = data.anforandelista.anforande;
+    }
 }
 
 function oneMonthBack() {
@@ -61,7 +62,7 @@ function oneMonthBack() {
 }
 
 //making allmp:s an object literal of objects
-// function makeMPObject(MPs) {
+// function makeMyMPObjects(MPs) {
 //     let personlista = MPs.personlista.person;
 //     let allMPs = {}
 //     console.log(personlista);
