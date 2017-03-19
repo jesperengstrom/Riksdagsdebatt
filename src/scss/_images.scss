@@ -1,0 +1,14 @@
+.mp-img-container {
+    height: 150px;
+    width: 150px;
+    overflow: hidden;
+    border: 5px solid;
+    border-radius: 50%;
+    margin-top: 1rem;
+}
+
+.mp-img {
+    position: relative;
+    top: -10px;
+    width: 150px;
+}

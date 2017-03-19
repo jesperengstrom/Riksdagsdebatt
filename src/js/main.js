@@ -1,12 +1,41 @@
+/**
+ * EVENT LISTENERS
+ */
+
 (function() {
     document.addEventListener("DOMContentLoaded", start);
-    document.getElementById("getButton").addEventListener("click", fetchAllMPs);
+    //document.getElementById("getButton").addEventListener("click", fetchAllMPs);
+    /**
+     * above event listener picks upp mp-array and makes 300 ajax calls and creates
+     * a live object.
+     * below event listener bypasses all that & cuts directly to sorting using 
+     * a placeholder array of objects.
+     */
+    document.getElementById("getButton").addEventListener("click", function() {
+        sortNumberOfSpeeches(testMPs);
+    });
 
 })();
 
-function start() {
+function start() {}
 
-}
+
+const STORE = (function() {
+    var allMPs = [];
+
+
+
+    return {
+        getMPs: function() {
+            return allMPs;
+        },
+
+        setMPs: function() {
+
+        }
+
+    };
+})();
 
 //fetched from: http://data.riksdagen.se/personlista/?iid=&fnamn=&enamn=&f_ar=&kn=&parti=&valkrets=&rdlstatus=&org=&utformat=json&termlista=
 function fetchAllMPs() {
@@ -16,7 +45,7 @@ function fetchAllMPs() {
 }
 
 //making allmp:s an array of objects. MUST NOT BE GLOBAL
-let allMPs = [];
+
 
 function makeMyMPObjects(MPs) {
     let personlista = MPs.personlista.person;
@@ -25,7 +54,7 @@ function makeMyMPObjects(MPs) {
             id: personlista[i].intressent_id,
             firstname: personlista[i].tilltalsnamn,
             lastname: personlista[i].efternamn,
-            party: "(" + personlista[i].parti + ")",
+            party: personlista[i].parti,
             image: personlista[i].bild_url_192
         });
     }
@@ -68,16 +97,16 @@ function sortNumberOfSpeeches(mps) {
 function printTopList(mps) {
     let top = 10;
     var toplist = document.getElementById("toplist");
-    for (let i = 0; i <= top; i++) {
+    for (let i = 0; i < top; i++) {
         toplist.innerHTML += `
         <tr data-id="${mps[i].id}">
             <td>${i + 1}</td>
             <td>
-                <div class="mp-img-container">
+                <div class="mp-img-container border-${mps[i].party}">
                     <img src="${mps[i].image}" class="mp-img" alt="${mps[i].firstname} ${mps[i].lastname}">
                 </div>
             </td>
-            <td>${mps[i].firstname} ${mps[i].lastname} ${mps[i].party}</td>
+            <td>${mps[i].firstname} ${mps[i].lastname} (${mps[i].party})</td>
             <td>${mps[i].numberofspeeches} anföranden</td>
         </tr>
         `

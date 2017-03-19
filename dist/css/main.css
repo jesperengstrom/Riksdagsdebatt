@@ -2,7 +2,7 @@
   height: 150px;
   width: 150px;
   overflow: hidden;
-  border: 1px solid;
+  border: 5px solid;
   border-radius: 50%;
   margin-top: 1rem; }
 
@@ -10,3 +10,30 @@
   position: relative;
   top: -10px;
   width: 150px; }
+
+.border-M {
+  border-color: #52BDEC; }
+
+.border-S {
+  border-color: #EE2020; }
+
+.border-V {
+  border-color: #B00000; }
+
+.border-MP {
+  border-color: #53A045; }
+
+.border-SD {
+  border-color: #FBC700; }
+
+.border-C {
+  border-color: #016A3A; }
+
+.border-L {
+  border-color: #0069B4; }
+
+.border-KD {
+  border-color: #2D338E; }
+
+.border-- {
+  border-color: #DDDDDD; }
