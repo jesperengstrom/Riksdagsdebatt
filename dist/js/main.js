@@ -1,121 +1,151 @@
 "use strict";
 
-/**
- * EVENT LISTENERS
- */
-
-(function () {
-    document.addEventListener("DOMContentLoaded", start);
-    //document.getElementById("getButton").addEventListener("click", fetchAllMPs);
-    /**
-     * above event listener picks upp mp-array and makes 300 ajax calls and creates
-     * a live object.
-     * below event listener bypasses all that & cuts directly to sorting using 
-     * a placeholder array of objects.
-     */
-    document.getElementById("getButton").addEventListener("click", function () {
-        sortNumberOfSpeeches(testMPs);
-    });
-})();
-
-function start() {}
-
-var STORE = function () {
+var MODEL = function () {
     var allMPs = [];
 
+    /**
+     * Returns a promise of all MP:s. NEEDS REJECT OPTION
+     * Originally fetched from: http://data.riksdagen.se/personlista/?iid=&fnamn=&enamn=&f_ar=&kn=&parti=&valkrets=&rdlstatus=&org=&utformat=json&termlista=
+     * But now fetched locally since it's very big and doesn't change very often.
+     */
+    function fetchAllMPs() {
+        return fetch("json/rawMPs.json").then(function (response) {
+            return response.json();
+        });
+    }
+
+    /**
+     * Returns a slimmer array of MP:s with the props i need
+     * @param {array} mps - original raw array of MP:s
+     */
+    function slimArray(mps) {
+        var mp = mps.personlista.person;
+        var newArr = [];
+        for (var i in mp) {
+            newArr.push({
+                id: mp[i].intressent_id,
+                firstname: mp[i].tilltalsnamn,
+                lastname: mp[i].efternamn,
+                party: mp[i].parti,
+                image: mp[i].bild_url_192
+            });
+        }
+        return newArr;
+    }
+
+    /**
+     * REVERTS CURRENT DATE ONE MONTH. NEEDS REMAKE (DEC BECOMES -1 INST OF 12)
+     */
+    function oneMonthBack() {
+        var date = new Date();
+        return date.getFullYear() + "-" + date.getMonth() + "-" + date.getDate();
+    }
+
     return {
+        fetchDebates: function fetchDebates(allMPs) {
+            var fetchObj;
+            var fromDate = oneMonthBack();
+            var countComebacks = "Ja";
+
+            var _loop = function _loop(i) {
+                fetchObj = fetch("http://data.riksdagen.se/anforandelista/?rm=2016%2F17&anftyp=" + countComebacks + "&d=" + fromDate + "&ts=&parti=&iid=" + allMPs[i].id + "&sz=200&utformat=json").then(function (response) {
+                    return response.json();
+                }).then(function (data) {
+                    return addSpeechToObj(data, i);
+                });
+            };
+
+            for (var i = 0; i < allMPs.length; i++) {
+                _loop(i);
+            }
+            console.log(allMPs);
+
+            fetchObj.then(function () {
+                sortNumberOfSpeeches(allMPs);
+            });
+        },
+
+        addSpeechToObj: function addSpeechToObj(data, index) {
+            allMPs[index].numberofspeeches = parseInt(data.anforandelista["@antal"]);
+            if (data.anforandelista["@antal"] !== "0") {
+                allMPs[index].speeches = data.anforandelista.anforande;
+            }
+        },
+
+        /**
+         * Function in charge of returning my master array of MP-objects inc. all necessary info using several helper methods.
+         * This is created on page load and then stored + printed. 
+         */
+        makeMasterMPArr: function makeMasterMPArr() {
+            var mps = fetchAllMPs().then(function (data) {
+                var newArr = slimArray(data);
+                console.log(newArr);
+            });
+        },
+
         getMPs: function getMPs() {
             return allMPs;
         },
 
-        setMPs: function setMPs() {}
-
+        setMPs: function setMPs(mps) {
+            allMPs = mps;
+        }
     };
 }();
 
-//fetched from: http://data.riksdagen.se/personlista/?iid=&fnamn=&enamn=&f_ar=&kn=&parti=&valkrets=&rdlstatus=&org=&utformat=json&termlista=
-function fetchAllMPs() {
-    fetch("json/rawMPs.json").then(function (response) {
-        return response.json();
-    }).then(function (data) {
-        return makeMyMPObjects(data);
-    });
-}
+var CONTROLLER = function () {
 
-//making allmp:s an array of objects. MUST NOT BE GLOBAL
-
-
-function makeMyMPObjects(MPs) {
-    var personlista = MPs.personlista.person;
-    for (var i in personlista) {
-        allMPs.push({
-            id: personlista[i].intressent_id,
-            firstname: personlista[i].tilltalsnamn,
-            lastname: personlista[i].efternamn,
-            party: personlista[i].parti,
-            image: personlista[i].bild_url_192
+    /**
+     * SORTS: MAKES THE TOP LIST
+     * @param {array} mps - mp array of objects
+     */
+    function sortNumberOfSpeeches(mps) {
+        return mps.sort(function (a, b) {
+            return a.numberofspeeches > b.numberofspeeches ? -1 : 1;
         });
     }
-    fetchDebates(allMPs);
-}
 
-function fetchDebates(allMPs) {
-    var fetchObj;
-    var fromDate = oneMonthBack();
-    var countComebacks = "Nej";
+    return {
+        /**
+         * first call picks upp mp-array and makes 300 ajax calls and creates
+         * a live object.
+         * second call is a dev bypass that cuts directly to sorting using 
+         * a readymade array of objects.
+         */
+        initMPObject: function initMPObject() {
+            MODEL.makeMasterMPArr();
 
-    var _loop = function _loop(i) {
-        fetchObj = fetch("http://data.riksdagen.se/anforandelista/?rm=2016%2F17&anftyp=" + countComebacks + "&d=" + fromDate + "&ts=&parti=&iid=" + allMPs[i].id + "&sz=200&utformat=json").then(function (response) {
-            return response.json();
-        }).then(function (data) {
-            return addSpeechToObj(data, i);
-        });
+            //let sortedMPs = sortNumberOfSpeeches(testMPs);
+            //MODEL.setMPs(sortedMPs);
+            //CONTROLLER.readyToPrintToplist(sortedMPs);
+        },
+        readyToPrintToplist: function readyToPrintToplist(mps) {
+            VIEW.printTopList(mps);
+        }
     };
+}();
 
-    for (var i = 0; i < allMPs.length; i++) {
-        _loop(i);
-    }
-    console.log(allMPs);
+var VIEW = function () {
 
-    fetchObj.then(function () {
-        sortNumberOfSpeeches(allMPs);
-    });
-}
+    return {
+        printTopList: function printTopList(mps) {
+            console.log(mps);
+            var top = 10;
+            var toplist = document.getElementById("toplist");
+            toplist.innerHTML = "";
+            for (var i = 0; i < top; i++) {
+                toplist.innerHTML += "\n        <tr data-id=\"" + mps[i].id + "\">\n            <td>" + (i + 1) + "</td>\n            <td>\n                <div class=\"mp-img-container border-" + mps[i].party + "\">\n                    <img src=\"" + mps[i].image + "\" class=\"mp-img\" alt=\"" + mps[i].firstname + " " + mps[i].lastname + "\">\n                </div>\n            </td>\n            <td>" + mps[i].firstname + " " + mps[i].lastname + " (" + mps[i].party + ")</td>\n            <td>" + mps[i].numberofspeeches + " anf\xF6randen</td>\n        </tr>\n        ";
+            }
+        },
+        /**
+         * EVENT LISTENERS
+         */
 
-function addSpeechToObj(data, index) {
-    allMPs[index].numberofspeeches = parseInt(data.anforandelista["@antal"]);
-    if (data.anforandelista["@antal"] !== "0") {
-        allMPs[index].speeches = data.anforandelista.anforande;
-    }
-}
-
-/**
- * WORKING. SORTS: MAKES THE TOP LIST
- * @param {array} mps - mp array of objects
- */
-function sortNumberOfSpeeches(mps) {
-    var sortedMPs = mps.sort(function (a, b) {
-        return a.numberofspeeches > b.numberofspeeches ? -1 : 1;
-    });
-    console.log(sortedMPs);
-    printTopList(sortedMPs);
-}
-
-function printTopList(mps) {
-    var top = 10;
-    var toplist = document.getElementById("toplist");
-    for (var i = 0; i < top; i++) {
-        toplist.innerHTML += "\n        <tr data-id=\"" + mps[i].id + "\">\n            <td>" + (i + 1) + "</td>\n            <td>\n                <div class=\"mp-img-container border-" + mps[i].party + "\">\n                    <img src=\"" + mps[i].image + "\" class=\"mp-img\" alt=\"" + mps[i].firstname + " " + mps[i].lastname + "\">\n                </div>\n            </td>\n            <td>" + mps[i].firstname + " " + mps[i].lastname + " (" + mps[i].party + ")</td>\n            <td>" + mps[i].numberofspeeches + " anf\xF6randen</td>\n        </tr>\n        ";
-    }
-}
-
-/**
- * REVERTS CURRENT DATE ONE MONTH. NEEDS REMAKE (DEC BECOMES -1 INST OF 12)
- */
-function oneMonthBack() {
-    var date = new Date();
-    return date.getFullYear() + "-" + date.getMonth() + "-" + date.getDate();
-}
+        init: function () {
+            document.getElementById("getButton").addEventListener("click", CONTROLLER.initMPObject);
+        }()
+    };
+}();
 
 /**
  * FOO FOR CALC ALL SPEECHES
