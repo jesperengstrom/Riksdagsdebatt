@@ -9,7 +9,8 @@ const MODEL = (function() {
      */
     function fetchAllMPs() {
         return fetch("json/rawMPs.json")
-            .then(response => response.json());
+            .then(response => response.json())
+            .then(data => slimArray(data));
     }
 
     /**
@@ -18,9 +19,8 @@ const MODEL = (function() {
      */
     function slimArray(mps) {
         let mp = mps.personlista.person;
-        let newArr = [];
         for (let i in mp) {
-            newArr.push({
+            allMPs.push({
                 id: mp[i].intressent_id,
                 firstname: mp[i].tilltalsnamn,
                 lastname: mp[i].efternamn,
@@ -28,22 +28,30 @@ const MODEL = (function() {
                 image: mp[i].bild_url_192
             });
         }
-        return newArr;
+        fetchDebates(allMPs);
     }
 
-    function fetchDebates(mps, i, fromDate) {
+    function fetchDebates(mps) {
+        var fetchObj;
+        let fromDate = oneMonthBack();
         let countComebacks = "Ja";
-        return fetch(`http://data.riksdagen.se/anforandelista/?rm=2016%2F17&anftyp=${countComebacks}&d=${fromDate}&ts=&parti=&iid=${mps[i].id}&sz=200&utformat=json`)
-            .then(response => response.json());
+
+        for (let i in mps) {
+            fetchObj = fetch(`http://data.riksdagen.se/anforandelista/?rm=2016%2F17&anftyp=${countComebacks}&d=${fromDate}&ts=&parti=&iid=${mps[i].id}&sz=200&utformat=json`)
+                .then(response => response.json())
+                .then(data => addSpeech(data, i));
+        }
+        fetchObj.then(function() {
+            CONTROLLER.storeArray(allMPs, "all");
+        });
 
     }
 
-    function addSpeech(data, i, newArr) {
-        newArr[i].numberofspeeches = parseInt(data.anforandelista["@antal"]);
+    function addSpeech(data, i) {
+        allMPs[i].numberofspeeches = parseInt(data.anforandelista["@antal"]);
         if (data.anforandelista["@antal"] !== "0") {
-            newArr[i].speeches = data.anforandelista.anforande;
+            allMPs[i].speeches = data.anforandelista.anforande;
         }
-        return newArr[i];
     }
 
     /**
@@ -54,41 +62,6 @@ const MODEL = (function() {
         return date.getFullYear() + "-" + date.getMonth() + "-" + date.getDate();
     }
 
-    return {
-
-        /**
-         * Function in charge of returning my master array of MP-objects inc. all necessary info using several helper methods.
-         * This is created on page load and then stored + printed. 
-         */
-        makeMasterMPArr: function() {
-            let fetchy = fetchAllMPs().then(data => {
-                let newArr = slimArray(data);
-                let fromDate = oneMonthBack();
-                for (let i in newArr) {
-                    fetchDebates(newArr, i, fromDate)
-                        .then(data => {
-                            newArr[i] = addSpeech(data, i, newArr);
-                        });
-                }
-                return newArr;
-            });
-            fetchy.then(function(result) {
-                CONTROLLER.storeArray(result, "all");
-            });
-        },
-
-        getArray: function(which) {
-            return which === "all" ? allMPs : filteredMPs;
-        },
-
-        setArray: function(mps, which) {
-            return which === "all" ? allMPs = mps : filteredMPs = mps;
-        },
-    };
-})();
-
-const CONTROLLER = (function() {
-
     /**
      * SORTS: MAKES THE TOP LIST
      * @param {array} mps - mp array of objects
@@ -97,28 +70,41 @@ const CONTROLLER = (function() {
         return mps.sort((a, b) => a.numberofspeeches > b.numberofspeeches ? -1 : 1);
     }
 
-    function launchPrintToplist(type) {
-        let toPrint = MODEL.getArray(type);
-        VIEW.printTopList(toPrint);
-    }
-
     return {
 
-        /**
-         * first call picks upp mp-array and makes 300 ajax calls and creates
-         * a live object.
-         * second call is a dev bypass that cuts directly to sorting using 
-         * a readymade array of objects.
-         */
+        getArray: function(which) {
+            return which === "all" ? allMPs : filteredMPs;
+        },
+
+        setArray: function(mps, which) {
+            let sorted = sortNumberOfSpeeches(mps);
+            return which === "all" ? allMPs = sorted : filteredMPs = sorted;
+        },
 
         initMPObject: function() {
-            let mpObject = MODEL.makeMasterMPArr();
+            fetchAllMPs();
+        },
+    };
+})();
+
+const CONTROLLER = (function() {
+    return {
+        init: function() {
+            VIEW.toggleLoadScreen();
+            //MODEL.initMPObject();
+
+
         },
 
         storeArray: function(mps, type) {
             MODEL.setArray(mps, type);
-            launchPrintToplist(type);
+            CONTROLLER.launchPrintToplist(type);
         },
+
+        launchPrintToplist: function(type) {
+            let toPrint = MODEL.getArray(type);
+            VIEW.printTopList(toPrint);
+        }
 
     };
 
@@ -128,6 +114,12 @@ const CONTROLLER = (function() {
 const VIEW = (function() {
 
     return {
+        toggleLoadScreen: function() {
+            let loadScreen = document.querySelector(".loading");
+            loadScreen.classList.toggle("visible");
+            loadScreen.classList.toggle("hidden");
+        },
+
         printTopList: function(mps) {
             let top = 10;
             var toplist = document.getElementById("toplist");
@@ -151,8 +143,17 @@ const VIEW = (function() {
         /**
          * EVENT LISTENERS
          */
+        /**
+         * first call picks upp mp-array and makes 300 ajax calls and creates
+         * a live object.
+         * second call is a dev bypass that cuts directly to sorting using 
+         * a readymade array of objects.
+         */
         init: (function() {
-            document.getElementById("getButton").addEventListener("click", CONTROLLER.initMPObject);
+            document.getElementById("getButton").addEventListener("click", CONTROLLER.init);
+            /*document.getElementById("getButton").addEventListener("click", function() {
+                CONTROLLER.storeArray(testMPs, "all");
+            });*/
         })()
     };
 })();
