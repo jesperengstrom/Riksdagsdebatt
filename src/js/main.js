@@ -25,6 +25,9 @@ const MODEL = (function() {
                 firstname: mp[i].tilltalsnamn,
                 lastname: mp[i].efternamn,
                 party: mp[i].parti,
+                gender: mp[i].kon,
+                born: mp[i].fodd_ar,
+                electorate: mp[i].valkrets,
                 image: mp[i].bild_url_192
             });
         }
@@ -33,7 +36,7 @@ const MODEL = (function() {
 
     function fetchDebates(mps) {
         var fetchObj;
-        let fromDate = oneMonthBack();
+        let fromDate = MODEL.oneMonthBack();
         let countComebacks = "Ja";
 
         for (let i in mps) {
@@ -53,14 +56,6 @@ const MODEL = (function() {
         if (data.anforandelista["@antal"] !== "0") {
             allMPs[i].speeches = data.anforandelista.anforande;
         }
-    }
-
-    /**
-     * REVERTS CURRENT DATE ONE MONTH. NEEDS REMAKE (DEC BECOMES -1 INST OF 12)
-     */
-    function oneMonthBack() {
-        let date = new Date();
-        return date.getFullYear() + "-" + date.getMonth() + "-" + date.getDate();
     }
 
     /**
@@ -85,6 +80,13 @@ const MODEL = (function() {
         initMPObject: function() {
             fetchAllMPs();
         },
+        /**
+         * REVERTS CURRENT DATE ONE MONTH. NEEDS REMAKE (DEC BECOMES -1 INST OF 12)
+         */
+        oneMonthBack: function() {
+            let date = new Date();
+            return date.getFullYear() + "-" + date.getMonth() + "-" + date.getDate();
+        }
     };
 })();
 
@@ -96,6 +98,7 @@ const CONTROLLER = (function() {
         },
 
         storeArray: function(mps, type) {
+            console.log(mps);
             MODEL.setArray(mps, type);
             CONTROLLER.launchPrintToplist(type);
         },
@@ -103,6 +106,11 @@ const CONTROLLER = (function() {
         launchPrintToplist: function(type) {
             let toPrint = MODEL.getArray(type);
             VIEW.printTopList(toPrint);
+        },
+
+        openModal: function(event, mp) {
+            VIEW.renderModal.call(mp);
+            $("#mpModal").modal();
         }
     };
 })();
@@ -119,13 +127,10 @@ const VIEW = (function() {
     function listenersForToplist(mps) {
         for (let i in mps) {
             document.querySelector(`tr[data-id="${mps[i].id}"]`).
-            addEventListener('click', openWindow.bind(null, event, mps[i]));
+            addEventListener('click', CONTROLLER.openModal.bind(null, event, mps[i]));
         }
     }
 
-    function openWindow(event, mp) {
-        console.log(mp);
-    }
 
     return {
 
@@ -159,6 +164,31 @@ const VIEW = (function() {
                 toplistArr.push(mps[i]);
             }
             listenersForToplist(toplistArr);
+        },
+
+        renderModal: function() {
+            console.log(this);
+            let speechList = speechSnippet(this);
+            let modalBody = document.querySelector(".modal-content");
+            modalBody.innerHTML =
+                `
+            <div class="modal-header">
+                <h5 class="modal-title" id="mpModalLabel">${this.firstname} ${this.lastname} (${this.party})
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Född: ${this.born}. Valkrets: ${this.electorate}.
+                <p>${this.firstname} har talat i Riksdagen ${this.numberofspeeches} gånger sedan
+                    ${MODEL.oneMonthBack()}.
+                </p>
+                <p> Här är några av de saker som ${this.gender == "man" ? "han" : "hon"} har debatterat:</p>
+                ${speechList}
+            </div>
+            
+            `;
         },
 
 

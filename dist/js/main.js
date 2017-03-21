@@ -29,6 +29,9 @@ var MODEL = function () {
                 firstname: mp[i].tilltalsnamn,
                 lastname: mp[i].efternamn,
                 party: mp[i].parti,
+                gender: mp[i].kon,
+                born: mp[i].fodd_ar,
+                electorate: mp[i].valkrets,
                 image: mp[i].bild_url_192
             });
         }
@@ -37,7 +40,7 @@ var MODEL = function () {
 
     function fetchDebates(mps) {
         var fetchObj;
-        var fromDate = oneMonthBack();
+        var fromDate = MODEL.oneMonthBack();
         var countComebacks = "Ja";
 
         var _loop = function _loop(i) {
@@ -65,14 +68,6 @@ var MODEL = function () {
     }
 
     /**
-     * REVERTS CURRENT DATE ONE MONTH. NEEDS REMAKE (DEC BECOMES -1 INST OF 12)
-     */
-    function oneMonthBack() {
-        var date = new Date();
-        return date.getFullYear() + "-" + date.getMonth() + "-" + date.getDate();
-    }
-
-    /**
      * SORTS: MAKES THE TOP LIST
      * @param {array} mps - mp array of objects
      */
@@ -95,6 +90,13 @@ var MODEL = function () {
 
         initMPObject: function initMPObject() {
             fetchAllMPs();
+        },
+        /**
+         * REVERTS CURRENT DATE ONE MONTH. NEEDS REMAKE (DEC BECOMES -1 INST OF 12)
+         */
+        oneMonthBack: function oneMonthBack() {
+            var date = new Date();
+            return date.getFullYear() + "-" + date.getMonth() + "-" + date.getDate();
         }
     };
 }();
@@ -107,6 +109,7 @@ var CONTROLLER = function () {
         },
 
         storeArray: function storeArray(mps, type) {
+            console.log(mps);
             MODEL.setArray(mps, type);
             CONTROLLER.launchPrintToplist(type);
         },
@@ -114,6 +117,11 @@ var CONTROLLER = function () {
         launchPrintToplist: function launchPrintToplist(type) {
             var toPrint = MODEL.getArray(type);
             VIEW.printTopList(toPrint);
+        },
+
+        openModal: function openModal(event, mp) {
+            VIEW.renderModal.call(mp);
+            $("#mpModal").modal();
         }
     };
 }();
@@ -128,12 +136,8 @@ var VIEW = function () {
      */
     function listenersForToplist(mps) {
         for (var i in mps) {
-            document.querySelector("tr[data-id=\"" + mps[i].id + "\"]").addEventListener('click', openWindow.bind(null, event, mps[i]));
+            document.querySelector("tr[data-id=\"" + mps[i].id + "\"]").addEventListener('click', CONTROLLER.openModal.bind(null, event, mps[i]));
         }
-    }
-
-    function openWindow(event, mp) {
-        console.log(mp);
     }
 
     return {
@@ -157,6 +161,13 @@ var VIEW = function () {
                 toplistArr.push(mps[i]);
             }
             listenersForToplist(toplistArr);
+        },
+
+        renderModal: function renderModal() {
+            console.log(this);
+            var speechList = speechSnippet(this);
+            var modalBody = document.querySelector(".modal-content");
+            modalBody.innerHTML = "\n            <div class=\"modal-header\">\n                <h5 class=\"modal-title\" id=\"mpModalLabel\">" + this.firstname + " " + this.lastname + " (" + this.party + ")\n                </h5>\n                <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-label=\"Close\">\n                    <span aria-hidden=\"true\">&times;</span>\n                </button>\n            </div>\n            <div class=\"modal-body\">\n                <p>F\xF6dd: " + this.born + ". Valkrets: " + this.electorate + ".\n                <p>" + this.firstname + " har talat i Riksdagen " + this.numberofspeeches + " g\xE5nger sedan\n                    " + MODEL.oneMonthBack() + ".\n                </p>\n                <p> H\xE4r \xE4r n\xE5gra av de saker som " + (this.gender == "man" ? "han" : "hon") + " har debatterat:</p>\n                " + speechList + "\n            </div>\n            \n            ";
         },
 
         /**

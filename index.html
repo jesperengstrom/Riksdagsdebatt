@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="dist/css/main.css">
@@ -13,7 +13,7 @@
 <body>
 
     <h1>Debatt-toppen</h1>
-    <button id="getButton">Hämta topplista</button>
+    <button id="getButton" class="btn btn-primary">Hämta topplista</button>
     <!-- load spinner courtesy of http://tobiasahlin.com/spinkit/ -->
     <div class="loading hidden">
         <h4>Laddar in data, var god vänta...</h4>
@@ -32,13 +32,29 @@
             <div class="sk-circle12 sk-child"></div>
         </div>
     </div>
-    <!-- end -->
+    <!-- end spinner-->
+    <!-- Modal -->
+    <div class="modal fade" id="mpModal" tabindex="-1" role="dialog" aria-labelledby="mpModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+            </div>
+        </div>
+    </div>
+    <!-- end modal -->
+    <!-- modal button--
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#mpModal">
+  Launch demo modal
+</button>
+    --end modal button-->
     <div>
         <table>
             <tbody id="toplist">
             </tbody>
         </table>
     </div>
+    <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
 
     <script src="saved-allMPs.js"></script>
     <script src="dist/js/main.js"></script>
