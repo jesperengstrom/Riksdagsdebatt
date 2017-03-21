@@ -43,6 +43,7 @@ const MODEL = (function() {
         }
         fetchObj.then(function() {
             CONTROLLER.storeArray(allMPs, "all");
+            VIEW.toggleLoadScreen();
         });
 
     }
@@ -91,9 +92,7 @@ const CONTROLLER = (function() {
     return {
         init: function() {
             VIEW.toggleLoadScreen();
-            //MODEL.initMPObject();
-
-
+            MODEL.initMPObject();
         },
 
         storeArray: function(mps, type) {
@@ -105,44 +104,65 @@ const CONTROLLER = (function() {
             let toPrint = MODEL.getArray(type);
             VIEW.printTopList(toPrint);
         }
-
     };
-
 })();
 
 
 const VIEW = (function() {
 
+    /**
+     * It was a nightmare to figure out how to append event listerners to all the toplist items. I tried every possible closure to get
+     * the loop varables saved. Turns out the problem was probably the DOM selector operating in the same loop as the template literal.
+     * I.e. an element was selected just as it was created. As soon as i made another loop everything just worked :/
+     * @param {array} mps 
+     */
+    function listenersForToplist(mps) {
+        for (let i in mps) {
+            document.querySelector(`tr[data-id="${mps[i].id}"]`).
+            addEventListener('click', openWindow.bind(null, event, mps[i]));
+        }
+    }
+
+    function openWindow(event, mp) {
+        console.log(mp);
+    }
+
     return {
+
         toggleLoadScreen: function() {
-            let loadScreen = document.querySelector(".loading");
+            const loadScreen = document.querySelector(".loading");
             loadScreen.classList.toggle("visible");
             loadScreen.classList.toggle("hidden");
         },
 
         printTopList: function(mps) {
+            //console.log(mps);
             let top = 10;
-            var toplist = document.getElementById("toplist");
+            const toplist = document.getElementById("toplist");
             toplist.innerHTML = "";
+
+            const toplistArr = [];
+
             for (let i = 0; i < top; i++) {
                 toplist.innerHTML += `
-        <tr data-id="${mps[i].id}">
-            <td>${i + 1}</td>
-            <td>
-                <div class="mp-img-container border-${mps[i].party}">
-                    <img src="${mps[i].image}" class="mp-img" alt="${mps[i].firstname} ${mps[i].lastname}">
-                </div>
-            </td>
-            <td>${mps[i].firstname} ${mps[i].lastname} (${mps[i].party})</td>
-            <td>${mps[i].numberofspeeches} anföranden</td>
-        </tr>
-        `
+            <tr data-id="${mps[i].id}">
+                <td>${i + 1}</td>
+                <td>
+                    <div class="mp-img-container border-${mps[i].party}">
+                        <img src="${mps[i].image}" class="mp-img" alt="${mps[i].firstname} ${mps[i].lastname}">
+                    </div>
+                </td>
+                <td>${mps[i].firstname} ${mps[i].lastname} (${mps[i].party})</td>
+                <td>${mps[i].numberofspeeches} anföranden</td>
+            </tr>
+            `;
+                toplistArr.push(mps[i]);
             }
+            listenersForToplist(toplistArr);
         },
 
-        /**
-         * EVENT LISTENERS
-         */
+
+
         /**
          * first call picks upp mp-array and makes 300 ajax calls and creates
          * a live object.
@@ -150,10 +170,10 @@ const VIEW = (function() {
          * a readymade array of objects.
          */
         init: (function() {
-            document.getElementById("getButton").addEventListener("click", CONTROLLER.init);
-            /*document.getElementById("getButton").addEventListener("click", function() {
+            //document.getElementById("getButton").addEventListener("click", CONTROLLER.init);
+            document.getElementById("getButton").addEventListener("click", function() {
                 CONTROLLER.storeArray(testMPs, "all");
-            });*/
+            });
         })()
     };
 })();

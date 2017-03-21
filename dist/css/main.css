@@ -38,6 +38,7 @@
 .border-- {
   border-color: #DDDDDD; }
 
+/* Spinkit courtesy of http://tobiasahlin.com/spinkit/ */
 .sk-circle {
   margin: 200px auto;
   width: 80px;
@@ -57,7 +58,7 @@
   margin: 0 auto;
   width: 15%;
   height: 15%;
-  background-color: red;
+  background-color: slategray;
   border-radius: 100%;
   animation: sk-circleBounceDelay 1.2s infinite ease-in-out both; }
 
@@ -137,3 +138,6 @@
 
 .hidden {
   display: none; }
+
+.visible {
+  display: block; }
