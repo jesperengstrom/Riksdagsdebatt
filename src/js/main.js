@@ -118,17 +118,64 @@ const CONTROLLER = (function() {
 
 const VIEW = (function() {
 
-    /**
-     * It was a nightmare to figure out how to append event listerners to all the toplist items. I tried every possible closure to get
-     * the loop varables saved. Turns out the problem was probably the DOM selector operating in the same loop as the template literal.
-     * I.e. an element was selected just as it was created. As soon as i made another loop everything just worked :/
-     * @param {array} mps 
-     */
-    function listenersForToplist(mps) {
-        for (let i in mps) {
-            document.querySelector(`tr[data-id="${mps[i].id}"]`).
-            addEventListener('click', CONTROLLER.openModal.bind(null, event, mps[i]));
+            /**
+             * It was a nightmare to figure out how to append event listerners to all the toplist items. I tried every possible closure to get
+             * not only the last one to stick. Turns out the problem was probably the DOM selector operating in the same 
+             * loop as the template literal? Don't know why really. But soon as i made another loop everything just worked :/
+             * @param {array} mps 
+             */
+            function listenersForToplist(mps) {
+                for (let i in mps) {
+                    document.querySelector(`tr[data-id="${mps[i].id}"]`).
+                    addEventListener('click', CONTROLLER.openModal.bind(null, event, mps[i]));
+                }
+            }
+
+            /**
+             * You can often remove a lot of things in these topic descriptions. For ex "svar på interpellation 1235 om..." after the "om" follows
+             * the real issue, so i extract everything after the "om", capitalize the first letter and return.
+             * @param {string} string - topic of the speech
+             */
+            function trimString(string) {
+                let newString = string;
+                let search = newString.indexOf(" om ");
+                if (search > 0) {
+                    let temp = newString.substring(search + 4, newString.length);
+                    temp = capitalizeFirst(temp);
+                    newString = temp;
+                }
+                return newString;
+            }
+
+            function capitalizeFirst(str) {
+                if (str) {
+                    str = str[0].toUpperCase() + str.substring(1, str.length);
+                }
+                return str;
+            }
+
+            function speechSnippet(mp) {
+                let string = ``;
+                let count = 0;
+                const sp = this.speeches;
+
+                if (!sp) return "Inga debatter";
+
+                for (let i in sp) {
+                    //if the previous debate was the same as this one, then skip it
+                    if (i == 0 || sp[i].avsnittsrubrik !== sp[i - 1].avsnittsrubrik) {
+                        //byt till anforande_url_xml om tid finns
+                        string += `<li><a href="${sp[i].protokoll_url_www}" target="_blank">${sp[i].replik == "Y" ? 
+                        `<span class="comeback-debate debate-topic">` : `<span class="own-debate debate-topic">`}${trimString(sp[i].avsnittsrubrik)} 
+                </span></a>
+                <span class="debate-context">${capitalizeFirst(sp[i].kammaraktivitet) || "" } ${sp[i].dok_datum}.</span> 
+                </li>`;
+                count++;
+
+            } else string += `<span class="additional-entries">${sp[i].replik == "Y" ? "| + replik " : "| + anförande "}</span>`
+            if (count === 10) break;
         }
+        return string;
     }
 
 
@@ -142,11 +189,10 @@ const VIEW = (function() {
 
         printTopList: function(mps) {
             //console.log(mps);
-            let top = 10;
             const toplist = document.getElementById("toplist");
-            toplist.innerHTML = "";
-
+            let top = 10;
             const toplistArr = [];
+            toplist.innerHTML = "";
 
             for (let i = 0; i < top; i++) {
                 toplist.innerHTML += `
@@ -158,7 +204,7 @@ const VIEW = (function() {
                     </div>
                 </td>
                 <td>${mps[i].firstname} ${mps[i].lastname} (${mps[i].party})</td>
-                <td>${mps[i].numberofspeeches} anföranden</td>
+                <td>${mps[i].numberofspeeches} debattinlägg</td>
             </tr>
             `;
                 toplistArr.push(mps[i]);
@@ -168,7 +214,7 @@ const VIEW = (function() {
 
         renderModal: function() {
             console.log(this);
-            let speechList = speechSnippet(this);
+            let speechList = speechSnippet.call(this);
             let modalBody = document.querySelector(".modal-content");
             modalBody.innerHTML =
                 `
@@ -181,17 +227,19 @@ const VIEW = (function() {
             </div>
             <div class="modal-body">
                 <p>Född: ${this.born}. Valkrets: ${this.electorate}.
-                <p>${this.firstname} har talat i Riksdagen ${this.numberofspeeches} gånger sedan
-                    ${MODEL.oneMonthBack()}.
+                <p>${this.firstname} har debatterat i Riksdagen vid ${this.numberofspeeches} tillfällen sedan
+                    ${MODEL.oneMonthBack()}. <br>
+                    Här är några av de senaste frågorna ${this.gender == "man" ? "han" : "hon"} har talat om:
                 </p>
-                <p> Här är några av de saker som ${this.gender == "man" ? "han" : "hon"} har debatterat:</p>
+                <ul>
                 ${speechList}
+                </ul>
+                    <span class="own-debate debate-topic">   </span> = Eget anförande
+                    <span class="comeback-debate debate-topic">   </span> = Replik på någon annan
             </div>
             
             `;
         },
-
-
 
         /**
          * first call picks upp mp-array and makes 300 ajax calls and creates

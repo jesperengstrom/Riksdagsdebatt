@@ -141,3 +141,22 @@
 
 .visible {
   display: block; }
+
+.own-debate {
+  background: yellow; }
+
+.comeback-debate {
+  background: lightyellow; }
+
+.debate-topic {
+  padding: 0 .5rem;
+  margin-right: .5rem; }
+
+.debate-context {
+  color: dimgray;
+  font-size: .8rem; }
+
+.additional-entries {
+  font-size: 0.85rem;
+  font-variant: small-caps;
+  color: darkgrey; }

@@ -130,14 +130,56 @@ var VIEW = function () {
 
     /**
      * It was a nightmare to figure out how to append event listerners to all the toplist items. I tried every possible closure to get
-     * the loop varables saved. Turns out the problem was probably the DOM selector operating in the same loop as the template literal.
-     * I.e. an element was selected just as it was created. As soon as i made another loop everything just worked :/
+     * not only the last one to stick. Turns out the problem was probably the DOM selector operating in the same 
+     * loop as the template literal? Don't know why really. But soon as i made another loop everything just worked :/
      * @param {array} mps 
      */
     function listenersForToplist(mps) {
         for (var i in mps) {
             document.querySelector("tr[data-id=\"" + mps[i].id + "\"]").addEventListener('click', CONTROLLER.openModal.bind(null, event, mps[i]));
         }
+    }
+
+    /**
+     * You can often remove a lot of things in these topic descriptions. For ex "svar på interpellation 1235 om..." after the "om" follows
+     * the real issue, so i extract everything after the "om", capitalize the first letter and return.
+     * @param {string} string - topic of the speech
+     */
+    function trimString(string) {
+        var newString = string;
+        var search = newString.indexOf(" om ");
+        if (search > 0) {
+            var temp = newString.substring(search + 4, newString.length);
+            temp = capitalizeFirst(temp);
+            newString = temp;
+        }
+        return newString;
+    }
+
+    function capitalizeFirst(str) {
+        if (str) {
+            str = str[0].toUpperCase() + str.substring(1, str.length);
+        }
+        return str;
+    }
+
+    function speechSnippet(mp) {
+        var string = "";
+        var count = 0;
+        var sp = this.speeches;
+
+        if (!sp) return "Inga debatter";
+
+        for (var i in sp) {
+            //if the previous debate was the same as this one, then skip it
+            if (i == 0 || sp[i].avsnittsrubrik !== sp[i - 1].avsnittsrubrik) {
+                //byt till anforande_url_xml om tid finns
+                string += "<li><a href=\"" + sp[i].protokoll_url_www + "\" target=\"_blank\">" + (sp[i].replik == "Y" ? "<span class=\"comeback-debate debate-topic\">" : "<span class=\"own-debate debate-topic\">") + trimString(sp[i].avsnittsrubrik) + " \n                </span></a>\n                <span class=\"debate-context\">" + (capitalizeFirst(sp[i].kammaraktivitet) || "") + " " + sp[i].dok_datum + ".</span> \n                </li>";
+                count++;
+            } else string += "<span class=\"additional-entries\">" + (sp[i].replik == "Y" ? "| + replik " : "| + anförande ") + "</span>";
+            if (count === 10) break;
+        }
+        return string;
     }
 
     return {
@@ -150,14 +192,13 @@ var VIEW = function () {
 
         printTopList: function printTopList(mps) {
             //console.log(mps);
-            var top = 10;
             var toplist = document.getElementById("toplist");
+            var top = 10;
+            var toplistArr = [];
             toplist.innerHTML = "";
 
-            var toplistArr = [];
-
             for (var i = 0; i < top; i++) {
-                toplist.innerHTML += "\n            <tr data-id=\"" + mps[i].id + "\">\n                <td>" + (i + 1) + "</td>\n                <td>\n                    <div class=\"mp-img-container border-" + mps[i].party + "\">\n                        <img src=\"" + mps[i].image + "\" class=\"mp-img\" alt=\"" + mps[i].firstname + " " + mps[i].lastname + "\">\n                    </div>\n                </td>\n                <td>" + mps[i].firstname + " " + mps[i].lastname + " (" + mps[i].party + ")</td>\n                <td>" + mps[i].numberofspeeches + " anf\xF6randen</td>\n            </tr>\n            ";
+                toplist.innerHTML += "\n            <tr data-id=\"" + mps[i].id + "\">\n                <td>" + (i + 1) + "</td>\n                <td>\n                    <div class=\"mp-img-container border-" + mps[i].party + "\">\n                        <img src=\"" + mps[i].image + "\" class=\"mp-img\" alt=\"" + mps[i].firstname + " " + mps[i].lastname + "\">\n                    </div>\n                </td>\n                <td>" + mps[i].firstname + " " + mps[i].lastname + " (" + mps[i].party + ")</td>\n                <td>" + mps[i].numberofspeeches + " debattinl\xE4gg</td>\n            </tr>\n            ";
                 toplistArr.push(mps[i]);
             }
             listenersForToplist(toplistArr);
@@ -165,9 +206,9 @@ var VIEW = function () {
 
         renderModal: function renderModal() {
             console.log(this);
-            var speechList = speechSnippet(this);
+            var speechList = speechSnippet.call(this);
             var modalBody = document.querySelector(".modal-content");
-            modalBody.innerHTML = "\n            <div class=\"modal-header\">\n                <h5 class=\"modal-title\" id=\"mpModalLabel\">" + this.firstname + " " + this.lastname + " (" + this.party + ")\n                </h5>\n                <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-label=\"Close\">\n                    <span aria-hidden=\"true\">&times;</span>\n                </button>\n            </div>\n            <div class=\"modal-body\">\n                <p>F\xF6dd: " + this.born + ". Valkrets: " + this.electorate + ".\n                <p>" + this.firstname + " har talat i Riksdagen " + this.numberofspeeches + " g\xE5nger sedan\n                    " + MODEL.oneMonthBack() + ".\n                </p>\n                <p> H\xE4r \xE4r n\xE5gra av de saker som " + (this.gender == "man" ? "han" : "hon") + " har debatterat:</p>\n                " + speechList + "\n            </div>\n            \n            ";
+            modalBody.innerHTML = "\n            <div class=\"modal-header\">\n                <h5 class=\"modal-title\" id=\"mpModalLabel\">" + this.firstname + " " + this.lastname + " (" + this.party + ")\n                </h5>\n                <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-label=\"Close\">\n                    <span aria-hidden=\"true\">&times;</span>\n                </button>\n            </div>\n            <div class=\"modal-body\">\n                <p>F\xF6dd: " + this.born + ". Valkrets: " + this.electorate + ".\n                <p>" + this.firstname + " har debatterat i Riksdagen vid " + this.numberofspeeches + " tillf\xE4llen sedan\n                    " + MODEL.oneMonthBack() + ". <br>\n                    H\xE4r \xE4r n\xE5gra av de senaste fr\xE5gorna " + (this.gender == "man" ? "han" : "hon") + " har talat om:\n                </p>\n                <ul>\n                " + speechList + "\n                </ul>\n                    <span class=\"own-debate debate-topic\">   </span> = Eget anf\xF6rande\n                    <span class=\"comeback-debate debate-topic\">   </span> = Replik p\xE5 n\xE5gon annan\n            </div>\n            \n            ";
         },
 
         /**
