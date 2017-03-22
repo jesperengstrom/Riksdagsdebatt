@@ -75,7 +75,8 @@ const MODEL = (function() {
         },
 
         /**
-         * stores the array of MP:s in the model. Either all or a current selection depending on request.
+         * Sorts the array of MP:s by no of speeches before storing it in the model.
+         * Either all or a current selection depending on request.
          */
         setArray: function(mps, which) {
             let sorted = sortNumberOfSpeeches(mps);
@@ -105,7 +106,7 @@ const MODEL = (function() {
                     return party === mp.party;
                 });
             });
-            CONTROLLER.storeArray(filtered, "some");
+            CONTROLLER.storeArray(filtered, "filtered");
         }
     };
 })();
@@ -124,6 +125,8 @@ const CONTROLLER = (function() {
 
         launchPrintToplist: function(type) {
             let toPrint = MODEL.getArray(type);
+            if (toPrint.length === 0) console.log("control says: Array came back empty from storage")
+            else console.log("To print:", toPrint);
             VIEW.printTopList(toPrint);
         },
 
@@ -148,8 +151,6 @@ const CONTROLLER = (function() {
          * Opens modal window for each MP. Sudden jQuery-syntax is advised from Bootstrap documentation.
          */
         openModal: function(event, mp) {
-            console.log("openModal");
-            console.log(mp);
             VIEW.renderModal.call(mp);
             $("#mpModal").modal();
         }
@@ -195,9 +196,7 @@ const VIEW = (function() {
                 return str;
             }
 
-            function speechSnippet(mp) {
-                console.log("speechsnippet");
-                console.log(mp);
+            function speechSnippet() {
                 let string = ``;
                 let count = 0;
                 const sp = this.speeches;
@@ -205,8 +204,9 @@ const VIEW = (function() {
                 if (!sp) return "Inga debatter";
 
                 for (let i in sp) {
-                    //if the previous debate was the same as this one, then skip it
-                    if (i === 0 || sp[i].avsnittsrubrik !== sp[i - 1].avsnittsrubrik) {
+                    //if the previous debate was the same as this one, then skip it.
+                    //the loose compare is important since it accepts "0".
+                    if (i == 0 || sp[i].avsnittsrubrik !== sp[i - 1].avsnittsrubrik) {
                         //byt till anforande_url_xml om tid finns
                         string += `<li><a href="${sp[i].protokoll_url_www}" target="_blank">${sp[i].replik == "Y" ? 
                         `<span class="comeback-debate debate-topic">` : `<span class="own-debate debate-topic">`}${trimString(sp[i].avsnittsrubrik)} 
@@ -233,15 +233,15 @@ const VIEW = (function() {
         printTopList: function (mps) {
             //console.log(mps);
             const toplist = document.getElementById("toplist");
-            let top = 10;
+            let max = 10;
             const toplistArr = [];
             toplist.innerHTML = "";
             if (mps.length === 0) {
-                toplist.innerHTML = `<p>Oops, kunde inte hämta data.</p>`;
+                toplist.innerHTML = `<p>Oops, det finns ingen data att visa</p>`;
                 return;
             }
-
-            for (let i = 0; i < top; i++) {
+            //keep printing the toplist until you reach the end or the max.
+            for (let i = 0; i < max && i < mps.length; i++) {
                 toplist.innerHTML += `
             <tr data-id="${mps[i].id}">
                 <td>${i + 1}</td>
@@ -271,10 +271,7 @@ const VIEW = (function() {
         },
 
         renderModal: function () {
-            console.log("rendermodal");
-            console.log(this);
-            let speechList = speechSnippet(this);
-            console.log(speechList);
+            let speechList = speechSnippet.call(this);
             let modalBody = document.querySelector(".modal-content");
             modalBody.innerHTML =
                 `

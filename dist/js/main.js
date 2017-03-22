@@ -86,7 +86,8 @@ var MODEL = function () {
         },
 
         /**
-         * stores the array of MP:s in the model. Either all or a current selection depending on request.
+         * Sorts the array of MP:s by no of speeches before storing it in the model.
+         * Either all or a current selection depending on request.
          */
         setArray: function setArray(mps, which) {
             var sorted = sortNumberOfSpeeches(mps);
@@ -116,7 +117,7 @@ var MODEL = function () {
                     return party === mp.party;
                 });
             });
-            CONTROLLER.storeArray(filtered, "some");
+            CONTROLLER.storeArray(filtered, "filtered");
         }
     };
 }();
@@ -135,6 +136,7 @@ var CONTROLLER = function () {
 
         launchPrintToplist: function launchPrintToplist(type) {
             var toPrint = MODEL.getArray(type);
+            if (toPrint.length === 0) console.log("control says: Array came back empty from storage");else console.log("To print:", toPrint);
             VIEW.printTopList(toPrint);
         },
 
@@ -159,8 +161,6 @@ var CONTROLLER = function () {
          * Opens modal window for each MP. Sudden jQuery-syntax is advised from Bootstrap documentation.
          */
         openModal: function openModal(event, mp) {
-            console.log("openModal");
-            console.log(mp);
             VIEW.renderModal.call(mp);
             $("#mpModal").modal();
         }
@@ -204,9 +204,7 @@ var VIEW = function () {
         return str;
     }
 
-    function speechSnippet(mp) {
-        console.log("speechsnippet");
-        console.log(mp);
+    function speechSnippet() {
         var string = "";
         var count = 0;
         var sp = this.speeches;
@@ -214,8 +212,9 @@ var VIEW = function () {
         if (!sp) return "Inga debatter";
 
         for (var i in sp) {
-            //if the previous debate was the same as this one, then skip it
-            if (i === 0 || sp[i].avsnittsrubrik !== sp[i - 1].avsnittsrubrik) {
+            //if the previous debate was the same as this one, then skip it.
+            //the loose compare is important since it accepts "0".
+            if (i == 0 || sp[i].avsnittsrubrik !== sp[i - 1].avsnittsrubrik) {
                 //byt till anforande_url_xml om tid finns
                 string += "<li><a href=\"" + sp[i].protokoll_url_www + "\" target=\"_blank\">" + (sp[i].replik == "Y" ? "<span class=\"comeback-debate debate-topic\">" : "<span class=\"own-debate debate-topic\">") + trimString(sp[i].avsnittsrubrik) + " \n                </span></a>\n                <span class=\"debate-context\">" + (capitalizeFirst(sp[i].kammaraktivitet) || "") + " " + sp[i].dok_datum + ".</span> \n                </li>";
                 count++;
@@ -236,15 +235,15 @@ var VIEW = function () {
         printTopList: function printTopList(mps) {
             //console.log(mps);
             var toplist = document.getElementById("toplist");
-            var top = 10;
+            var max = 10;
             var toplistArr = [];
             toplist.innerHTML = "";
             if (mps.length === 0) {
-                toplist.innerHTML = "<p>Oops, kunde inte h\xE4mta data.</p>";
+                toplist.innerHTML = "<p>Oops, det finns ingen data att visa</p>";
                 return;
             }
-
-            for (var i = 0; i < top; i++) {
+            //keep printing the toplist until you reach the end or the max.
+            for (var i = 0; i < max && i < mps.length; i++) {
                 toplist.innerHTML += "\n            <tr data-id=\"" + mps[i].id + "\">\n                <td>" + (i + 1) + "</td>\n                <td>\n                    <div class=\"mp-img-container border-" + mps[i].party + "\">\n                        <img src=\"" + mps[i].image + "\" class=\"mp-img\" alt=\"" + mps[i].firstname + " " + mps[i].lastname + "\">\n                    </div>\n                </td>\n                <td>" + mps[i].firstname + " " + mps[i].lastname + " (" + mps[i].party + ")</td>\n                <td>" + mps[i].numberofspeeches + " debattinl\xE4gg</td>\n            </tr>\n            ";
                 toplistArr.push(mps[i]);
             }
@@ -263,10 +262,7 @@ var VIEW = function () {
         },
 
         renderModal: function renderModal() {
-            console.log("rendermodal");
-            console.log(this);
-            var speechList = speechSnippet(this);
-            console.log(speechList);
+            var speechList = speechSnippet.call(this);
             var modalBody = document.querySelector(".modal-content");
             modalBody.innerHTML = "\n            <div class=\"modal-header\">\n                <h5 class=\"modal-title\" id=\"mpModalLabel\">" + this.firstname + " " + this.lastname + " (" + this.party + ")\n                </h5>\n                <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-label=\"Close\">\n                    <span aria-hidden=\"true\">&times;</span>\n                </button>\n            </div>\n            <div class=\"modal-body\">\n                <p>F\xF6dd: " + this.born + ". Valkrets: " + this.electorate + ".\n                <p>" + this.firstname + " har debatterat i Riksdagen vid " + this.numberofspeeches + " tillf\xE4llen sedan\n                    " + MODEL.oneMonthBack() + ". <br>\n                    H\xE4r \xE4r n\xE5gra av de senaste fr\xE5gorna " + (this.gender == "man" ? "han" : "hon") + " har talat om:\n                </p>\n                <ul>\n                " + speechList + "\n                </ul>\n                    <span class=\"own-debate debate-topic\">   </span> = Eget anf\xF6rande\n                    <span class=\"comeback-debate debate-topic\">   </span> = Replik p\xE5 n\xE5gon annan\n            </div>\n            \n            ";
         },
