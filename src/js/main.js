@@ -98,7 +98,6 @@ const CONTROLLER = (function() {
         },
 
         storeArray: function(mps, type) {
-            console.log(mps);
             MODEL.setArray(mps, type);
             CONTROLLER.launchPrintToplist(type);
         },
@@ -106,6 +105,19 @@ const CONTROLLER = (function() {
         launchPrintToplist: function(type) {
             let toPrint = MODEL.getArray(type);
             VIEW.printTopList(toPrint);
+        },
+
+        navClick: function() {
+            let clicked = this.firstChild.nodeValue;
+            if (clicked == "Topplistan") CONTROLLER.launchPrintToplist("all");
+            if (clicked == "Om") VIEW.printAbout();
+            if (clicked == "Partitoppen") VIEW.printPartySummary();
+            if (clicked == "Könsfördelning") VIEW.printGenderSummary();
+        },
+
+        activeParties: function(elems) {
+            console.log(elems);
+
         },
 
         openModal: function(event, mp) {
@@ -181,18 +193,22 @@ const VIEW = (function() {
 
     return {
 
-        toggleLoadScreen: function() {
+        toggleLoadScreen: function () {
             const loadScreen = document.querySelector(".loading");
             loadScreen.classList.toggle("visible");
             loadScreen.classList.toggle("hidden");
         },
 
-        printTopList: function(mps) {
+        printTopList: function (mps) {
             //console.log(mps);
             const toplist = document.getElementById("toplist");
             let top = 10;
             const toplistArr = [];
             toplist.innerHTML = "";
+            if (mps.length == 0) {
+                toplist.innerHTML = `<p>Oops, kunde inte hämta data.</p>`;
+                return;
+            }
 
             for (let i = 0; i < top; i++) {
                 toplist.innerHTML += `
@@ -211,8 +227,19 @@ const VIEW = (function() {
             }
             listenersForToplist(toplistArr);
         },
+        printAbout: function () {
+            alert("om");
+        },
 
-        renderModal: function() {
+        printPartySummary: function () {
+            alert("partisummering");
+        },
+
+        printGenderSummary: function () {
+            alert("könsfördelning");
+        },
+
+        renderModal: function () {
             console.log(this);
             let speechList = speechSnippet.call(this);
             let modalBody = document.querySelector(".modal-content");
@@ -242,16 +269,39 @@ const VIEW = (function() {
         },
 
         /**
-         * first call picks upp mp-array and makes 300 ajax calls and creates
+         * EVENT LISTENERS FOR NON-DYNAMIC ELEMENTS
+         * 1) first call picks upp mp-array and makes 300 ajax calls and creates
          * a live object.
-         * second call is a dev bypass that cuts directly to sorting using 
+         * 2) second call is a dev bypass that cuts directly to sorting using 
          * a readymade array of objects.
          */
-        init: (function() {
+        init: (function () {
+            //1)
             //document.getElementById("getButton").addEventListener("click", CONTROLLER.init);
-            document.getElementById("getButton").addEventListener("click", function() {
+            //2
+            document.getElementById("getButton").addEventListener("click", function () {
                 CONTROLLER.storeArray(testMPs, "all");
             });
+
+/**
+ * event listeners for my menu items, since nothing on the page is a hyperlink, just JS.
+ * Sends all of the nav-element to a controller function which then decides which one was clicked via 'this'.
+ */
+            document.querySelectorAll(".launch-nav-event").forEach(function (element) {
+                element.addEventListener("click", CONTROLLER.navClick);
+            }, this);
+
+/**
+ * Same basic concept with my listeners for party filtering. I just send the current nodelist along to controller function, 
+ * which then checks which ones are 'active', ie selected.
+ */
+            const partytoggles = document.querySelectorAll(".filterParty");
+            partytoggles.forEach(function (element) {
+                element.addEventListener("click", function() {
+                    CONTROLLER.activeParties(partytoggles);
+                });
+            }, this);
+
         })()
     };
 })();

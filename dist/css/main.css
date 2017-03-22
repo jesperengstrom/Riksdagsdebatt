@@ -160,3 +160,9 @@
   font-size: 0.85rem;
   font-variant: small-caps;
   color: darkgrey; }
+
+.nav-link {
+  margin-right: 1rem; }
+
+.dropdown-menu {
+  padding: 1rem; }

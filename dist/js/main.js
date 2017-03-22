@@ -109,7 +109,6 @@ var CONTROLLER = function () {
         },
 
         storeArray: function storeArray(mps, type) {
-            console.log(mps);
             MODEL.setArray(mps, type);
             CONTROLLER.launchPrintToplist(type);
         },
@@ -117,6 +116,18 @@ var CONTROLLER = function () {
         launchPrintToplist: function launchPrintToplist(type) {
             var toPrint = MODEL.getArray(type);
             VIEW.printTopList(toPrint);
+        },
+
+        navClick: function navClick() {
+            var clicked = this.firstChild.nodeValue;
+            if (clicked == "Topplistan") CONTROLLER.launchPrintToplist("all");
+            if (clicked == "Om") VIEW.printAbout();
+            if (clicked == "Partitoppen") VIEW.printPartySummary();
+            if (clicked == "Könsfördelning") VIEW.printGenderSummary();
+        },
+
+        activeParties: function activeParties(elems) {
+            console.log(elems);
         },
 
         openModal: function openModal(event, mp) {
@@ -196,12 +207,27 @@ var VIEW = function () {
             var top = 10;
             var toplistArr = [];
             toplist.innerHTML = "";
+            if (mps.length == 0) {
+                toplist.innerHTML = "<p>Oops, kunde inte h\xE4mta data.</p>";
+                return;
+            }
 
             for (var i = 0; i < top; i++) {
                 toplist.innerHTML += "\n            <tr data-id=\"" + mps[i].id + "\">\n                <td>" + (i + 1) + "</td>\n                <td>\n                    <div class=\"mp-img-container border-" + mps[i].party + "\">\n                        <img src=\"" + mps[i].image + "\" class=\"mp-img\" alt=\"" + mps[i].firstname + " " + mps[i].lastname + "\">\n                    </div>\n                </td>\n                <td>" + mps[i].firstname + " " + mps[i].lastname + " (" + mps[i].party + ")</td>\n                <td>" + mps[i].numberofspeeches + " debattinl\xE4gg</td>\n            </tr>\n            ";
                 toplistArr.push(mps[i]);
             }
             listenersForToplist(toplistArr);
+        },
+        printAbout: function printAbout() {
+            alert("om");
+        },
+
+        printPartySummary: function printPartySummary() {
+            alert("partisummering");
+        },
+
+        printGenderSummary: function printGenderSummary() {
+            alert("könsfördelning");
         },
 
         renderModal: function renderModal() {
@@ -212,16 +238,38 @@ var VIEW = function () {
         },
 
         /**
-         * first call picks upp mp-array and makes 300 ajax calls and creates
+         * EVENT LISTENERS FOR NON-DYNAMIC ELEMENTS
+         * 1) first call picks upp mp-array and makes 300 ajax calls and creates
          * a live object.
-         * second call is a dev bypass that cuts directly to sorting using 
+         * 2) second call is a dev bypass that cuts directly to sorting using 
          * a readymade array of objects.
          */
         init: function () {
+            //1)
             //document.getElementById("getButton").addEventListener("click", CONTROLLER.init);
+            //2
             document.getElementById("getButton").addEventListener("click", function () {
                 CONTROLLER.storeArray(testMPs, "all");
             });
+
+            /**
+             * event listeners for my menu items, since nothing on the page is a hyperlink, just JS.
+             * Sends all of the nav-element to a controller function which then decides which one was clicked via 'this'.
+             */
+            document.querySelectorAll(".launch-nav-event").forEach(function (element) {
+                element.addEventListener("click", CONTROLLER.navClick);
+            }, this);
+
+            /**
+             * Same basic concept with my listeners for party filtering. I just send the current nodelist along to controller function, 
+             * which then checks which ones are 'active', ie selected.
+             */
+            var partytoggles = document.querySelectorAll(".filterParty");
+            partytoggles.forEach(function (element) {
+                element.addEventListener("click", function () {
+                    CONTROLLER.activeParties(partytoggles);
+                });
+            }, this);
         }()
     };
 }();
