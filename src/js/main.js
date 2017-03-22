@@ -67,11 +67,16 @@ const MODEL = (function() {
     }
 
     return {
-
+        /**
+         * Retrieves the array of MP:s from the model. Either all or a current selection depending on request.
+         */
         getArray: function(which) {
             return which === "all" ? allMPs : filteredMPs;
         },
 
+        /**
+         * stores the array of MP:s in the model. Either all or a current selection depending on request.
+         */
         setArray: function(mps, which) {
             let sorted = sortNumberOfSpeeches(mps);
             return which === "all" ? allMPs = sorted : filteredMPs = sorted;
@@ -86,6 +91,21 @@ const MODEL = (function() {
         oneMonthBack: function() {
             let date = new Date();
             return date.getFullYear() + "-" + date.getMonth() + "-" + date.getDate();
+        },
+
+        /**
+         * I have to filter out my huge array on the basis of another array of
+         * selections. So i go through each element with array.Filter - it it returns true or not depends on the result
+         * of the nested array.Some which looks for any occurance in the other array.
+         */
+        filterMPs: function(lookingfor) {
+            let all = MODEL.getArray("all");
+            let filtered = all.filter((mp) => {
+                return lookingfor.some((party) => {
+                    return party === mp.party;
+                });
+            });
+            CONTROLLER.storeArray(filtered, "some");
         }
     };
 })();
@@ -115,12 +135,21 @@ const CONTROLLER = (function() {
             if (clicked == "Könsfördelning") VIEW.printGenderSummary();
         },
 
-        activeParties: function(elems) {
-            console.log(elems);
-
+        partySelection: function(elems) {
+            let selection = [];
+            elems.forEach((element) => {
+                if (element.classList.contains("activeParty")) {
+                    selection.push(element.firstChild.nodeValue);
+                }
+            });
+            MODEL.filterMPs(selection);
         },
-
+        /**
+         * Opens modal window for each MP. Sudden jQuery-syntax is advised from Bootstrap documentation.
+         */
         openModal: function(event, mp) {
+            console.log("openModal");
+            console.log(mp);
             VIEW.renderModal.call(mp);
             $("#mpModal").modal();
         }
@@ -167,6 +196,8 @@ const VIEW = (function() {
             }
 
             function speechSnippet(mp) {
+                console.log("speechsnippet");
+                console.log(mp);
                 let string = ``;
                 let count = 0;
                 const sp = this.speeches;
@@ -175,7 +206,7 @@ const VIEW = (function() {
 
                 for (let i in sp) {
                     //if the previous debate was the same as this one, then skip it
-                    if (i == 0 || sp[i].avsnittsrubrik !== sp[i - 1].avsnittsrubrik) {
+                    if (i === 0 || sp[i].avsnittsrubrik !== sp[i - 1].avsnittsrubrik) {
                         //byt till anforande_url_xml om tid finns
                         string += `<li><a href="${sp[i].protokoll_url_www}" target="_blank">${sp[i].replik == "Y" ? 
                         `<span class="comeback-debate debate-topic">` : `<span class="own-debate debate-topic">`}${trimString(sp[i].avsnittsrubrik)} 
@@ -184,7 +215,7 @@ const VIEW = (function() {
                 </li>`;
                 count++;
 
-            } else string += `<span class="additional-entries">${sp[i].replik == "Y" ? "| + replik " : "| + anförande "}</span>`
+            } else string += `<span class="additional-entries">${sp[i].replik == "Y" ? "| + replik " : "| + anförande "}</span>`;
             if (count === 10) break;
         }
         return string;
@@ -205,7 +236,7 @@ const VIEW = (function() {
             let top = 10;
             const toplistArr = [];
             toplist.innerHTML = "";
-            if (mps.length == 0) {
+            if (mps.length === 0) {
                 toplist.innerHTML = `<p>Oops, kunde inte hämta data.</p>`;
                 return;
             }
@@ -240,8 +271,10 @@ const VIEW = (function() {
         },
 
         renderModal: function () {
+            console.log("rendermodal");
             console.log(this);
-            let speechList = speechSnippet.call(this);
+            let speechList = speechSnippet(this);
+            console.log(speechList);
             let modalBody = document.querySelector(".modal-content");
             modalBody.innerHTML =
                 `
@@ -292,13 +325,14 @@ const VIEW = (function() {
             }, this);
 
 /**
- * Same basic concept with my listeners for party filtering. I just send the current nodelist along to controller function, 
- * which then checks which ones are 'active', ie selected.
+ * Same concept with my listeners for party filtering, except I toggle a class and lets the controller function check
+ * which ones are 'active', ie selected.
  */
-            const partytoggles = document.querySelectorAll(".filterParty");
-            partytoggles.forEach(function (element) {
+            const partyBtns = document.querySelectorAll(".partyBtn");
+            partyBtns.forEach(function (element) {
                 element.addEventListener("click", function() {
-                    CONTROLLER.activeParties(partytoggles);
+                    this.classList.toggle("activeParty");
+                    CONTROLLER.partySelection(partyBtns);
                 });
             }, this);
 

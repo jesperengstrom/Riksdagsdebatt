@@ -78,11 +78,16 @@ var MODEL = function () {
     }
 
     return {
-
+        /**
+         * Retrieves the array of MP:s from the model. Either all or a current selection depending on request.
+         */
         getArray: function getArray(which) {
             return which === "all" ? allMPs : filteredMPs;
         },
 
+        /**
+         * stores the array of MP:s in the model. Either all or a current selection depending on request.
+         */
         setArray: function setArray(mps, which) {
             var sorted = sortNumberOfSpeeches(mps);
             return which === "all" ? allMPs = sorted : filteredMPs = sorted;
@@ -97,6 +102,21 @@ var MODEL = function () {
         oneMonthBack: function oneMonthBack() {
             var date = new Date();
             return date.getFullYear() + "-" + date.getMonth() + "-" + date.getDate();
+        },
+
+        /**
+         * I have to filter out my huge array on the basis of another array of
+         * selections. So i go through each element with array.Filter - it it returns true or not depends on the result
+         * of the nested array.Some which looks for any occurance in the other array.
+         */
+        filterMPs: function filterMPs(lookingfor) {
+            var all = MODEL.getArray("all");
+            var filtered = all.filter(function (mp) {
+                return lookingfor.some(function (party) {
+                    return party === mp.party;
+                });
+            });
+            CONTROLLER.storeArray(filtered, "some");
         }
     };
 }();
@@ -126,11 +146,21 @@ var CONTROLLER = function () {
             if (clicked == "Könsfördelning") VIEW.printGenderSummary();
         },
 
-        activeParties: function activeParties(elems) {
-            console.log(elems);
+        partySelection: function partySelection(elems) {
+            var selection = [];
+            elems.forEach(function (element) {
+                if (element.classList.contains("activeParty")) {
+                    selection.push(element.firstChild.nodeValue);
+                }
+            });
+            MODEL.filterMPs(selection);
         },
-
+        /**
+         * Opens modal window for each MP. Sudden jQuery-syntax is advised from Bootstrap documentation.
+         */
         openModal: function openModal(event, mp) {
+            console.log("openModal");
+            console.log(mp);
             VIEW.renderModal.call(mp);
             $("#mpModal").modal();
         }
@@ -175,6 +205,8 @@ var VIEW = function () {
     }
 
     function speechSnippet(mp) {
+        console.log("speechsnippet");
+        console.log(mp);
         var string = "";
         var count = 0;
         var sp = this.speeches;
@@ -183,7 +215,7 @@ var VIEW = function () {
 
         for (var i in sp) {
             //if the previous debate was the same as this one, then skip it
-            if (i == 0 || sp[i].avsnittsrubrik !== sp[i - 1].avsnittsrubrik) {
+            if (i === 0 || sp[i].avsnittsrubrik !== sp[i - 1].avsnittsrubrik) {
                 //byt till anforande_url_xml om tid finns
                 string += "<li><a href=\"" + sp[i].protokoll_url_www + "\" target=\"_blank\">" + (sp[i].replik == "Y" ? "<span class=\"comeback-debate debate-topic\">" : "<span class=\"own-debate debate-topic\">") + trimString(sp[i].avsnittsrubrik) + " \n                </span></a>\n                <span class=\"debate-context\">" + (capitalizeFirst(sp[i].kammaraktivitet) || "") + " " + sp[i].dok_datum + ".</span> \n                </li>";
                 count++;
@@ -207,7 +239,7 @@ var VIEW = function () {
             var top = 10;
             var toplistArr = [];
             toplist.innerHTML = "";
-            if (mps.length == 0) {
+            if (mps.length === 0) {
                 toplist.innerHTML = "<p>Oops, kunde inte h\xE4mta data.</p>";
                 return;
             }
@@ -231,8 +263,10 @@ var VIEW = function () {
         },
 
         renderModal: function renderModal() {
+            console.log("rendermodal");
             console.log(this);
-            var speechList = speechSnippet.call(this);
+            var speechList = speechSnippet(this);
+            console.log(speechList);
             var modalBody = document.querySelector(".modal-content");
             modalBody.innerHTML = "\n            <div class=\"modal-header\">\n                <h5 class=\"modal-title\" id=\"mpModalLabel\">" + this.firstname + " " + this.lastname + " (" + this.party + ")\n                </h5>\n                <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-label=\"Close\">\n                    <span aria-hidden=\"true\">&times;</span>\n                </button>\n            </div>\n            <div class=\"modal-body\">\n                <p>F\xF6dd: " + this.born + ". Valkrets: " + this.electorate + ".\n                <p>" + this.firstname + " har debatterat i Riksdagen vid " + this.numberofspeeches + " tillf\xE4llen sedan\n                    " + MODEL.oneMonthBack() + ". <br>\n                    H\xE4r \xE4r n\xE5gra av de senaste fr\xE5gorna " + (this.gender == "man" ? "han" : "hon") + " har talat om:\n                </p>\n                <ul>\n                " + speechList + "\n                </ul>\n                    <span class=\"own-debate debate-topic\">   </span> = Eget anf\xF6rande\n                    <span class=\"comeback-debate debate-topic\">   </span> = Replik p\xE5 n\xE5gon annan\n            </div>\n            \n            ";
         },
@@ -261,13 +295,14 @@ var VIEW = function () {
             }, this);
 
             /**
-             * Same basic concept with my listeners for party filtering. I just send the current nodelist along to controller function, 
-             * which then checks which ones are 'active', ie selected.
+             * Same concept with my listeners for party filtering, except I toggle a class and lets the controller function check
+             * which ones are 'active', ie selected.
              */
-            var partytoggles = document.querySelectorAll(".filterParty");
-            partytoggles.forEach(function (element) {
+            var partyBtns = document.querySelectorAll(".partyBtn");
+            partyBtns.forEach(function (element) {
                 element.addEventListener("click", function () {
-                    CONTROLLER.activeParties(partytoggles);
+                    this.classList.toggle("activeParty");
+                    CONTROLLER.partySelection(partyBtns);
                 });
             }, this);
         }()
