@@ -68,13 +68,22 @@ var MODEL = function () {
     }
 
     /**
-     * SORTS: MAKES THE TOP LIST
-     * @param {array} mps - mp array of objects
+     * Sorts the array passed in by speeches, i.e making the top list
      */
     function sortNumberOfSpeeches(mps) {
         return mps.sort(function (a, b) {
             return a.numberofspeeches > b.numberofspeeches ? -1 : 1;
         });
+    }
+
+    /**
+     * calcs the total number of speeches in the array recieved and returns the number
+     * @param {array} mps 
+     */
+    function totalSpeeches(mps) {
+        return mps.reduce(function (total, cur) {
+            return total + cur.numberofspeeches;
+        }, 0);
     }
 
     return {
@@ -105,19 +114,41 @@ var MODEL = function () {
             return date.getFullYear() + "-" + date.getMonth() + "-" + date.getDate();
         },
 
-        /**
-         * I have to filter out my huge array on the basis of another array of
-         * selections. So i go through each element with array.Filter - it it returns true or not depends on the result
+        /** 
+         * I have to filter out my huge array on the basis of another array of selections. 
+         * So i go through each element with array.Filter - it it returns true or not depends on the result
          * of the nested array.Some which looks for any occurance in the other array.
+         * * @param {array} lookingfor - array of strings (party names / gender?) that I want to filter
          */
         filterMPs: function filterMPs(lookingfor) {
+            console.log(lookingfor);
             var all = MODEL.getArray("all");
             var filtered = all.filter(function (mp) {
                 return lookingfor.some(function (party) {
                     return party === mp.party;
                 });
             });
-            CONTROLLER.storeArray(filtered, "filtered");
+            return filtered;
+        },
+        /**
+         * Returns an object that contains the sum of speeches - first total, then by party
+         * using the filterMPs and totalSpeeches functions.
+         */
+        sumPartySpeeches: function sumPartySpeeches() {
+            var result = {};
+            //filterMPs function only accept arrays so I have to nest these
+            var allParties = [["S"], ["V"], ["MP"], ["M"], ["L"], ["C"], ["KD"], ["SD"], ["-"]];
+            var all = MODEL.getArray("all");
+            var total = totalSpeeches(all);
+            result.totalSpeeches = total;
+
+            allParties.forEach(function (element) {
+                var number = totalSpeeches(MODEL.filterMPs(element));
+                result[element] = number;
+            });
+            var s = MODEL.filterMPs(["S"]);
+            console.log(result);
+            return result;
         }
     };
 }();
@@ -129,6 +160,11 @@ var CONTROLLER = function () {
             MODEL.initMPObject();
         },
 
+        /**
+         * Stores and sends to print the (right type) array
+         * * @param {array} mps - the array of MPs
+         * * @param {string} type - in which array to store - "all" or "filtered"
+         */
         storeArray: function storeArray(mps, type) {
             MODEL.setArray(mps, type);
             CONTROLLER.launchPrintToplist(type);
@@ -144,10 +180,16 @@ var CONTROLLER = function () {
             var clicked = this.firstChild.nodeValue;
             if (clicked == "Topplistan") CONTROLLER.launchPrintToplist("all");
             if (clicked == "Om") VIEW.printAbout();
-            if (clicked == "Partitoppen") VIEW.printPartySummary();
+            if (clicked == "Partitoppen") MODEL.sumPartySpeeches();
             if (clicked == "Könsfördelning") VIEW.printGenderSummary();
         },
 
+        /**
+         * Extracts the strings from the active buttons - i.e the names of parties I want to filter out.
+         * These are pushed to an array and then sent to filterMPs - returning the mp-objects that match.
+         * Then sent to storage.
+         * * @param {nodeList} elems - the list of toggle buttons for filtering parties.
+         */
         partySelection: function partySelection(elems) {
             var selection = [];
             elems.forEach(function (element) {
@@ -155,7 +197,8 @@ var CONTROLLER = function () {
                     selection.push(element.firstChild.nodeValue);
                 }
             });
-            MODEL.filterMPs(selection);
+            var filtered = MODEL.filterMPs(selection);
+            CONTROLLER.storeArray(filtered, "filtered");
         },
         /**
          * Opens modal window for each MP. Sudden jQuery-syntax is advised from Bootstrap documentation.

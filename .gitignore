@@ -9,3 +9,5 @@
 *.css.map
 
 node_modules/
+
+.eslintrc.json
