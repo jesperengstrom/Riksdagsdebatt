@@ -142,6 +142,9 @@
 .visible {
   display: block; }
 
+a {
+  color: #292b2c; }
+
 .own-debate {
   background: yellow; }
 
@@ -154,15 +157,18 @@
 
 .debate-context {
   color: dimgray;
+  background: lightcyan;
   font-size: .8rem; }
-
-.additional-entries {
-  font-size: 0.85rem;
-  font-variant: small-caps;
-  color: darkgrey; }
 
 .nav-link {
   margin-right: 1rem; }
 
 .dropdown-menu {
+  padding: 1rem; }
+
+.em {
+  height: 21px !important;
+  width: 21px !important; }
+
+.modal-content {
   padding: 1rem; }

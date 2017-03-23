@@ -200,6 +200,8 @@ const VIEW = (function() {
                 let string = ``;
                 let count = 0;
                 const sp = this.speeches;
+                const eMega = `<i class="em em-mega pull-right"> </i>`;
+                const eSpeech = `<i class="em em-speech_balloon pull-right"> </i>`;
 
                 if (!sp) return "Inga debatter";
 
@@ -210,13 +212,18 @@ const VIEW = (function() {
                         //byt till anforande_url_xml om tid finns
                         string += `<li><a href="${sp[i].protokoll_url_www}" target="_blank">${sp[i].replik == "Y" ? 
                         `<span class="comeback-debate debate-topic">` : `<span class="own-debate debate-topic">`}${trimString(sp[i].avsnittsrubrik)} 
-                </span></a>
-                <span class="debate-context">${capitalizeFirst(sp[i].kammaraktivitet) || "" } ${sp[i].dok_datum}.</span> 
-                </li>`;
-                count++;
-
-            } else string += `<span class="additional-entries">${sp[i].replik == "Y" ? "| + replik " : "| + anförande "}</span>`;
+                        </span></a>
+                        <span class="debate-context">${capitalizeFirst(sp[i].kammaraktivitet) || "" } ${sp[i].dok_datum}.</span> 
+                        `;
+                        count++;
+                //If the next topic will be a new one, close the list item.
+                if (i > sp.length -1 && sp[i].avsnittsrubrik !== sp[i + 1].avsnittsrubrik) string += `</li>`;
+            
+            //instead print out an emoji
+            } else string += `<span class="additional-entries">${sp[i].replik == "Y" ? eSpeech : eMega}`;
+            
             if (count === 10) break;
+            
         }
         return string;
     }
@@ -273,6 +280,7 @@ const VIEW = (function() {
         renderModal: function () {
             let speechList = speechSnippet.call(this);
             let modalBody = document.querySelector(".modal-content");
+            let modalHeader = ``
             modalBody.innerHTML =
                 `
             <div class="modal-header">
@@ -291,10 +299,13 @@ const VIEW = (function() {
                 <ul>
                 ${speechList}
                 </ul>
-                    <span class="own-debate debate-topic">   </span> = Eget anförande
-                    <span class="comeback-debate debate-topic">   </span> = Replik på någon annan
+                                <span class="own-debate debate-topic">     </span> = Eget anförande
+                <span class="comeback-debate debate-topic">     </span> = Replik på någon annan <br>
+                <i class="em em-mega"></i><i class="em em-speech_balloon"></i> = ${this.firstname} har flera inlägg i den här debatten.
             </div>
-            
+            <div class="modal-footer">
+
+            </div>
             `;
         },
 
