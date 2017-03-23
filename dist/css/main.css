@@ -172,3 +172,7 @@ a {
 
 .modal-content {
   padding: 1rem; }
+
+#chart-container {
+  width: 30%;
+  height: 30%; }

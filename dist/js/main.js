@@ -54,9 +54,9 @@ var MODEL = function () {
         for (var i in mps) {
             _loop(i);
         }
+        //Fetch is done, we're ready to store array and send to print
         fetchObj.then(function () {
             CONTROLLER.storeArray(allMPs, "all");
-            VIEW.toggleLoadScreen();
         });
     }
 
@@ -121,7 +121,6 @@ var MODEL = function () {
          * * @param {array} lookingfor - array of strings (party names / gender?) that I want to filter
          */
         filterMPs: function filterMPs(lookingfor) {
-            console.log(lookingfor);
             var all = MODEL.getArray("all");
             var filtered = all.filter(function (mp) {
                 return lookingfor.some(function (party) {
@@ -146,8 +145,6 @@ var MODEL = function () {
                 var number = totalSpeeches(MODEL.filterMPs(element));
                 result[element] = number;
             });
-            var s = MODEL.filterMPs(["S"]);
-            console.log(result);
             return result;
         }
     };
@@ -155,8 +152,12 @@ var MODEL = function () {
 
 var CONTROLLER = function () {
     return {
+
+        /**
+         * Inits on page load. Triggers the loading-section
+         */
         init: function init() {
-            VIEW.toggleLoadScreen();
+            VIEW.hideAllButMe("loading-section");
             MODEL.initMPObject();
         },
 
@@ -167,20 +168,42 @@ var CONTROLLER = function () {
          */
         storeArray: function storeArray(mps, type) {
             MODEL.setArray(mps, type);
-            CONTROLLER.launchPrintToplist(type);
+            CONTROLLER.sendToPrintToplist(type);
         },
 
-        launchPrintToplist: function launchPrintToplist(type) {
+        /**
+         * gets the right (type) of array and then sends it to print.
+         * Hides all other sections. Cause it's kind of a hub, it also console.logs some stuff.
+         */
+        sendToPrintToplist: function sendToPrintToplist(type) {
             var toPrint = MODEL.getArray(type);
             if (toPrint.length === 0) console.log("control says: Array came back empty from storage");else console.log("To print:", toPrint);
+
+            VIEW.hideAllButMe("toplist-section");
             VIEW.printTopList(toPrint);
         },
 
+        /**
+         * Gets sent an element that was clicked in the nav bar.
+         * Depening on which one, a function is executed, and sections not belonging to it are hidden.
+         */
         navClick: function navClick() {
             var clicked = this.firstChild.nodeValue;
-            if (clicked == "Topplistan") CONTROLLER.launchPrintToplist("all");
-            if (clicked == "Om") VIEW.printAbout();
-            if (clicked == "Partitoppen") MODEL.sumPartySpeeches();
+
+            if (clicked == "Topplistan") {
+                CONTROLLER.sendToPrintToplist("all");
+            }
+
+            if (clicked == "Om") {
+                VIEW.printAbout();{}
+                VIEW.hideAllButMe("about-section");
+            }
+
+            if (clicked == "Partitoppen") {
+                var votesbyParty = MODEL.sumPartySpeeches();
+                VIEW.printChart(votesbyParty);
+                VIEW.hideAllButMe("chart-section");
+            }
             if (clicked == "Könsfördelning") VIEW.printGenderSummary();
         },
 
@@ -200,8 +223,9 @@ var CONTROLLER = function () {
             var filtered = MODEL.filterMPs(selection);
             CONTROLLER.storeArray(filtered, "filtered");
         },
+
         /**
-         * Opens modal window for each MP. Sudden jQuery-syntax is advised from Bootstrap documentation.
+         * Opens modal window for each MP. Sudden jQuery-syntax comes from Bootstrap documentation.
          */
         openModal: function openModal(event, mp) {
             VIEW.renderModal.call(mp);
@@ -274,16 +298,19 @@ var VIEW = function () {
         return string;
     }
 
+    /**
+     * HTML-page consists of 3 sections which corresponds to three 
+     * features of the page: to print a toplist, to display a chart and to display an about-text.
+     * Following three functions print these sections using helper methods.
+     * 
+     */
+
     return {
 
-        toggleLoadScreen: function toggleLoadScreen() {
-            var loadScreen = document.querySelector(".loading");
-            loadScreen.classList.toggle("visible");
-            loadScreen.classList.toggle("hidden");
-        },
-
+        /**
+         * prints toplist
+         */
         printTopList: function printTopList(mps) {
-            //console.log(mps);
             var toplist = document.getElementById("toplist");
             var max = 10;
             var toplistArr = [];
@@ -292,23 +319,47 @@ var VIEW = function () {
                 toplist.innerHTML = "<p>Oops, det finns ingen data att visa</p>";
                 return;
             }
-            //keep printing the toplist until you reach the end or the max.
+            //keep printing the toplist until you reach the end of arr OR max value.
             for (var i = 0; i < max && i < mps.length; i++) {
                 toplist.innerHTML += "\n            <tr data-id=\"" + mps[i].id + "\">\n                <td>" + (i + 1) + "</td>\n                <td>\n                    <div class=\"mp-img-container border-" + mps[i].party + "\">\n                        <img src=\"" + mps[i].image + "\" class=\"mp-img\" alt=\"" + mps[i].firstname + " " + mps[i].lastname + "\">\n                    </div>\n                </td>\n                <td>" + mps[i].firstname + " " + mps[i].lastname + " (" + mps[i].party + ")</td>\n                <td>" + mps[i].numberofspeeches + " debattinl\xE4gg</td>\n            </tr>\n            ";
                 toplistArr.push(mps[i]);
             }
             listenersForToplist(toplistArr);
         },
+
+        printChart: function printChart(obj) {
+            var target = document.getElementById("pie-chart").getContext('2d');;
+            console.log(obj);
+            var myChart = new Chart(target, {
+                type: 'pie',
+                data: {
+                    labels: ["M", "T", "W", "T", "F", "S", "S"],
+                    datasets: [{
+                        backgroundColor: ["#2ecc71", "#3498db", "#95a5a6", "#9b59b6", "#f1c40f", "#e74c3c", "#34495e"],
+                        data: [12, 19, 3, 17, 28, 24, 7]
+                    }]
+                } });
+        },
+
         printAbout: function printAbout() {
             alert("om");
         },
 
-        printPartySummary: function printPartySummary() {
-            alert("partisummering");
-        },
-
         printGenderSummary: function printGenderSummary() {
             alert("könsfördelning");
+        },
+
+        /**
+         * * @param {string} section - the section to remain visible
+         * First hides all the main sections. Then showing the section of the argument
+         */
+        hideAllButMe: function hideAllButMe(section) {
+            document.getElementById("loading-section").className = "hidden";
+            document.getElementById("toplist-section").className = "hidden";
+            document.getElementById("chart-section").className = "hidden";
+            document.getElementById("about-section").className = "hidden";
+
+            document.getElementById(section).className = "visible";
         },
 
         renderModal: function renderModal() {
@@ -335,21 +386,22 @@ var VIEW = function () {
             //document.getElementById("getButton").addEventListener("click", CONTROLLER.init);
             //2
             document.getElementById("getButton").addEventListener("click", function () {
+                VIEW.hideAllButMe("toplist-section");
                 CONTROLLER.storeArray(testMPs, "all");
             });
 
             /**
-             * event listeners for my menu items, since nothing on the page is a hyperlink, just JS.
-             * Sends all of the nav-element to a controller function which then decides which one was clicked via 'this'.
-             */
+            * event listeners for my menu items, since nothing on the page is a hyperlink, just JS.
+            * Sends all of the nav-element to a controller function which then decides which one was clicked via 'this'.
+            */
             document.querySelectorAll(".launch-nav-event").forEach(function (element) {
                 element.addEventListener("click", CONTROLLER.navClick);
             }, this);
 
             /**
-             * Same concept with my listeners for party filtering, except I toggle a class and lets the controller function check
-             * which ones are 'active', ie selected.
-             */
+            * Same concept with my listeners for party filtering, except I toggle a class and lets the controller function check
+            * which ones are 'active', ie selected.
+            */
             var partyBtns = document.querySelectorAll(".partyBtn");
             partyBtns.forEach(function (element) {
                 element.addEventListener("click", function () {
@@ -360,12 +412,3 @@ var VIEW = function () {
         }()
     };
 }();
-
-/**
- * FOO FOR CALC ALL SPEECHES
- */
-// function totalNumberOfSpeeches(array) {
-//     const totalSpeeches = array.reduce(function(prev, cur) {
-//         return prev + cur.numberofspeeches;
-//     }, 0);
-// }
