@@ -280,7 +280,6 @@ const VIEW = (function() {
         renderModal: function () {
             let speechList = speechSnippet.call(this);
             let modalBody = document.querySelector(".modal-content");
-            let modalHeader = ``
             modalBody.innerHTML =
                 `
             <div class="modal-header">
