@@ -203,7 +203,7 @@ const VIEW = (function() {
                 const eMega = `<i class="em em-mega pull-right"> </i>`;
                 const eSpeech = `<i class="em em-speech_balloon pull-right"> </i>`;
 
-                if (!sp) return "Inga debatter";
+                if (!sp) return `<i class="em em-disappointed"></i>`;
 
                 for (let i in sp) {
                     //if the previous debate was the same as this one, then skip it.
@@ -278,32 +278,40 @@ const VIEW = (function() {
         },
 
         renderModal: function () {
+            //getting the dynamic content from another funcion
             let speechList = speechSnippet.call(this);
             let modalBody = document.querySelector(".modal-content");
+            //setting the more static content as variables..
+            let headerContent = `${this.firstname} ${this.lastname} (${this.party})`;
+            let lastLine = this.speeches ? 
+                `<br>Här är några av de senaste frågorna ${this.gender == "man" ? "han" : "hon"} har talat om:</p>` :
+                `<br>Därför finns det inget att visa här.</p>`;
+            let bodyFacts = `
+            <p>Född: ${this.born}. Valkrets: ${this.electorate}.</p>
+            <p>${this.firstname} har debatterat i Riksdagen vid ${this.numberofspeeches} tillfällen sedan ${MODEL.oneMonthBack()}. 
+            ${lastLine}
+            `;
+            //..inserting them in the modal template literal.
             modalBody.innerHTML =
-                `
+            `
             <div class="modal-header">
-                <h5 class="modal-title" id="mpModalLabel">${this.firstname} ${this.lastname} (${this.party})
+                <h5 class="modal-title" id="mpModalLabel">
+                ${headerContent}
                 </h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                <p>Född: ${this.born}. Valkrets: ${this.electorate}.
-                <p>${this.firstname} har debatterat i Riksdagen vid ${this.numberofspeeches} tillfällen sedan
-                    ${MODEL.oneMonthBack()}. <br>
-                    Här är några av de senaste frågorna ${this.gender == "man" ? "han" : "hon"} har talat om:
-                </p>
+                ${bodyFacts}
+                <hr>
                 <ul>
                 ${speechList}
                 </ul>
-                                <span class="own-debate debate-topic">     </span> = Eget anförande
+                <hr>
+                <span class="own-debate debate-topic">     </span> = Eget anförande
                 <span class="comeback-debate debate-topic">     </span> = Replik på någon annan <br>
                 <i class="em em-mega"></i><i class="em em-speech_balloon"></i> = ${this.firstname} har flera inlägg i den här debatten.
-            </div>
-            <div class="modal-footer">
-
             </div>
             `;
         },

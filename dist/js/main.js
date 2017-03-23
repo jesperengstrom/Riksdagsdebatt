@@ -211,7 +211,7 @@ var VIEW = function () {
         var eMega = "<i class=\"em em-mega pull-right\"> </i>";
         var eSpeech = "<i class=\"em em-speech_balloon pull-right\"> </i>";
 
-        if (!sp) return "Inga debatter";
+        if (!sp) return "<i class=\"em em-disappointed\"></i>";
 
         for (var i in sp) {
             //if the previous debate was the same as this one, then skip it.
@@ -269,9 +269,15 @@ var VIEW = function () {
         },
 
         renderModal: function renderModal() {
+            //getting the dynamic content from another funcion
             var speechList = speechSnippet.call(this);
             var modalBody = document.querySelector(".modal-content");
-            modalBody.innerHTML = "\n            <div class=\"modal-header\">\n                <h5 class=\"modal-title\" id=\"mpModalLabel\">" + this.firstname + " " + this.lastname + " (" + this.party + ")\n                </h5>\n                <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-label=\"Close\">\n                    <span aria-hidden=\"true\">&times;</span>\n                </button>\n            </div>\n            <div class=\"modal-body\">\n                <p>F\xF6dd: " + this.born + ". Valkrets: " + this.electorate + ".\n                <p>" + this.firstname + " har debatterat i Riksdagen vid " + this.numberofspeeches + " tillf\xE4llen sedan\n                    " + MODEL.oneMonthBack() + ". <br>\n                    H\xE4r \xE4r n\xE5gra av de senaste fr\xE5gorna " + (this.gender == "man" ? "han" : "hon") + " har talat om:\n                </p>\n                <ul>\n                " + speechList + "\n                </ul>\n                                <span class=\"own-debate debate-topic\">     </span> = Eget anf\xF6rande\n                <span class=\"comeback-debate debate-topic\">     </span> = Replik p\xE5 n\xE5gon annan <br>\n                <i class=\"em em-mega\"></i><i class=\"em em-speech_balloon\"></i> = " + this.firstname + " har flera inl\xE4gg i den h\xE4r debatten.\n            </div>\n            <div class=\"modal-footer\">\n\n            </div>\n            ";
+            //setting the more static content as variables..
+            var headerContent = this.firstname + " " + this.lastname + " (" + this.party + ")";
+            var lastLine = this.speeches ? "<br>H\xE4r \xE4r n\xE5gra av de senaste fr\xE5gorna " + (this.gender == "man" ? "han" : "hon") + " har talat om:</p>" : "<br>D\xE4rf\xF6r finns det inget att visa h\xE4r.</p>";
+            var bodyFacts = "\n            <p>F\xF6dd: " + this.born + ". Valkrets: " + this.electorate + ".</p>\n            <p>" + this.firstname + " har debatterat i Riksdagen vid " + this.numberofspeeches + " tillf\xE4llen sedan " + MODEL.oneMonthBack() + ". \n            " + lastLine + "\n            ";
+            //..inserting them in the modal template literal.
+            modalBody.innerHTML = "\n            <div class=\"modal-header\">\n                <h5 class=\"modal-title\" id=\"mpModalLabel\">\n                " + headerContent + "\n                </h5>\n                <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-label=\"Close\">\n                    <span aria-hidden=\"true\">&times;</span>\n                </button>\n            </div>\n            <div class=\"modal-body\">\n                " + bodyFacts + "\n                <hr>\n                <ul>\n                " + speechList + "\n                </ul>\n                <hr>\n                <span class=\"own-debate debate-topic\">     </span> = Eget anf\xF6rande\n                <span class=\"comeback-debate debate-topic\">     </span> = Replik p\xE5 n\xE5gon annan <br>\n                <i class=\"em em-mega\"></i><i class=\"em em-speech_balloon\"></i> = " + this.firstname + " har flera inl\xE4gg i den h\xE4r debatten.\n            </div>\n            ";
         },
 
         /**
