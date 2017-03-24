@@ -87,6 +87,34 @@ var MODEL = function () {
         }, 0);
     }
 
+    /**
+     * Before we can print the chart, we need to format data in a way that chart.js accepts + add colors
+     * @param {array} indata - the data to be displayed in the chart.
+     */
+    function formatChartObj(indata) {
+        //template object
+        var data = {
+            labels: [],
+            datasets: [{
+                label: "My First dataset",
+                backgroundColor: [],
+                borderColor: [],
+                borderWidth: 1,
+                data: []
+            }]
+        };
+
+        console.log(indata);
+        indata.forEach(function (element) {
+            data.labels.push(element.label);
+            data.datasets[0].backgroundColor.push('rgba(255, 99, 132, 0.2)');
+            data.datasets[0].borderColor.push('rgba(255, 99, 132, 0.2)');
+            data.datasets[0].data.push(element.quota);
+        }, this);
+
+        return data;
+    }
+
     return {
 
         /**
@@ -141,7 +169,7 @@ var MODEL = function () {
          * * @param {string} prop - I want to sum the values in this property
          */
         sumSpeechesBy: function sumSpeechesBy(prop) {
-            var result = [];
+            var temp = [];
             var categories = [];
             if (prop == "party") {
                 categories = ["S", "V", "MP", "M", "L", "C", "KD", "SD", "-"];
@@ -153,25 +181,43 @@ var MODEL = function () {
             //no need to count the total?
             // let all = MODEL.getArray("all");
             // let total = totalSpeeches(all);
-            // result.totalSpeeches = total;
 
             categories.forEach(function (category) {
                 var numMps = MODEL.filterMPs([category], prop).length;
                 var numSpeeches = totalSpeeches(MODEL.filterMPs([category], prop));
 
-                result.push({
+                temp.push({
                     label: category,
                     mps: numMps,
                     speeches: numSpeeches,
                     quota: Math.round(numSpeeches / numMps * 100) / 100
                 });
             });
+            var result = formatChartObj(temp);
+            console.log(result);
             return result;
         }
     };
 }();
 
+/**
+ * CONTROLLER MODULE - CONTROLS COMMUNICATION
+ */
 var CONTROLLER = function () {
+
+    /**
+     * gets the right (type) of array and then sends it to print.
+     * Hides all other sections. Cause it's kind of a hub, it also console.logs some stuff.
+     * @param {string} type - what to print all or filtered list
+     */
+    function prepareToPrintToplist(type) {
+        var toPrint = MODEL.getArray(type);
+        if (toPrint.length === 0) console.log("control says: Array came back empty from storage");else console.log("To print:", toPrint);
+
+        VIEW.hideAllButMe("toplist-section");
+        VIEW.printTopList(toPrint);
+    }
+
     return {
 
         /**
@@ -189,19 +235,7 @@ var CONTROLLER = function () {
          */
         storeArray: function storeArray(mps, type) {
             MODEL.setArray(mps, type);
-            CONTROLLER.sendToPrintToplist(type);
-        },
-
-        /**
-         * gets the right (type) of array and then sends it to print.
-         * Hides all other sections. Cause it's kind of a hub, it also console.logs some stuff.
-         */
-        sendToPrintToplist: function sendToPrintToplist(type) {
-            var toPrint = MODEL.getArray(type);
-            if (toPrint.length === 0) console.log("control says: Array came back empty from storage");else console.log("To print:", toPrint);
-
-            VIEW.hideAllButMe("toplist-section");
-            VIEW.printTopList(toPrint);
+            prepareToPrintToplist(type);
         },
 
         /**
@@ -213,7 +247,7 @@ var CONTROLLER = function () {
             var clicked = this.firstChild.nodeValue;
 
             if (clicked == "Topplistan") {
-                CONTROLLER.sendToPrintToplist("all");
+                prepareToPrintToplist("all");
             }
 
             if (clicked == "Om") {
@@ -222,13 +256,14 @@ var CONTROLLER = function () {
 
             if (clicked == "Partitoppen") {
                 var votesbyParty = MODEL.sumSpeechesBy("party");
-                VIEW.printChart(votesbyParty);
-                VIEW.hideAllButMe("chart-section");
+                //adding a string as caller id. both charts use the same method, but I need to create separate charts.
+                VIEW.printChart(votesbyParty, "partyChart");
+                VIEW.hideAllButMe("party-chart-section");
             }
             if (clicked == "Könsfördelning") {
                 var votesByGender = MODEL.sumSpeechesBy("gender");
-                VIEW.printChart(votesByGender);
-                VIEW.hideAllButMe("chart-section");
+                VIEW.printChart(votesByGender, "genderChart");
+                VIEW.hideAllButMe("gender-chart-section");
             }
         },
 
@@ -360,28 +395,24 @@ var VIEW = function () {
         },
 
         /**
-         * @param {object} obj - property/values to be displayed in the chart
+         * Makes a new chart object and inserts the data, rendering a new chart.
+         * * @param {object} data - data to be displayed in the chart
+         * * @param {string} which - are we creating gender/party chart?
          */
-        printChart: function printChart(obj) {
-
-            var data = {
-                labels: ["January", "February", "March", "April", "May", "June", "July"],
-                datasets: [{
-                    label: "My First dataset",
-                    backgroundColor: ['rgba(255, 99, 132, 0.2)', 'rgba(54, 162, 235, 0.2)', 'rgba(255, 206, 86, 0.2)', 'rgba(75, 192, 192, 0.2)', 'rgba(153, 102, 255, 0.2)', 'rgba(255, 159, 64, 0.2)'],
-                    borderColor: ['rgba(255,99,132,1)', 'rgba(54, 162, 235, 1)', 'rgba(255, 206, 86, 1)', 'rgba(75, 192, 192, 1)', 'rgba(153, 102, 255, 1)', 'rgba(255, 159, 64, 1)'],
-                    borderWidth: 1,
-                    data: [65, 59, 80, 81, 56, 55, 40]
-                }]
-            };
-
-            var target = document.getElementById("chart").getContext("2d");
-            console.log(obj);
-
-            var myBarChart = new Chart(target, {
-                type: "bar",
-                data: data
-            });
+        printChart: function printChart(data, which) {
+            var target = document.getElementById(which).getContext("2d");
+            if (which === "partyChart") {
+                var partyChart = new Chart(target, {
+                    type: "bar",
+                    data: data
+                });
+            }
+            if (which === "genderChart") {
+                var genderChart = new Chart(target, {
+                    type: "bar",
+                    data: data
+                });
+            }
         },
 
         /**
@@ -391,7 +422,8 @@ var VIEW = function () {
         hideAllButMe: function hideAllButMe(section) {
             document.getElementById("loading-section").className = "hidden";
             document.getElementById("toplist-section").className = "hidden";
-            document.getElementById("chart-section").className = "hidden";
+            document.getElementById("gender-chart-section").className = "hidden";
+            document.getElementById("party-chart-section").className = "hidden";
             document.getElementById("about-section").className = "hidden";
 
             document.getElementById(section).className = "visible";

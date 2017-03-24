@@ -173,6 +173,6 @@ a {
 .modal-content {
   padding: 1rem; }
 
-#chart-container {
-  width: 30%;
-  height: 30%; }
+.chart-container {
+  width: 50%;
+  height: 50%; }
