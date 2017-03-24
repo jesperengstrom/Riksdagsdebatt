@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="dist/css/main.css">
     <link href="https://afeld.github.io/emoji-css/emoji.css" rel="stylesheet">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/chartist.js/latest/chartist.min.css">
     <title>Debatt-toppen</title>
 </head>
 
@@ -96,14 +97,18 @@
         <!-- summary stats -->
         <section id="party-chart-section">
             <div class="chart-container">
-                <canvas id="partyChart">
-                </canvas>
+                <div class="ct-chart ct-perfect-fourth" id="partyChart">
+                    <!--<canvas id="partyChart">
+                </canvas>-->
+                </div>
             </div>
         </section>
         <section id="gender-chart-section">
             <div class="chart-container">
-                <canvas id="genderChart">
-                </canvas>
+                <div class="ct-chart ct-perfect-fourth" id="genderChart">
+                    <!--<canvas id="genderChart">
+                </canvas>-->
+                </div>
             </div>
         </section>
         <!-- end summary stats -->
@@ -124,10 +129,12 @@
     <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+    <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script> -->
+    <script src="//cdn.jsdelivr.net/chartist.js/latest/chartist.min.js"></script>
     <script src="saved-allMPs.js"></script>
     <script src="dist/js/main.js"></script>
     <script src="dist/js/jq_code.js"></script>
+    <script src="dist/js/chart_animation.js"></script>
 
 
 </body>

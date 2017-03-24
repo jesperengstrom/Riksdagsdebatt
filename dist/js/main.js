@@ -89,36 +89,29 @@ var MODEL = function () {
 
     /**
      * Before we can print the chart, we need to format data in a way that chart.js accepts + add colors
-     * @param {array} indata - the data to be displayed in the chart.
+     * * @param {array} indata - the data to be displayed in the chart.
      */
     function formatChartObj(indata) {
         //template object
         var data = {
             labels: [],
-            datasets: [{
-                label: "My First dataset",
-                backgroundColor: [],
-                borderColor: [],
-                borderWidth: 1,
-                data: []
-            }]
+            series: [[]]
         };
 
-        console.log(indata);
         indata.forEach(function (element) {
             data.labels.push(element.label);
-            data.datasets[0].backgroundColor.push('rgba(255, 99, 132, 0.2)');
-            data.datasets[0].borderColor.push('rgba(255, 99, 132, 0.2)');
-            data.datasets[0].data.push(element.quota);
+            //data.datasets[0].backgroundColor.push('rgba(255, 99, 132, 0.2)');
+            //data.datasets[0].borderColor.push('rgba(255, 99, 132, 0.2)');
+            data.series[0].push(element.quota);
         }, this);
-
         return data;
     }
 
     return {
 
         /**
-         * Retrieves the array of MP:s from the model. Either all or a current selection depending on request.
+         * Retrieves the array of MP:s from the model. 
+         *  * @param {string} which - Either all or a current selection depending on request.
          */
         getArray: function getArray(which) {
             return which === "all" ? allMPs : filteredMPs;
@@ -395,23 +388,18 @@ var VIEW = function () {
         },
 
         /**
-         * Makes a new chart object and inserts the data, rendering a new chart.
+         * 
          * * @param {object} data - data to be displayed in the chart
          * * @param {string} which - are we creating gender/party chart?
+         * Chart itself is made in chart_animation.js
          */
         printChart: function printChart(data, which) {
-            var target = document.getElementById(which).getContext("2d");
+
             if (which === "partyChart") {
-                var partyChart = new Chart(target, {
-                    type: "bar",
-                    data: data
-                });
+                makePartyChart(data);
             }
             if (which === "genderChart") {
-                var genderChart = new Chart(target, {
-                    type: "bar",
-                    data: data
-                });
+                makeGenderChart(data);
             }
         },
 

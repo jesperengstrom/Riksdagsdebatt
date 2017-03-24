@@ -160,6 +160,9 @@ a {
   background: lightcyan;
   font-size: .8rem; }
 
+#page-wrap {
+  margin-bottom: 56px; }
+
 .nav-link {
   margin-right: 1rem; }
 
@@ -172,7 +175,3 @@ a {
 
 .modal-content {
   padding: 1rem; }
-
-.chart-container {
-  width: 50%;
-  height: 50%; }
