@@ -3,7 +3,7 @@ const MODEL = (function() {
     var filteredMPs = [];
 
     /**
-     * Returns a promise of all MP:s. NEEDS REJECT OPTION
+     * Returns a promise of all MP:s. NEEDS ERROR HANDLING
      * Originally fetched from: http://data.riksdagen.se/personlista/?iid=&fnamn=&enamn=&f_ar=&kn=&parti=&valkrets=&rdlstatus=&org=&utformat=json&termlista=
      * But now fetched locally since it's very big and doesn't change very often.
      */
@@ -55,6 +55,7 @@ const MODEL = (function() {
         allMPs[i].numberofspeeches = parseInt(data.anforandelista["@antal"]);
         if (data.anforandelista["@antal"] !== "0") {
             allMPs[i].speeches = data.anforandelista.anforande;
+            console.log("getting speeches");
         }
     }
 
@@ -124,41 +125,36 @@ const MODEL = (function() {
         },
 
         /**
-         * Returns an object that contains the sum of speeches - first total, then by party
-         * using the filterMPs and totalSpeeches functions.
+         * Making use of the filterMPs and totalSpeeches functions to return an array of objects with 
+         * the total number of speeches by a certain category (party/gender). Also the number of members in that 
+         * category and the quota of the two. Objecs are constructed so they will eventuelly fit charts.js.
          * * @param {string} prop - I want to sum the values in this property
          */
         sumSpeechesBy: function(prop) {
-            const result = {};
+            const result = [];
             var categories = [];
             if (prop == "party") {
-                //filterMPs function only accept arrays so I have to nest these
-                categories = [
-                    ["S"],
-                    ["V"],
-                    ["MP"],
-                    ["M"],
-                    ["L"],
-                    ["C"],
-                    ["KD"],
-                    ["SD"],
-                    ["-"]
-                ];
-            }
-            if (prop == "gender") {
-                categories = [
-                    ["man"],
-                    ["kvinna"]
-                ];
+                categories = ["S", "V", "MP", "M", "L", "C", "KD", "SD", "-"];
             }
 
-            let all = MODEL.getArray("all");
-            let total = totalSpeeches(all);
-            result.totalSpeeches = total;
+            if (prop == "gender") {
+                categories = ["man", "kvinna"];
+            }
+            //no need to count the total?
+            // let all = MODEL.getArray("all");
+            // let total = totalSpeeches(all);
+            // result.totalSpeeches = total;
 
             categories.forEach(function(category) {
-                let number = totalSpeeches(MODEL.filterMPs(category, prop));
-                result[category] = number;
+                let numMps = MODEL.filterMPs([category], prop).length;
+                let numSpeeches = totalSpeeches(MODEL.filterMPs([category], prop));
+
+                result.push({
+                    label: category,
+                    mps: numMps,
+                    speeches: numSpeeches,
+                    quota: Math.round((numSpeeches / numMps) * 100) / 100
+                });
             });
             return result;
         }
@@ -375,26 +371,44 @@ const VIEW = (function() {
          * @param {object} obj - property/values to be displayed in the chart
          */
         printChart: function (obj) {
-            var target = document.getElementById("pie-chart").getContext('2d');;
+
+        var data = {
+            labels: ["January", "February", "March", "April", "May", "June", "July"],
+            datasets: [
+                {
+                label: "My First dataset",
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(255, 206, 86, 0.2)',
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(153, 102, 255, 0.2)',
+                    'rgba(255, 159, 64, 0.2)'
+                ],
+                borderColor: [
+                    'rgba(255,99,132,1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)'
+                ],
+borderWidth: 1,
+data: [65, 59, 80, 81, 56, 55, 40],
+        }]
+        };
+
+            var target = document.getElementById("chart").getContext("2d");
             console.log(obj);
-            var myChart = new Chart(target, {
-                type: 'pie',
-                data: {
-                labels: ["M", "T", "W", "T", "F", "S", "S"],
-                datasets: [{
-                    backgroundColor: [
-                        "#2ecc71",
-                        "#3498db",
-                        "#95a5a6",
-                        "#9b59b6",
-                        "#f1c40f",
-                        "#e74c3c",
-                        "#34495e"
-                        ],
-                data: [12, 19, 3, 17, 28, 24, 7]
-            }]
-        }});
+
+            var myBarChart = new Chart(target, {
+                type: "bar",
+                data: data,
+            });
+
         },
+
+        
 
         /**
          * First hides all the main sections.
