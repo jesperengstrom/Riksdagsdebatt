@@ -87,6 +87,7 @@ var MODEL = function () {
     }
 
     return {
+
         /**
          * Retrieves the array of MP:s from the model. Either all or a current selection depending on request.
          */
@@ -106,6 +107,7 @@ var MODEL = function () {
         initMPObject: function initMPObject() {
             fetchAllMPs();
         },
+
         /**
          * REVERTS CURRENT DATE ONE MONTH. NEEDS REMAKE (DEC BECOMES -1 INST OF 12)
          */
@@ -119,31 +121,41 @@ var MODEL = function () {
          * So i go through each element with array.Filter - it it returns true or not depends on the result
          * of the nested array.Some which looks for any occurance in the other array.
          * * @param {array} lookingfor - array of strings (party names / gender?) that I want to filter
+         * * @param {string} prop - the property that i want to target
          */
-        filterMPs: function filterMPs(lookingfor) {
+        filterMPs: function filterMPs(lookingfor, prop) {
             var all = MODEL.getArray("all");
             var filtered = all.filter(function (mp) {
-                return lookingfor.some(function (party) {
-                    return party === mp.party;
+                return lookingfor.some(function (thing) {
+                    return thing === mp[prop];
                 });
             });
             return filtered;
         },
+
         /**
          * Returns an object that contains the sum of speeches - first total, then by party
          * using the filterMPs and totalSpeeches functions.
+         * * @param {string} prop - I want to sum the values in this property
          */
-        sumPartySpeeches: function sumPartySpeeches() {
+        sumSpeechesBy: function sumSpeechesBy(prop) {
             var result = {};
-            //filterMPs function only accept arrays so I have to nest these
-            var allParties = [["S"], ["V"], ["MP"], ["M"], ["L"], ["C"], ["KD"], ["SD"], ["-"]];
+            var categories = [];
+            if (prop == "party") {
+                //filterMPs function only accept arrays so I have to nest these
+                categories = [["S"], ["V"], ["MP"], ["M"], ["L"], ["C"], ["KD"], ["SD"], ["-"]];
+            }
+            if (prop == "gender") {
+                categories = [["man"], ["kvinna"]];
+            }
+
             var all = MODEL.getArray("all");
             var total = totalSpeeches(all);
             result.totalSpeeches = total;
 
-            allParties.forEach(function (element) {
-                var number = totalSpeeches(MODEL.filterMPs(element));
-                result[element] = number;
+            categories.forEach(function (category) {
+                var number = totalSpeeches(MODEL.filterMPs(category, prop));
+                result[category] = number;
             });
             return result;
         }
@@ -185,9 +197,10 @@ var CONTROLLER = function () {
 
         /**
          * Gets sent an element that was clicked in the nav bar.
-         * Depening on which one, a function is executed, and sections not belonging to it are hidden.
+         * Depening on which one, the right function runs and all other sections are hidden.
          */
         navClick: function navClick() {
+            //switch case could be used here
             var clicked = this.firstChild.nodeValue;
 
             if (clicked == "Topplistan") {
@@ -195,16 +208,19 @@ var CONTROLLER = function () {
             }
 
             if (clicked == "Om") {
-                VIEW.printAbout();{}
                 VIEW.hideAllButMe("about-section");
             }
 
             if (clicked == "Partitoppen") {
-                var votesbyParty = MODEL.sumPartySpeeches();
+                var votesbyParty = MODEL.sumSpeechesBy("party");
                 VIEW.printChart(votesbyParty);
                 VIEW.hideAllButMe("chart-section");
             }
-            if (clicked == "Könsfördelning") VIEW.printGenderSummary();
+            if (clicked == "Könsfördelning") {
+                var votesByGender = MODEL.sumSpeechesBy("gender");
+                VIEW.printChart(votesByGender);
+                VIEW.hideAllButMe("chart-section");
+            }
         },
 
         /**
@@ -220,7 +236,7 @@ var CONTROLLER = function () {
                     selection.push(element.firstChild.nodeValue);
                 }
             });
-            var filtered = MODEL.filterMPs(selection);
+            var filtered = MODEL.filterMPs(selection, "party");
             CONTROLLER.storeArray(filtered, "filtered");
         },
 
@@ -234,12 +250,15 @@ var CONTROLLER = function () {
     };
 }();
 
+/**
+ * VIEW MODULE - HANDLES EVERYTHING UI 
+ */
 var VIEW = function () {
 
     /**
      * It was a nightmare to figure out how to append event listerners to all the toplist items. I tried every possible closure to get
      * not only the last one to stick. Turns out the problem was probably the DOM selector operating in the same 
-     * loop as the template literal? Don't know why really. But soon as i made another loop everything just worked :/
+     * loop as the template literal? As soon as i made ANOTHER loop everything just worked :/
      * @param {array} mps 
      */
     function listenersForToplist(mps) {
@@ -264,6 +283,10 @@ var VIEW = function () {
         return newString;
     }
 
+    /**
+     * capital first letter of str
+     * @param {string} str 
+     */
     function capitalizeFirst(str) {
         if (str) {
             str = str[0].toUpperCase() + str.substring(1, str.length);
@@ -271,6 +294,9 @@ var VIEW = function () {
         return str;
     }
 
+    /**
+     * returns the template literal list of speeches code to the main modal printing function.
+     */
     function speechSnippet() {
         var string = "";
         var count = 0;
@@ -281,7 +307,7 @@ var VIEW = function () {
         if (!sp) return "<i class=\"em em-disappointed\"></i>";
 
         for (var i in sp) {
-            //if the previous debate was the same as this one, then skip it.
+            //if the previous debate was the same as this one, then skip it...
             //the loose compare is important since it accepts "0".
             if (i == 0 || sp[i].avsnittsrubrik !== sp[i - 1].avsnittsrubrik) {
                 //byt till anforande_url_xml om tid finns
@@ -290,7 +316,7 @@ var VIEW = function () {
                 //If the next topic will be a new one, close the list item.
                 if (i > sp.length - 1 && sp[i].avsnittsrubrik !== sp[i + 1].avsnittsrubrik) string += "</li>";
 
-                //instead print out an emoji
+                //... instead print out an emoji
             } else string += "<span class=\"additional-entries\">" + (sp[i].replik == "Y" ? eSpeech : eMega);
 
             if (count === 10) break;
@@ -299,20 +325,17 @@ var VIEW = function () {
     }
 
     /**
-     * HTML-page consists of 3 sections which corresponds to three 
-     * features of the page: to print a toplist, to display a chart and to display an about-text.
+     * HTML-page consists of 3 sections that corresponds to three 
+     * features of the page: to print a toplist, to display a chart and to display an about-text (+loading).
      * Following three functions print these sections using helper methods.
-     * 
      */
 
     return {
 
-        /**
-         * prints toplist
-         */
         printTopList: function printTopList(mps) {
             var toplist = document.getElementById("toplist");
             var max = 10;
+            //make a new arr of the items printed so I can add event listeners for them
             var toplistArr = [];
             toplist.innerHTML = "";
             if (mps.length === 0) {
@@ -327,6 +350,9 @@ var VIEW = function () {
             listenersForToplist(toplistArr);
         },
 
+        /**
+         * @param {object} obj - property/values to be displayed in the chart
+         */
         printChart: function printChart(obj) {
             var target = document.getElementById("pie-chart").getContext('2d');;
             console.log(obj);
@@ -341,17 +367,9 @@ var VIEW = function () {
                 } });
         },
 
-        printAbout: function printAbout() {
-            alert("om");
-        },
-
-        printGenderSummary: function printGenderSummary() {
-            alert("könsfördelning");
-        },
-
         /**
-         * * @param {string} section - the section to remain visible
-         * First hides all the main sections. Then showing the section of the argument
+         * First hides all the main sections.
+         ** @param {string} section - this section is set to visible
          */
         hideAllButMe: function hideAllButMe(section) {
             document.getElementById("loading-section").className = "hidden";
@@ -362,14 +380,20 @@ var VIEW = function () {
             document.getElementById(section).className = "visible";
         },
 
+        /**
+         * Prints a modal that pop up when you click an MP.
+         */
         renderModal: function renderModal() {
-            //getting the dynamic content from another funcion
+            //getting code for this list of speeches
             var speechList = speechSnippet.call(this);
             var modalBody = document.querySelector(".modal-content");
+
             //setting the more static content as variables..
             var headerContent = this.firstname + " " + this.lastname + " (" + this.party + ")";
             var lastLine = this.speeches ? "<br>H\xE4r \xE4r n\xE5gra av de senaste fr\xE5gorna " + (this.gender == "man" ? "han" : "hon") + " har talat om:</p>" : "<br>D\xE4rf\xF6r finns det inget att visa h\xE4r.</p>";
+
             var bodyFacts = "\n            <p>F\xF6dd: " + this.born + ". Valkrets: " + this.electorate + ".</p>\n            <p>" + this.firstname + " har debatterat i Riksdagen vid " + this.numberofspeeches + " tillf\xE4llen sedan " + MODEL.oneMonthBack() + ". \n            " + lastLine + "\n            ";
+
             //..inserting them in the modal template literal.
             modalBody.innerHTML = "\n            <div class=\"modal-header\">\n                <h5 class=\"modal-title\" id=\"mpModalLabel\">\n                " + headerContent + "\n                </h5>\n                <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-label=\"Close\">\n                    <span aria-hidden=\"true\">&times;</span>\n                </button>\n            </div>\n            <div class=\"modal-body\">\n                " + bodyFacts + "\n                <hr>\n                <ul>\n                " + speechList + "\n                </ul>\n                <hr>\n                <span class=\"own-debate debate-topic\">     </span> = Eget anf\xF6rande\n                <span class=\"comeback-debate debate-topic\">     </span> = Replik p\xE5 n\xE5gon annan <br>\n                <i class=\"em em-mega\"></i><i class=\"em em-speech_balloon\"></i> = " + this.firstname + " har flera inl\xE4gg i den h\xE4r debatten.\n            </div>\n            ";
         },

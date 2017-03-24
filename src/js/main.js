@@ -77,6 +77,7 @@ const MODEL = (function() {
     }
 
     return {
+
         /**
          * Retrieves the array of MP:s from the model. Either all or a current selection depending on request.
          */
@@ -96,6 +97,7 @@ const MODEL = (function() {
         initMPObject: function() {
             fetchAllMPs();
         },
+
         /**
          * REVERTS CURRENT DATE ONE MONTH. NEEDS REMAKE (DEC BECOMES -1 INST OF 12)
          */
@@ -109,41 +111,54 @@ const MODEL = (function() {
          * So i go through each element with array.Filter - it it returns true or not depends on the result
          * of the nested array.Some which looks for any occurance in the other array.
          * * @param {array} lookingfor - array of strings (party names / gender?) that I want to filter
+         * * @param {string} prop - the property that i want to target
          */
-        filterMPs: function(lookingfor) {
+        filterMPs: function(lookingfor, prop) {
             let all = MODEL.getArray("all");
             let filtered = all.filter((mp) => {
-                return lookingfor.some((party) => {
-                    return party === mp.party;
+                return lookingfor.some((thing) => {
+                    return thing === mp[prop];
                 });
             });
             return filtered;
         },
+
         /**
          * Returns an object that contains the sum of speeches - first total, then by party
          * using the filterMPs and totalSpeeches functions.
+         * * @param {string} prop - I want to sum the values in this property
          */
-        sumPartySpeeches: function() {
+        sumSpeechesBy: function(prop) {
             const result = {};
-            //filterMPs function only accept arrays so I have to nest these
-            const allParties = [
-                ["S"],
-                ["V"],
-                ["MP"],
-                ["M"],
-                ["L"],
-                ["C"],
-                ["KD"],
-                ["SD"],
-                ["-"]
-            ];
+            var categories = [];
+            if (prop == "party") {
+                //filterMPs function only accept arrays so I have to nest these
+                categories = [
+                    ["S"],
+                    ["V"],
+                    ["MP"],
+                    ["M"],
+                    ["L"],
+                    ["C"],
+                    ["KD"],
+                    ["SD"],
+                    ["-"]
+                ];
+            }
+            if (prop == "gender") {
+                categories = [
+                    ["man"],
+                    ["kvinna"]
+                ];
+            }
+
             let all = MODEL.getArray("all");
             let total = totalSpeeches(all);
             result.totalSpeeches = total;
 
-            allParties.forEach(function(element) {
-                let number = totalSpeeches(MODEL.filterMPs(element));
-                result[element] = number;
+            categories.forEach(function(category) {
+                let number = totalSpeeches(MODEL.filterMPs(category, prop));
+                result[category] = number;
             });
             return result;
         }
@@ -186,9 +201,10 @@ const CONTROLLER = (function() {
 
         /**
          * Gets sent an element that was clicked in the nav bar.
-         * Depening on which one, a function is executed, and sections not belonging to it are hidden.
+         * Depening on which one, the right function runs and all other sections are hidden.
          */
         navClick: function() {
+            //switch case could be used here
             let clicked = this.firstChild.nodeValue;
 
             if (clicked == "Topplistan") {
@@ -196,16 +212,19 @@ const CONTROLLER = (function() {
             }
 
             if (clicked == "Om") {
-                VIEW.printAbout(); {}
                 VIEW.hideAllButMe("about-section");
             }
 
             if (clicked == "Partitoppen") {
-                let votesbyParty = MODEL.sumPartySpeeches();
+                let votesbyParty = MODEL.sumSpeechesBy("party");
                 VIEW.printChart(votesbyParty);
                 VIEW.hideAllButMe("chart-section");
             }
-            if (clicked == "Könsfördelning") VIEW.printGenderSummary();
+            if (clicked == "Könsfördelning") {
+                let votesByGender = MODEL.sumSpeechesBy("gender");
+                VIEW.printChart(votesByGender);
+                VIEW.hideAllButMe("chart-section");
+            }
         },
 
         /**
@@ -221,7 +240,7 @@ const CONTROLLER = (function() {
                     selection.push(element.firstChild.nodeValue);
                 }
             });
-            let filtered = MODEL.filterMPs(selection);
+            let filtered = MODEL.filterMPs(selection, "party");
             CONTROLLER.storeArray(filtered, "filtered");
         },
 
@@ -236,12 +255,15 @@ const CONTROLLER = (function() {
 })();
 
 
+/**
+ * VIEW MODULE - HANDLES EVERYTHING UI 
+ */
 const VIEW = (function() {
 
             /**
              * It was a nightmare to figure out how to append event listerners to all the toplist items. I tried every possible closure to get
              * not only the last one to stick. Turns out the problem was probably the DOM selector operating in the same 
-             * loop as the template literal? Don't know why really. But soon as i made another loop everything just worked :/
+             * loop as the template literal? As soon as i made ANOTHER loop everything just worked :/
              * @param {array} mps 
              */
             function listenersForToplist(mps) {
@@ -267,6 +289,10 @@ const VIEW = (function() {
                 return newString;
             }
 
+            /**
+             * capital first letter of str
+             * @param {string} str 
+             */
             function capitalizeFirst(str) {
                 if (str) {
                     str = str[0].toUpperCase() + str.substring(1, str.length);
@@ -274,6 +300,9 @@ const VIEW = (function() {
                 return str;
             }
 
+            /**
+             * returns the template literal list of speeches code to the main modal printing function.
+             */
             function speechSnippet() {
                 let string = ``;
                 let count = 0;
@@ -284,7 +313,7 @@ const VIEW = (function() {
                 if (!sp) return `<i class="em em-disappointed"></i>`;
 
                 for (let i in sp) {
-                    //if the previous debate was the same as this one, then skip it.
+                    //if the previous debate was the same as this one, then skip it...
                     //the loose compare is important since it accepts "0".
                     if (i == 0 || sp[i].avsnittsrubrik !== sp[i - 1].avsnittsrubrik) {
                         //byt till anforande_url_xml om tid finns
@@ -297,30 +326,26 @@ const VIEW = (function() {
                 //If the next topic will be a new one, close the list item.
                 if (i > sp.length -1 && sp[i].avsnittsrubrik !== sp[i + 1].avsnittsrubrik) string += `</li>`;
             
-            //instead print out an emoji
+            //... instead print out an emoji
             } else string += `<span class="additional-entries">${sp[i].replik == "Y" ? eSpeech : eMega}`;
             
             if (count === 10) break;
-            
         }
         return string;
     }
 
         /**
-         * HTML-page consists of 3 sections which corresponds to three 
-         * features of the page: to print a toplist, to display a chart and to display an about-text.
+         * HTML-page consists of 3 sections that corresponds to three 
+         * features of the page: to print a toplist, to display a chart and to display an about-text (+loading).
          * Following three functions print these sections using helper methods.
-         * 
          */
 
     return {
 
-        /**
-         * prints toplist
-         */
         printTopList: function (mps) {
             const toplist = document.getElementById("toplist");
             let max = 10;
+            //make a new arr of the items printed so I can add event listeners for them
             const toplistArr = [];
             toplist.innerHTML = "";
             if (mps.length === 0) {
@@ -346,6 +371,9 @@ const VIEW = (function() {
             listenersForToplist(toplistArr);
         },
 
+        /**
+         * @param {object} obj - property/values to be displayed in the chart
+         */
         printChart: function (obj) {
             var target = document.getElementById("pie-chart").getContext('2d');;
             console.log(obj);
@@ -368,17 +396,9 @@ const VIEW = (function() {
         }});
         },
 
-        printAbout: function () {
-            alert("om");
-        },
-
-        printGenderSummary: function () {
-            alert("könsfördelning");
-        },
-
         /**
-         * * @param {string} section - the section to remain visible
-         * First hides all the main sections. Then showing the section of the argument
+         * First hides all the main sections.
+         ** @param {string} section - this section is set to visible
          */
         hideAllButMe: function (section) {
             document.getElementById("loading-section").className = "hidden";
@@ -389,20 +409,26 @@ const VIEW = (function() {
             document.getElementById(section).className = "visible";
         },
 
+        /**
+         * Prints a modal that pop up when you click an MP.
+         */
         renderModal: function () {
-            //getting the dynamic content from another funcion
+            //getting code for this list of speeches
             let speechList = speechSnippet.call(this);
             let modalBody = document.querySelector(".modal-content");
+
             //setting the more static content as variables..
             let headerContent = `${this.firstname} ${this.lastname} (${this.party})`;
             let lastLine = this.speeches ? 
                 `<br>Här är några av de senaste frågorna ${this.gender == "man" ? "han" : "hon"} har talat om:</p>` :
                 `<br>Därför finns det inget att visa här.</p>`;
+            
             let bodyFacts = `
             <p>Född: ${this.born}. Valkrets: ${this.electorate}.</p>
             <p>${this.firstname} har debatterat i Riksdagen vid ${this.numberofspeeches} tillfällen sedan ${MODEL.oneMonthBack()}. 
             ${lastLine}
             `;
+
             //..inserting them in the modal template literal.
             modalBody.innerHTML =
             `
