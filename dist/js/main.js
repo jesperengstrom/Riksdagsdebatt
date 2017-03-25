@@ -1,5 +1,8 @@
 "use strict";
 
+/**
+ * MODEL module - handles app logic & data
+ */
 var MODEL = function () {
     var allMPs = [];
     var filteredMPs = [];
@@ -88,7 +91,7 @@ var MODEL = function () {
     }
 
     /**
-     * Before we can print the chart, we need to format data in a way that chart.js accepts + add colors
+     * Before we can print the chart, we need to format data in a way that Chartist.js accepts.
      * * @param {array} indata - the data to be displayed in the chart.
      */
     function formatChartObj(indata) {
@@ -97,12 +100,11 @@ var MODEL = function () {
             labels: [],
             series: [[]]
         };
-
+        //since Chartist don't support setting bar colors via the API, Im adding a meta tag and append 
+        //the corresponding class to the SVG element on draw..phew
         indata.forEach(function (element) {
             data.labels.push(element.label);
-            //data.datasets[0].backgroundColor.push('rgba(255, 99, 132, 0.2)');
-            //data.datasets[0].borderColor.push('rgba(255, 99, 132, 0.2)');
-            data.series[0].push(element.quota);
+            data.series[0].push({ value: element.quota, className: "bar-" + element.label });
         }, this);
         return data;
     }
@@ -187,14 +189,13 @@ var MODEL = function () {
                 });
             });
             var result = formatChartObj(temp);
-            console.log(result);
             return result;
         }
     };
 }();
 
 /**
- * CONTROLLER MODULE - CONTROLS COMMUNICATION
+ * CONTROLLER module - directs communication
  */
 var CONTROLLER = function () {
 
@@ -288,7 +289,7 @@ var CONTROLLER = function () {
 }();
 
 /**
- * VIEW MODULE - HANDLES EVERYTHING UI 
+ * VIEW module - Handles everything u see & interact with
  */
 var VIEW = function () {
 
@@ -321,8 +322,7 @@ var VIEW = function () {
     }
 
     /**
-     * capital first letter of str
-     * @param {string} str 
+     * capital first letter of a string
      */
     function capitalizeFirst(str) {
         if (str) {
@@ -394,12 +394,13 @@ var VIEW = function () {
          * Chart itself is made in chart_animation.js
          */
         printChart: function printChart(data, which) {
+            console.log(data);
 
             if (which === "partyChart") {
-                makePartyChart(data);
+                CHART.makePartyChart(data);
             }
             if (which === "genderChart") {
-                makeGenderChart(data);
+                CHART.makeGenderChart(data);
             }
         },
 

@@ -38,6 +38,41 @@
 .border-- {
   border-color: #DDDDDD; }
 
+/*Colors for chart bars
+*/
+.bar-man {
+  stroke: #2D338E; }
+
+.bar-kvinna {
+  stroke: #B00000; }
+
+.bar-M {
+  stroke: #52BDEC; }
+
+.bar-S {
+  stroke: #EE2020; }
+
+.bar-V {
+  stroke: #B00000; }
+
+.bar-MP {
+  stroke: #53A045; }
+
+.bar-SD {
+  stroke: #FBC700; }
+
+.bar-C {
+  stroke: #016A3A; }
+
+.bar-L {
+  stroke: #0069B4; }
+
+.bar-KD {
+  stroke: #2D338E; }
+
+.bar-- {
+  stroke: #DDDDDD; }
+
 /* Spinkit courtesy of http://tobiasahlin.com/spinkit/ */
 .sk-circle {
   margin: 200px auto;
@@ -175,3 +210,9 @@ a {
 
 .modal-content {
   padding: 1rem; }
+
+.ct-chart-bar {
+  height: 75vh !important; }
+
+.ct-perfect-fourth:before {
+  padding-bottom: 0 !important; }
