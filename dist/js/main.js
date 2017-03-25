@@ -73,16 +73,17 @@ var MODEL = function () {
 
     /**
      * Sorts the array passed in by speeches, i.e making the top list
+     * * @param {array} arr - array to be sorted 
+     * * @param {string} prop - property to sort 
      */
-    function sortNumberOfSpeeches(mps) {
-        return mps.sort(function (a, b) {
-            return a.numberofspeeches > b.numberofspeeches ? -1 : 1;
+    function sortNumberOfSpeeches(arr, prop) {
+        return arr.sort(function (a, b) {
+            return a[prop] > b[prop] ? -1 : 1;
         });
     }
 
     /**
      * calcs the total number of speeches in the array recieved and returns the number
-     * @param {array} mps 
      */
     function totalSpeeches(mps) {
         return mps.reduce(function (total, cur) {
@@ -124,7 +125,7 @@ var MODEL = function () {
          * Either all or a current selection depending on request.
          */
         setArray: function setArray(mps, which) {
-            var sorted = sortNumberOfSpeeches(mps);
+            var sorted = sortNumberOfSpeeches(mps, "numberofspeeches");
             return which === "all" ? allMPs = sorted : filteredMPs = sorted;
         },
 
@@ -188,6 +189,9 @@ var MODEL = function () {
                     quota: Math.round(numSpeeches / numMps * 100) / 100
                 });
             });
+            console.log("before", temp);
+            temp = sortNumberOfSpeeches(temp, "quota");
+            console.log("after", temp);
             var result = formatChartObj(temp);
             return result;
         }

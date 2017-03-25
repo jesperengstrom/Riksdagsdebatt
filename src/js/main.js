@@ -64,14 +64,15 @@ const MODEL = (function() {
 
     /**
      * Sorts the array passed in by speeches, i.e making the top list
+     * * @param {array} arr - array to be sorted 
+     * * @param {string} prop - property to sort 
      */
-    function sortNumberOfSpeeches(mps) {
-        return mps.sort((a, b) => a.numberofspeeches > b.numberofspeeches ? -1 : 1);
+    function sortNumberOfSpeeches(arr, prop) {
+        return arr.sort((a, b) => a[prop] > b[prop] ? -1 : 1);
     }
 
     /**
      * calcs the total number of speeches in the array recieved and returns the number
-     * @param {array} mps 
      */
     function totalSpeeches(mps) {
         return mps.reduce(function(total, cur) {
@@ -116,7 +117,7 @@ const MODEL = (function() {
          * Either all or a current selection depending on request.
          */
         setArray: function(mps, which) {
-            let sorted = sortNumberOfSpeeches(mps);
+            let sorted = sortNumberOfSpeeches(mps, "numberofspeeches");
             return which === "all" ? allMPs = sorted : filteredMPs = sorted;
         },
 
@@ -156,7 +157,7 @@ const MODEL = (function() {
          * * @param {string} prop - I want to sum the values in this property
          */
         sumSpeechesBy: function(prop) {
-            const temp = [];
+            let temp = [];
             var categories = [];
             if (prop == "party") {
                 categories = ["S", "V", "MP", "M", "L", "C", "KD", "SD", "-"];
@@ -180,6 +181,9 @@ const MODEL = (function() {
                     quota: Math.round((numSpeeches / numMps) * 100) / 100
                 });
             });
+            console.log("before", temp);
+            temp = sortNumberOfSpeeches(temp, "quota");
+            console.log("after", temp);
             const result = formatChartObj(temp);
             return result;
         }
