@@ -1,3 +1,5 @@
+//MP = Member of Parliament
+
 /**
  * MODEL module - handles app logic & data
  */
@@ -63,7 +65,7 @@ const MODEL = (function() {
     }
 
     /**
-     * Sorts the array passed in by speeches, i.e making the top list
+     * Sorts the array passed in by value of the given prop. To sort toplist + chart.
      * * @param {array} arr - array to be sorted 
      * * @param {string} prop - property to sort 
      */
@@ -94,7 +96,7 @@ const MODEL = (function() {
             ]
         };
         //since Chartist don't support setting bar colors via the API, Im adding a meta tag and append 
-        //the corresponding class to the SVG element on draw..phew
+        //the corresponding class to the SVG element later on draw..phew
         indata.forEach(function(element) {
             data.labels.push(element.label);
             data.series[0].push({ value: element.quota, className: "bar-" + element.label });
@@ -113,8 +115,9 @@ const MODEL = (function() {
         },
 
         /**
-         * Sorts the array of MP:s by no of speeches before storing it in the model.
-         * Either all or a current selection depending on request.
+         * Sorts and stores the array of MP: in the model. 
+         * * @param {array} mps - array of mp:s to store.
+         * * @param {string} which - store all or current selection depending on request.
          */
         setArray: function(mps, which) {
             let sorted = sortNumberOfSpeeches(mps, "numberofspeeches");
@@ -151,9 +154,8 @@ const MODEL = (function() {
         },
 
         /**
-         * Making use of the filterMPs and totalSpeeches functions to return an array of objects with 
-         * the total number of speeches by a certain category (party/gender). Also the number of members in that 
-         * category and the quota of the two. Objecs are constructed so they will eventuelly fit charts.js.
+         * Returns an array of objects with the total number of speeches by a certain category (party/gender). 
+         * Also the number of members in that category and the quota of the two.
          * * @param {string} prop - I want to sum the values in this property
          */
         sumSpeechesBy: function(prop) {
@@ -181,11 +183,13 @@ const MODEL = (function() {
                     quota: Math.round((numSpeeches / numMps) * 100) / 100
                 });
             });
-            console.log("before", temp);
             temp = sortNumberOfSpeeches(temp, "quota");
-            console.log("after", temp);
             const result = formatChartObj(temp);
             return result;
+        },
+
+        getSpeech: function(event, arr) {
+            console.log(arr.replik);
         }
     };
 })();
@@ -264,7 +268,7 @@ const CONTROLLER = (function() {
          * Then sent to storage.
          * * @param {nodeList} elems - the list of toggle buttons for filtering parties.
          */
-        partySelection: function(elems) {
+        getPartySelection: function(elems) {
             let selection = [];
             elems.forEach((element) => {
                 if (element.classList.contains("activeParty")) {
@@ -279,7 +283,7 @@ const CONTROLLER = (function() {
          * Opens modal window for each MP. Sudden jQuery-syntax comes from Bootstrap documentation.
          */
         openModal: function(event, mp) {
-            VIEW.renderModal.call(mp);
+            VIEW.printModal.call(mp);
             $("#mpModal").modal();
         }
     };
@@ -291,88 +295,108 @@ const CONTROLLER = (function() {
  */
 const VIEW = (function() {
 
-            /**
-             * It was a nightmare to figure out how to append event listerners to all the toplist items. I tried every possible closure to get
-             * not only the last one to stick. Turns out the problem was probably the DOM selector operating in the same 
-             * loop as the template literal? As soon as i made ANOTHER loop everything just worked :/
-             * @param {array} mps 
-             */
-            function listenersForToplist(mps) {
-                for (let i in mps) {
-                    document.querySelector(`tr[data-id="${mps[i].id}"]`).
-                    addEventListener('click', CONTROLLER.openModal.bind(null, event, mps[i]));
-                }
-            }
-
-            /**
-             * You can often remove a lot of things in these topic descriptions. For ex "svar på interpellation 1235 om..." after the "om" follows
-             * the real issue, so i extract everything after the "om", capitalize the first letter and return.
-             * @param {string} string - topic of the speech
-             */
-            function trimString(string) {
-                let newString = string;
-                let search = newString.indexOf(" om ");
-                if (search > 0) {
-                    let temp = newString.substring(search + 4, newString.length);
-                    temp = capitalizeFirst(temp);
-                    newString = temp;
-                }
-                return newString;
-            }
-
-            /**
-             * capital first letter of a string
-             */
-            function capitalizeFirst(str) {
-                if (str) {
-                    str = str[0].toUpperCase() + str.substring(1, str.length);
-                }
-                return str;
-            }
-
-            /**
-             * returns the template literal list of speeches code to the main modal printing function.
-             */
-            function speechSnippet() {
-                let string = ``;
-                let count = 0;
-                const sp = this.speeches;
-                const eMega = `<i class="em em-mega pull-right"> </i>`;
-                const eSpeech = `<i class="em em-speech_balloon pull-right"> </i>`;
-
-                if (!sp) return `<i class="em em-disappointed"></i>`;
-
-                for (let i in sp) {
-                    //if the previous debate was the same as this one, then skip it...
-                    //the loose compare is important since it accepts "0".
-                    if (i == 0 || sp[i].avsnittsrubrik !== sp[i - 1].avsnittsrubrik) {
-                        //byt till anforande_url_xml om tid finns
-                        string += `<li><a href="${sp[i].protokoll_url_www}" target="_blank">${sp[i].replik == "Y" ? 
-                        `<span class="comeback-debate debate-topic">` : `<span class="own-debate debate-topic">`}${trimString(sp[i].avsnittsrubrik)} 
-                        </span></a>
-                        <span class="debate-context">${capitalizeFirst(sp[i].kammaraktivitet) || "" } ${sp[i].dok_datum}.</span> 
-                        `;
-                        count++;
-                //If the next topic will be a new one, close the list item.
-                if (i > sp.length -1 && sp[i].avsnittsrubrik !== sp[i + 1].avsnittsrubrik) string += `</li>`;
-            
-            //... instead print out an emoji
-            } else string += `<span class="additional-entries">${sp[i].replik == "Y" ? eSpeech : eMega}`;
-            
-            if (count === 10) break;
+    /**
+     * It was a nightmare to figure out how to append event listerners to all the toplist items. I tried every possible closure to get
+     * not only the last one to stick. Turns out the problem was probably the DOM selector operating in the same 
+     * loop as the template literal? As soon as i made ANOTHER loop everything just worked :/
+     * @param {array} mps 
+     */
+    function listenersForToplist(mps) {
+        for (let i in mps) {
+            document.querySelector(`tr[data-id="${mps[i].id}"]`).
+            addEventListener('click', CONTROLLER.openModal.bind(null, event, mps[i]));
         }
-        return string;
     }
 
-        /**
-         * HTML-page consists of 3 sections that corresponds to three 
-         * features of the page: to print a toplist, to display a chart and to display an about-text (+loading).
-         * Following three functions print these sections using helper methods.
-         */
+    /**
+     * Making speeches clickable
+     * @param {array} speeches - array of speeches that is printed in the modal
+     */
+    function listenersForSpeeches(speeches) {
+        for (let i in speeches) {
+            document.getElementById(speeches[i].anforande_id).
+            addEventListener('click', MODEL.getSpeech.bind(null, event, speeches[i]));
+
+        }
+    }
+
+    /**
+     * You can often remove a lot of things in these topic descriptions. For ex "svar på interpellation 1235 om..." after the "om" follows
+     * the real issue, so i extract everything after the "om", capitalize the first letter and return.
+     * @param {string} string - topic of the speech
+     */
+    function trimString(string) {
+        let newString = string;
+        let search = newString.indexOf(" om ");
+        if (search > 0) {
+            let temp = newString.substring(search + 4, newString.length);
+            temp = capitalizeFirst(temp);
+            newString = temp;
+        }
+        return newString;
+    }
+
+    /**
+     * capital first letter of a string
+     */
+    function capitalizeFirst(str) {
+        if (str) {
+            str = str[0].toUpperCase() + str.substring(1, str.length);
+        }
+        return str;
+    }
+
+    /**
+     * returns the template literal list of speeches code to the main modal printing function.
+     */
+    function printSpeechList() {
+        let ul = document.getElementById("modal-speech-list"),
+            speechArr = [],
+            string = ``,
+            count = 0;
+        const sp = this.speeches,
+            eMega = `<i class="em em-mega"> </i>`,
+            eSpeech = `<i class="em em-speech_balloon"> </i>`;
+
+        //no speeches
+        if (!sp) return `<i class="em em-disappointed"></i>`;
+
+        for (let i in sp) {
+
+            //if the previous debate was the same as this one, then skip it...
+            //the loose compare is important since it accepts "0".
+            if (i == 0 || sp[i].avsnittsrubrik !== sp[i - 1].avsnittsrubrik) {
+
+                string += `<li> 
+                            <span class="${sp[i].replik == "Y" ? "comeback" : "own"}-debate debate-topic" id="${sp[i].anforande_id}">
+                            ${trimString(sp[i].avsnittsrubrik)}</span>
+                            <span class="debate-context">${capitalizeFirst(sp[i].kammaraktivitet) || "" } ${sp[i].dok_datum}.</span> 
+                            `;
+                count++;
+
+                //If the next topic will be a new one, close the list item.
+                if (i > sp.length - 1 && sp[i].avsnittsrubrik !== sp[i + 1].avsnittsrubrik) string += `</li>`;
+
+                //... instead print out an emoji
+            } else string += `<i id="${sp[i].anforande_id}" class="em em-${sp[i].replik == "Y" ? "speech_balloon" : "mega"}"></i>`;
+
+            speechArr.push(sp[i]);
+            if (count === 10) break;
+        }
+        //can's just return the string to parent function because then the event listeners be created before the elements = fail. 
+        ul.innerHTML = string;
+        listenersForSpeeches(speechArr);
+    }
+
+    /**
+     * HTML-page consists of 3 sections that corresponds to three 
+     * features of the page: to print a toplist, to display a chart and to display an about-text (+loading).
+     * Following three functions print these sections using helper methods.
+     */
 
     return {
 
-        printTopList: function (mps) {
+        printTopList: function(mps) {
             const toplist = document.getElementById("toplist");
             let max = 10;
             //make a new arr of the items printed so I can add event listeners for them
@@ -407,45 +431,30 @@ const VIEW = (function() {
          * * @param {string} which - are we creating gender/party chart?
          * Chart itself is made in chart_animation.js
          */
-        printChart: function (data, which) {
+        printChart: function(data, which) {
             console.log(data);
 
             if (which === "partyChart") {
-            CHART.makePartyChart(data);
+                CHART.makePartyChart(data);
             }
             if (which === "genderChart") {
-            CHART.makeGenderChart(data);
+                CHART.makeGenderChart(data);
             }
-        },
-
-        /**
-         * First hides all the main sections.
-         ** @param {string} section - this section is set to visible
-         */
-        hideAllButMe: function (section) {
-            document.getElementById("loading-section").className = "hidden";
-            document.getElementById("toplist-section").className = "hidden";
-            document.getElementById("gender-chart-section").className = "hidden";
-            document.getElementById("party-chart-section").className = "hidden";
-            document.getElementById("about-section").className = "hidden";
-
-            document.getElementById(section).className = "visible";
         },
 
         /**
          * Prints a modal that pop up when you click an MP.
          */
-        renderModal: function () {
+        printModal: function() {
             //getting code for this list of speeches
-            let speechList = speechSnippet.call(this);
             let modalBody = document.querySelector(".modal-content");
 
             //setting the more static content as variables..
             let headerContent = `${this.firstname} ${this.lastname} (${this.party})`;
-            let lastLine = this.speeches ? 
+            let lastLine = this.speeches ?
                 `<br>Här är några av de senaste frågorna ${this.gender == "man" ? "han" : "hon"} har talat om:</p>` :
                 `<br>Därför finns det inget att visa här.</p>`;
-            
+
             let bodyFacts = `
             <p>Född: ${this.born}. Valkrets: ${this.electorate}.</p>
             <p>${this.firstname} har debatterat i Riksdagen vid ${this.numberofspeeches} tillfällen sedan ${MODEL.oneMonthBack()}. 
@@ -454,7 +463,7 @@ const VIEW = (function() {
 
             //..inserting them in the modal template literal.
             modalBody.innerHTML =
-            `
+                `
             <div class="modal-header">
                 <h5 class="modal-title" id="mpModalLabel">
                 ${headerContent}
@@ -466,8 +475,7 @@ const VIEW = (function() {
             <div class="modal-body">
                 ${bodyFacts}
                 <hr>
-                <ul>
-                ${speechList}
+                <ul id="modal-speech-list">
                 </ul>
                 <hr>
                 <span class="own-debate debate-topic">     </span> = Eget anförande
@@ -475,6 +483,22 @@ const VIEW = (function() {
                 <i class="em em-mega"></i><i class="em em-speech_balloon"></i> = ${this.firstname} har flera inlägg i den här debatten.
             </div>
             `;
+            //Need to print speechlist as the last thing
+            printSpeechList.call(this);
+        },
+
+        /**
+         * First hides all the main sections.
+         ** @param {string} section - this section is set to visible
+         */
+        hideAllButMe: function(section) {
+            document.getElementById("loading-section").className = "hidden";
+            document.getElementById("toplist-section").className = "hidden";
+            document.getElementById("gender-chart-section").className = "hidden";
+            document.getElementById("party-chart-section").className = "hidden";
+            document.getElementById("about-section").className = "hidden";
+
+            document.getElementById(section).className = "visible";
         },
 
         /**
@@ -484,32 +508,32 @@ const VIEW = (function() {
          * 2) second call is a dev bypass that cuts directly to sorting using 
          * a readymade array of objects.
          */
-        init: (function () {
+        init: (function() {
             //1)
             //document.getElementById("getButton").addEventListener("click", CONTROLLER.init);
             //2
-            document.getElementById("getButton").addEventListener("click", function () {
+            document.getElementById("getButton").addEventListener("click", function() {
                 VIEW.hideAllButMe("toplist-section");
                 CONTROLLER.storeArray(testMPs, "all");
             });
 
             /**
-            * event listeners for my menu items, since nothing on the page is a hyperlink, just JS.
-            * Sends all of the nav-element to a controller function which then decides which one was clicked via 'this'.
-            */
-            document.querySelectorAll(".launch-nav-event").forEach(function (element) {
+             * event listeners for my menu items, since nothing on the page is a hyperlink, just JS.
+             * Sends all of the nav-element to a controller function which then decides which one was clicked via 'this'.
+             */
+            document.querySelectorAll(".launch-nav-event").forEach(function(element) {
                 element.addEventListener("click", CONTROLLER.navClick);
             }, this);
 
             /**
-            * Same concept with my listeners for party filtering, except I toggle a class and lets the controller function check
-            * which ones are 'active', ie selected.
-            */
+             * Same concept with my listeners for party filtering, except I toggle a class and lets the controller function check
+             * which ones are 'active', ie selected.
+             */
             const partyBtns = document.querySelectorAll(".partyBtn");
-            partyBtns.forEach(function (element) {
+            partyBtns.forEach(function(element) {
                 element.addEventListener("click", function() {
                     this.classList.toggle("activeParty");
-                    CONTROLLER.partySelection(partyBtns);
+                    CONTROLLER.getPartySelection(partyBtns);
                 });
             }, this);
 

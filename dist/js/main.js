@@ -1,5 +1,7 @@
 "use strict";
 
+//MP = Member of Parliament
+
 /**
  * MODEL module - handles app logic & data
  */
@@ -72,7 +74,7 @@ var MODEL = function () {
     }
 
     /**
-     * Sorts the array passed in by speeches, i.e making the top list
+     * Sorts the array passed in by value of the given prop. To sort toplist + chart.
      * * @param {array} arr - array to be sorted 
      * * @param {string} prop - property to sort 
      */
@@ -102,7 +104,7 @@ var MODEL = function () {
             series: [[]]
         };
         //since Chartist don't support setting bar colors via the API, Im adding a meta tag and append 
-        //the corresponding class to the SVG element on draw..phew
+        //the corresponding class to the SVG element later on draw..phew
         indata.forEach(function (element) {
             data.labels.push(element.label);
             data.series[0].push({ value: element.quota, className: "bar-" + element.label });
@@ -121,8 +123,9 @@ var MODEL = function () {
         },
 
         /**
-         * Sorts the array of MP:s by no of speeches before storing it in the model.
-         * Either all or a current selection depending on request.
+         * Sorts and stores the array of MP: in the model. 
+         * * @param {array} mps - array of mp:s to store.
+         * * @param {string} which - store all or current selection depending on request.
          */
         setArray: function setArray(mps, which) {
             var sorted = sortNumberOfSpeeches(mps, "numberofspeeches");
@@ -159,9 +162,8 @@ var MODEL = function () {
         },
 
         /**
-         * Making use of the filterMPs and totalSpeeches functions to return an array of objects with 
-         * the total number of speeches by a certain category (party/gender). Also the number of members in that 
-         * category and the quota of the two. Objecs are constructed so they will eventuelly fit charts.js.
+         * Returns an array of objects with the total number of speeches by a certain category (party/gender). 
+         * Also the number of members in that category and the quota of the two.
          * * @param {string} prop - I want to sum the values in this property
          */
         sumSpeechesBy: function sumSpeechesBy(prop) {
@@ -189,11 +191,13 @@ var MODEL = function () {
                     quota: Math.round(numSpeeches / numMps * 100) / 100
                 });
             });
-            console.log("before", temp);
             temp = sortNumberOfSpeeches(temp, "quota");
-            console.log("after", temp);
             var result = formatChartObj(temp);
             return result;
+        },
+
+        getSpeech: function getSpeech(event, arr) {
+            console.log(arr.replik);
         }
     };
 }();
@@ -271,7 +275,7 @@ var CONTROLLER = function () {
          * Then sent to storage.
          * * @param {nodeList} elems - the list of toggle buttons for filtering parties.
          */
-        partySelection: function partySelection(elems) {
+        getPartySelection: function getPartySelection(elems) {
             var selection = [];
             elems.forEach(function (element) {
                 if (element.classList.contains("activeParty")) {
@@ -286,7 +290,7 @@ var CONTROLLER = function () {
          * Opens modal window for each MP. Sudden jQuery-syntax comes from Bootstrap documentation.
          */
         openModal: function openModal(event, mp) {
-            VIEW.renderModal.call(mp);
+            VIEW.printModal.call(mp);
             $("#mpModal").modal();
         }
     };
@@ -306,6 +310,16 @@ var VIEW = function () {
     function listenersForToplist(mps) {
         for (var i in mps) {
             document.querySelector("tr[data-id=\"" + mps[i].id + "\"]").addEventListener('click', CONTROLLER.openModal.bind(null, event, mps[i]));
+        }
+    }
+
+    /**
+     * Making speeches clickable
+     * @param {array} speeches - array of speeches that is printed in the modal
+     */
+    function listenersForSpeeches(speeches) {
+        for (var i in speeches) {
+            document.getElementById(speeches[i].anforande_id).addEventListener('click', MODEL.getSpeech.bind(null, event, speeches[i]));
         }
     }
 
@@ -338,31 +352,39 @@ var VIEW = function () {
     /**
      * returns the template literal list of speeches code to the main modal printing function.
      */
-    function speechSnippet() {
-        var string = "";
-        var count = 0;
-        var sp = this.speeches;
-        var eMega = "<i class=\"em em-mega pull-right\"> </i>";
-        var eSpeech = "<i class=\"em em-speech_balloon pull-right\"> </i>";
+    function printSpeechList() {
+        var ul = document.getElementById("modal-speech-list"),
+            speechArr = [],
+            string = "",
+            count = 0;
+        var sp = this.speeches,
+            eMega = "<i class=\"em em-mega\"> </i>",
+            eSpeech = "<i class=\"em em-speech_balloon\"> </i>";
 
+        //no speeches
         if (!sp) return "<i class=\"em em-disappointed\"></i>";
 
         for (var i in sp) {
+
             //if the previous debate was the same as this one, then skip it...
             //the loose compare is important since it accepts "0".
             if (i == 0 || sp[i].avsnittsrubrik !== sp[i - 1].avsnittsrubrik) {
-                //byt till anforande_url_xml om tid finns
-                string += "<li><a href=\"" + sp[i].protokoll_url_www + "\" target=\"_blank\">" + (sp[i].replik == "Y" ? "<span class=\"comeback-debate debate-topic\">" : "<span class=\"own-debate debate-topic\">") + trimString(sp[i].avsnittsrubrik) + " \n                        </span></a>\n                        <span class=\"debate-context\">" + (capitalizeFirst(sp[i].kammaraktivitet) || "") + " " + sp[i].dok_datum + ".</span> \n                        ";
+
+                string += "<li> \n                            <span class=\"" + (sp[i].replik == "Y" ? "comeback" : "own") + "-debate debate-topic\" id=\"" + sp[i].anforande_id + "\">\n                            " + trimString(sp[i].avsnittsrubrik) + "</span>\n                            <span class=\"debate-context\">" + (capitalizeFirst(sp[i].kammaraktivitet) || "") + " " + sp[i].dok_datum + ".</span> \n                            ";
                 count++;
+
                 //If the next topic will be a new one, close the list item.
                 if (i > sp.length - 1 && sp[i].avsnittsrubrik !== sp[i + 1].avsnittsrubrik) string += "</li>";
 
                 //... instead print out an emoji
-            } else string += "<span class=\"additional-entries\">" + (sp[i].replik == "Y" ? eSpeech : eMega);
+            } else string += "<i id=\"" + sp[i].anforande_id + "\" class=\"em em-" + (sp[i].replik == "Y" ? "speech_balloon" : "mega") + "\"></i>";
 
+            speechArr.push(sp[i]);
             if (count === 10) break;
         }
-        return string;
+        //can's just return the string to parent function because then the event listeners be created before the elements = fail. 
+        ul.innerHTML = string;
+        listenersForSpeeches(speechArr);
     }
 
     /**
@@ -409,6 +431,25 @@ var VIEW = function () {
         },
 
         /**
+         * Prints a modal that pop up when you click an MP.
+         */
+        printModal: function printModal() {
+            //getting code for this list of speeches
+            var modalBody = document.querySelector(".modal-content");
+
+            //setting the more static content as variables..
+            var headerContent = this.firstname + " " + this.lastname + " (" + this.party + ")";
+            var lastLine = this.speeches ? "<br>H\xE4r \xE4r n\xE5gra av de senaste fr\xE5gorna " + (this.gender == "man" ? "han" : "hon") + " har talat om:</p>" : "<br>D\xE4rf\xF6r finns det inget att visa h\xE4r.</p>";
+
+            var bodyFacts = "\n            <p>F\xF6dd: " + this.born + ". Valkrets: " + this.electorate + ".</p>\n            <p>" + this.firstname + " har debatterat i Riksdagen vid " + this.numberofspeeches + " tillf\xE4llen sedan " + MODEL.oneMonthBack() + ". \n            " + lastLine + "\n            ";
+
+            //..inserting them in the modal template literal.
+            modalBody.innerHTML = "\n            <div class=\"modal-header\">\n                <h5 class=\"modal-title\" id=\"mpModalLabel\">\n                " + headerContent + "\n                </h5>\n                <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-label=\"Close\">\n                    <span aria-hidden=\"true\">&times;</span>\n                </button>\n            </div>\n            <div class=\"modal-body\">\n                " + bodyFacts + "\n                <hr>\n                <ul id=\"modal-speech-list\">\n                </ul>\n                <hr>\n                <span class=\"own-debate debate-topic\">     </span> = Eget anf\xF6rande\n                <span class=\"comeback-debate debate-topic\">     </span> = Replik p\xE5 n\xE5gon annan <br>\n                <i class=\"em em-mega\"></i><i class=\"em em-speech_balloon\"></i> = " + this.firstname + " har flera inl\xE4gg i den h\xE4r debatten.\n            </div>\n            ";
+            //Need to print speechlist as the last thing
+            printSpeechList.call(this);
+        },
+
+        /**
          * First hides all the main sections.
          ** @param {string} section - this section is set to visible
          */
@@ -420,24 +461,6 @@ var VIEW = function () {
             document.getElementById("about-section").className = "hidden";
 
             document.getElementById(section).className = "visible";
-        },
-
-        /**
-         * Prints a modal that pop up when you click an MP.
-         */
-        renderModal: function renderModal() {
-            //getting code for this list of speeches
-            var speechList = speechSnippet.call(this);
-            var modalBody = document.querySelector(".modal-content");
-
-            //setting the more static content as variables..
-            var headerContent = this.firstname + " " + this.lastname + " (" + this.party + ")";
-            var lastLine = this.speeches ? "<br>H\xE4r \xE4r n\xE5gra av de senaste fr\xE5gorna " + (this.gender == "man" ? "han" : "hon") + " har talat om:</p>" : "<br>D\xE4rf\xF6r finns det inget att visa h\xE4r.</p>";
-
-            var bodyFacts = "\n            <p>F\xF6dd: " + this.born + ". Valkrets: " + this.electorate + ".</p>\n            <p>" + this.firstname + " har debatterat i Riksdagen vid " + this.numberofspeeches + " tillf\xE4llen sedan " + MODEL.oneMonthBack() + ". \n            " + lastLine + "\n            ";
-
-            //..inserting them in the modal template literal.
-            modalBody.innerHTML = "\n            <div class=\"modal-header\">\n                <h5 class=\"modal-title\" id=\"mpModalLabel\">\n                " + headerContent + "\n                </h5>\n                <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-label=\"Close\">\n                    <span aria-hidden=\"true\">&times;</span>\n                </button>\n            </div>\n            <div class=\"modal-body\">\n                " + bodyFacts + "\n                <hr>\n                <ul>\n                " + speechList + "\n                </ul>\n                <hr>\n                <span class=\"own-debate debate-topic\">     </span> = Eget anf\xF6rande\n                <span class=\"comeback-debate debate-topic\">     </span> = Replik p\xE5 n\xE5gon annan <br>\n                <i class=\"em em-mega\"></i><i class=\"em em-speech_balloon\"></i> = " + this.firstname + " har flera inl\xE4gg i den h\xE4r debatten.\n            </div>\n            ";
         },
 
         /**
@@ -457,22 +480,22 @@ var VIEW = function () {
             });
 
             /**
-            * event listeners for my menu items, since nothing on the page is a hyperlink, just JS.
-            * Sends all of the nav-element to a controller function which then decides which one was clicked via 'this'.
-            */
+             * event listeners for my menu items, since nothing on the page is a hyperlink, just JS.
+             * Sends all of the nav-element to a controller function which then decides which one was clicked via 'this'.
+             */
             document.querySelectorAll(".launch-nav-event").forEach(function (element) {
                 element.addEventListener("click", CONTROLLER.navClick);
             }, this);
 
             /**
-            * Same concept with my listeners for party filtering, except I toggle a class and lets the controller function check
-            * which ones are 'active', ie selected.
-            */
+             * Same concept with my listeners for party filtering, except I toggle a class and lets the controller function check
+             * which ones are 'active', ie selected.
+             */
             var partyBtns = document.querySelectorAll(".partyBtn");
             partyBtns.forEach(function (element) {
                 element.addEventListener("click", function () {
                     this.classList.toggle("activeParty");
-                    CONTROLLER.partySelection(partyBtns);
+                    CONTROLLER.getPartySelection(partyBtns);
                 });
             }, this);
         }()
