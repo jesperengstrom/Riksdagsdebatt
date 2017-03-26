@@ -10,16 +10,25 @@ var MODEL = function () {
     var filteredMPs = [];
 
     /**
-     * Returns a promise of all MP:s. NEEDS ERROR HANDLING
+     * Returns all MPs
      * Originally fetched from: http://data.riksdagen.se/personlista/?iid=&fnamn=&enamn=&f_ar=&kn=&parti=&valkrets=&rdlstatus=&org=&utformat=json&termlista=
-     * But now fetched locally since it's very big and doesn't change very often.
+     * Currently fetched locally since it's very big and doesn't change very often.
      */
     function fetchAllMPs() {
-        return fetch('json/rawMPs.json').then(function (response) {
+        return fetch('json/rawMPs.json').then(handleFetchErrors).then(function (response) {
             return response.json();
         }).then(function (data) {
             return slimArray(data);
+        }).catch(function (error) {
+            return console.log(error);
         });
+    }
+
+    function handleFetchErrors(response) {
+        if (!response.ok) {
+            throw Error(response.statusText);
+        }
+        return response;
     }
 
     /**
@@ -46,14 +55,18 @@ var MODEL = function () {
 
     function fetchDebates(mps) {
         var fetchObj;
-        var fromDate = MODEL.oneMonthBack();
+        //let fromDate = MODEL.oneMonthBack();
+        //If I want all of Riksmöte 16/17
+        var fromDate = "";
         var countComebacks = 'Ja';
 
         var _loop = function _loop(i) {
-            fetchObj = fetch('http://data.riksdagen.se/anforandelista/?rm=2016%2F17&anftyp=' + countComebacks + '&d=' + fromDate + '&ts=&parti=&iid=' + mps[i].id + '&sz=200&utformat=json').then(function (response) {
+            fetchObj = fetch('http://data.riksdagen.se/anforandelista/?rm=2016%2F17&anftyp=' + countComebacks + '&d=' + fromDate + '&ts=&parti=&iid=' + mps[i].id + '&sz=200&utformat=json').then(handleFetchErrors).then(function (response) {
                 return response.json();
             }).then(function (data) {
                 return addSpeechToArray(data, i);
+            }).catch(function (error) {
+                return console.log(error);
             });
         };
 
@@ -80,23 +93,31 @@ var MODEL = function () {
      * * @param {string} prop - property to sort
      */
     function sortNumberOfSpeeches(arr, prop) {
-        return arr.sort(function (a, b) {
+        return arr.filter(function (val) {
+            //Ajax async sometimes cause undefined values to turn up on the toplist. As for now i am simply removing that mp + logging it.
+            //Better than to set their speech rate to 0 as that effects the party stats negatively.
+            if (isNaN(val[prop])) console.log("filter removed an undefined", val);
+            return !isNaN(val[prop]);
+        }).sort(function (a, b) {
             return a[prop] > b[prop] ? -1 : 1;
         });
     }
 
     /**
-     * calcs the total number of speeches in the array recieved and returns the number
+     * calcs the total number of speeches in the array recieved and returns the number.
      */
     function totalSpeeches(mps) {
-        return mps.reduce(function (total, cur) {
+        //for safety, filters out any "undefined" values from the array to avoid a NaN total.
+        return mps.filter(function (val) {
+            return !isNaN(val.numberofspeeches);
+        }).reduce(function (total, cur) {
             return total + cur.numberofspeeches;
         }, 0);
     }
 
     /**
-     * Before we can print the chart, we need to format data in a way that Chartist.js accepts.
-     * * @param {array} indata - the data to be displayed in the chart.
+     * Before I can print the chart, I need to format data in a way that Chartist.js accepts.
+     * * @param {array} indata - the chart data to be formatted
      */
     function formatChartObj(indata) {
         // template object
@@ -147,9 +168,8 @@ var MODEL = function () {
 
         /**
          * I have to filter out my huge array on the basis of another array of selections.
-         * So i go through each element with array.Filter - it it returns true or not depends on the result
-         * of the nested array.Some which looks for any occurance in the other array.
-         * * @param {array} lookingfor - array of strings (party names / gender?) that I want to filter
+         * Array.Some is helpful here since it looks for any occurance in the other array.
+         * * @param {array} lookingfor - array of strings that I want to filter
          * * @param {string} prop - the property that i want to target
          */
         filterMPs: function filterMPs(lookingfor, prop) {
@@ -198,8 +218,7 @@ var MODEL = function () {
         },
 
         /**
-         * NEEDS ERROR HANDLING
-         * Gets the individual speeches in text.
+         * Gets the XML of individual speeches on request.
          * Since Fetch doesn't handle XML, I'm doing this the oldfashoned way.
          * * @param {object} speechobj - the object containing link to speech text
          * * @param {function} callback - for returning the result to the caller function. 
@@ -215,6 +234,9 @@ var MODEL = function () {
             };
             req.open("GET", speechobj.anforande_url_xml, true);
             req.send();
+            req.addEventListener("error", function () {
+                return console.log("Fel när anförandet skulle hämtas", req.statusText);
+            });
         }
     };
 }();
@@ -526,12 +548,12 @@ var VIEW = function () {
          */
         init: function () {
             // 1)
-            // document.getElementById("getButton").addEventListener("click", CONTROLLER.init);
+            document.getElementById("getButton").addEventListener("click", CONTROLLER.init);
             // 2
-            document.getElementById('getButton').addEventListener('click', function () {
-                VIEW.hideAllButMe('toplist-section');
-                CONTROLLER.storeArray(testMPs, 'all');
-            });
+            // document.getElementById('getButton').addEventListener('click', function() {
+            //     VIEW.hideAllButMe('toplist-section');
+            //     CONTROLLER.storeArray(testMPs, 'all');
+            // });
 
             /**
              * event listeners for my menu items, since nothing on the page is a hyperlink, just JS.
