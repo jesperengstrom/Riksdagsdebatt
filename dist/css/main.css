@@ -177,6 +177,9 @@
 .visible {
   display: block; }
 
+.inline {
+  display: inline; }
+
 a {
   color: #292b2c; }
 
@@ -194,6 +197,9 @@ a {
   color: dimgray;
   background: lightcyan;
   font-size: .8rem; }
+
+.speech-header {
+  font-weight: bold; }
 
 #page-wrap {
   margin-bottom: 56px; }
