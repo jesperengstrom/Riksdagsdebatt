@@ -8,7 +8,10 @@
 var MODEL = function () {
     var allMPs = [];
     var filteredMPs = [];
+    //counts fetches for the progress bar
     var loaded = 0;
+    //stores from when the last search was made
+    var searchDate;
 
     /**
      * Returns all MPs
@@ -76,7 +79,8 @@ var MODEL = function () {
         }
         // Fetch is done, we're ready to store array and send to print
         fetchObj.then(function () {
-            CONTROLLER.storeArray(allMPs, 'all');
+            CONTROLLER.storeArray(allMPs, 'all', fromDate);
+            searchDate = fromDate;
         });
     }
 
@@ -167,6 +171,10 @@ var MODEL = function () {
         setArray: function setArray(mps, which) {
             var sorted = sortNumberOfSpeeches(mps, 'numberofspeeches');
             return which === 'all' ? allMPs = sorted : filteredMPs = sorted;
+        },
+
+        getSearchDate: function getSearchDate() {
+            return searchDate;
         },
 
         initMPObject: function initMPObject() {
@@ -459,9 +467,13 @@ var VIEW = function () {
     return {
 
         printTopList: function printTopList(mps) {
+            //print search date
+            document.getElementById("dateline").innerHTML = '* ' + (MODEL.getSearchDate() || "Under riksmötet 2016/17");
+
             var toplist = document.getElementById("toplist");
             var toplistRight = document.getElementById("toplist2");
             var max = 10;
+
             // make a new arr of the items printed so I can add event listeners for them
             var toplistArr = [];
 
@@ -479,17 +491,16 @@ var VIEW = function () {
                 if (i >= 5) {
                     toplist = toplistRight;
                 }
-                toplist.innerHTML += '\n                <tr data-id="' + mps[i].id + '">\n                    <th scope="row">' + (i + 1) + '</th>\n                    <td class="td-img">\n                        <div class="mp-img-container border-' + mps[i].party + '">\n                            <img src="' + mps[i].image + '" class="mp-img" alt="' + mps[i].firstname + ' ' + mps[i].lastname + '">\n                        </div>\n                    </td>\n                    <td>' + mps[i].firstname + ' ' + mps[i].lastname + ' (' + mps[i].party + ')</td>\n                    <td class="td-right">' + mps[i].numberofspeeches + '</td>\n                </tr>\n                ';
+                toplist.innerHTML += '\n                <tr data-id="' + mps[i].id + '" class="bg-' + mps[i].party + '">\n                    <th scope="row">' + (i + 1) + '</th>\n                    <td class="td-img">\n                        <div class="mp-img-container border-' + mps[i].party + '">\n                            <img src="' + mps[i].image + '" class="mp-img" alt="' + mps[i].firstname + ' ' + mps[i].lastname + '">\n                        </div>\n                    </td>\n                    <td>' + mps[i].firstname + ' ' + mps[i].lastname + ' (' + mps[i].party + ')</td>\n                    <td class="td-right">' + mps[i].numberofspeeches + '</td>\n                </tr>\n                ';
                 toplistArr.push(mps[i]);
             }
             listenersForToplist(toplistArr);
         },
 
         /**
-         *
+         * Chart itself is made in chart_animation.js
          * * @param {object} data - data to be displayed in the chart
          * * @param {string} which - are we creating gender/party chart?
-         * Chart itself is made in chart_animation.js
          */
         printChart: function printChart(data, which) {
             console.log("print chart:", data);

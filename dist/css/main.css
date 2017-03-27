@@ -81,6 +81,33 @@
 .bar-- {
   stroke: #DDDDDD; }
 
+.bg-S {
+  background: rgba(238, 32, 32, 0.1); }
+
+.bg-V {
+  background: rgba(176, 0, 0, 0.1); }
+
+.bg-MP {
+  background: rgba(83, 160, 69, 0.1); }
+
+.bg-M {
+  background: rgba(82, 189, 236, 0.1); }
+
+.bg-C {
+  background: rgba(1, 106, 58, 0.1); }
+
+.bg-L {
+  background: rgba(0, 105, 180, 0.1); }
+
+.bg-KD {
+  background: rgba(45, 51, 142, 0.1); }
+
+.bg-SD {
+  background: rgba(251, 199, 0, 0.1); }
+
+.bg-- {
+  background: rgba(221, 221, 221, 0.1); }
+
 #loading-section {
   display: -ms-flexbox;
   display: flex;
@@ -121,6 +148,12 @@ a {
 .speech-header {
   font-weight: bold; }
 
+.lead-smaller {
+  font-size: 1rem;
+  font-weight: 300;
+  margin-top: .3rem;
+  float: right; }
+
 #page-wrap {
   margin-bottom: 56px; }
 
@@ -132,6 +165,9 @@ a {
 
 .dropdown-menu {
   padding: 0.5rem; }
+
+.navbar-right {
+  margin-right: 3rem; }
 
 .em {
   height: 21px !important;

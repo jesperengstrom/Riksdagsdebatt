@@ -6,7 +6,10 @@
 const MODEL = (function() {
     var allMPs = [];
     var filteredMPs = [];
+    //counts fetches for the progress bar
     var loaded = 0;
+    //stores from when the last search was made
+    var searchDate;
 
     /**
      * Returns all MPs
@@ -66,7 +69,8 @@ const MODEL = (function() {
         }
         // Fetch is done, we're ready to store array and send to print
         fetchObj.then(function() {
-            CONTROLLER.storeArray(allMPs, 'all');
+            CONTROLLER.storeArray(allMPs, 'all', fromDate);
+            searchDate = fromDate;
         });
     }
 
@@ -159,6 +163,10 @@ const MODEL = (function() {
         setArray: function(mps, which) {
             let sorted = sortNumberOfSpeeches(mps, 'numberofspeeches');
             return which === 'all' ? allMPs = sorted : filteredMPs = sorted;
+        },
+
+        getSearchDate: function() {
+            return searchDate;
         },
 
         initMPObject: function() {
@@ -458,9 +466,13 @@ const VIEW = (function() {
     return {
 
         printTopList: function(mps) {
+            //print search date
+            document.getElementById("dateline").innerHTML = `* ${MODEL.getSearchDate() || "Under riksmötet 2016/17"}`;
+
             let toplist = document.getElementById("toplist");
             const toplistRight = document.getElementById("toplist2");
             const max = 10;
+
             // make a new arr of the items printed so I can add event listeners for them
             const toplistArr = [];
 
@@ -479,7 +491,7 @@ const VIEW = (function() {
                     toplist = toplistRight;
                 }
                 toplist.innerHTML += `
-                <tr data-id="${mps[i].id}">
+                <tr data-id="${mps[i].id}" class="bg-${mps[i].party}">
                     <th scope="row">${i + 1}</th>
                     <td class="td-img">
                         <div class="mp-img-container border-${mps[i].party}">
@@ -496,10 +508,9 @@ const VIEW = (function() {
         },
 
         /**
-         *
+         * Chart itself is made in chart_animation.js
          * * @param {object} data - data to be displayed in the chart
          * * @param {string} which - are we creating gender/party chart?
-         * Chart itself is made in chart_animation.js
          */
         printChart: function(data, which) {
             console.log("print chart:", data);
