@@ -270,7 +270,8 @@ const CONTROLLER = (function() {
          * Inits on page load. Triggers the loading-section
          */
         init: function() {
-            VIEW.hideAllButMe('loading-section');
+
+            //VIEW.hideAllButMe('loading-section');
             MODEL.initMPObject();
         },
 
@@ -480,7 +481,7 @@ const VIEW = (function() {
                 toplist.innerHTML += `
                 <tr data-id="${mps[i].id}">
                     <th scope="row">${i + 1}</th>
-                    <td>
+                    <td class="td-img">
                         <div class="mp-img-container border-${mps[i].party}">
                             <img src="${mps[i].image}" class="mp-img" alt="${mps[i].firstname} ${mps[i].lastname}">
                         </div>

@@ -20,7 +20,7 @@
         <div class="container-fluid d-flex align-items-center">
             <div class="row">
                 <div class="col">
-                    <h4>Hämtar data från Riksdagen...</h4>
+                    <h4 class="lead">Hämtar data från Riksdagen...</h4>
                     <div class="progress">
                         <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
                             0%
@@ -47,17 +47,17 @@
     <main id="page-wrap" class="container-fluid">
 
         <!-- toplist -->
-        <section id="toplist-section">
+        <section id="toplist-section" class="hidden">
             <div class="container">
                 <div class="row">
-                    <div class="col">
+                    <div class="col border-right">
                         <table class="table">
                             <thead>
                                 <tr>
                                     <th>#</th>
                                     <th></th>
                                     <th>Namn</th>
-                                    <th class="td-right">Debattinlägg</th>
+                                    <th class="td-right">Debattinlägg*</th>
                                 </tr>
                             </thead>
                             <tbody id="toplist">
@@ -71,7 +71,7 @@
                                     <th>#</th>
                                     <th></th>
                                     <th>Namn</th>
-                                    <th class="td-right">Debattinlägg</th>
+                                    <th class="td-right">Debattinlägg*</th>
                                 </tr>
                             </thead>
                             <tbody id="toplist2">
@@ -84,7 +84,7 @@
         <!-- end toplist -->
 
         <!--  party chart -->
-        <section id="party-chart-section">
+        <section id="party-chart-section" class="hidden">
             <div class="chart-container">
                 <div class="ct-chart ct-perfect-fourth" id="partyChart">
                 </div>
@@ -93,7 +93,7 @@
         <!-- end party chart -->
 
         <!-- gender chart -->
-        <section id="gender-chart-section">
+        <section id="gender-chart-section" class="hidden">
             <div class="chart-container">
                 <div class="ct-chart ct-perfect-fourth ct-bar" id="genderChart">
                 </div>
@@ -108,15 +108,12 @@
         <!-- end about -->
 
         <!-- nav-bar-->
-        <nav class="navbar fixed-bottom navbar-toggleable-md navbar-light bg-faded">
+        <nav class="navbar fixed-bottom navbar-toggleable-md navbar-light bg-pastel">
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
-            <!-- thesee two makes margins but also causes bad behaviour -->
-            <!--<a class="navbar-brand" href="#"></a>-->
-            <!--<span class="navbar-text">&nbsp;</span>-->
             <div class="collapse navbar-collapse" id="navbarNavDropdown">
-                <ul class="navbar-nav mr-auto">
+                <ul class="navbar-nav mr-auto margin-left">
                     <li class="nav-item active">
                         <a class="nav-link launch-nav-event" href="#">Topplistan<span class="sr-only">(current)</span></a>
                     </li>
@@ -125,16 +122,20 @@
                         Filtrera på parti</a>
                         <div class="dropdown-menu" id="drop-noclose" aria-labelledby="navbarDropdownMenuLink">
                             <form class="form-inline">
-                                <div class="btn-group" data-toggle="buttons">
-                                    <button class="btn btn-outline-danger partyBtn">S</button>
-                                    <button class="btn btn-outline-danger partyBtn">V</button>
-                                    <button class="btn btn-outline-success partyBtn">MP</button>
-                                    <button class="btn btn-outline-primary partyBtn">M</button>
-                                    <button class="btn btn-outline-primary partyBtn">L</button>
-                                    <button class="btn btn-outline-success partyBtn">C</button>
-                                    <button class="btn btn-outline-primary partyBtn">KD</button>
-                                    <button class="btn btn-outline-warning partyBtn">SD</button>
-                                    <button class="btn btn-outline-secondary partyBtn">-</button>
+                                <div class="btn-gr" data-toggle="buttons">
+                                    <button class="btn btn-S partyBtn">S</button>
+                                    <button class="btn btn-V partyBtn">V</button>
+                                    <button class="btn btn-MP partyBtn">MP</button>
+                                </div>
+                                <div class="btn-gr" data-toggle="buttons">
+                                    <button class="btn btn-M partyBtn">M</button>
+                                    <button class="btn btn-L partyBtn">L</button>
+                                    <button class="btn btn-C partyBtn">C</button>
+                                </div>
+                                <div class="btn-gr" data-toggle="buttons">
+                                    <button class="btn btn-KD partyBtn">KD</button>
+                                    <button class="btn btn-SD partyBtn">SD</button>
+                                    <button class="btn btn-wild partyBtn">-</button>
                                 </div>
                             </form>
                         </div>

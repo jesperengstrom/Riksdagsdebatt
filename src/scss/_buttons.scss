@@ -1,0 +1,256 @@
+.myButton {
+    width: 50px;
+    height: 50px;
+    padding: 0;
+    margin: 0.25rem;
+    border-radius: 0;
+    background-image: none;
+    background-color: transparent;
+}
+
+//S
+.btn-S {
+    @extend .myButton;
+    color: $S;
+    border-color: $S;
+    &:active {
+        color: #fff;
+        background-color: $S;
+        border-color: $S;
+    }
+    &:focus {
+        box-shadow: none;
+    }
+    &:hover {
+        color: #fff;
+        background-color: rgba(238, 32, 32, .3);
+        border-color: rgba(238, 32, 32, .3);
+    }
+}
+
+.btn-S.active {
+    transform: scale(1.1);
+    color: #fff;
+    background-color: $S;
+    border-color: $S;
+}
+
+//V
+.btn-V {
+    @extend .myButton;
+    color: $V;
+    border-color: $V;
+    &:active {
+        color: #fff;
+        background-color: $V;
+        border-color: $V;
+    }
+    &:focus {
+        box-shadow: none;
+    }
+    &:hover {
+        color: #fff;
+        background-color: rgba(176, 0, 0, 0.3);
+        border-color: rgba(176, 0, 0, 0.3);
+    }
+}
+
+.btn-V.active {
+    transform: scale(1.1);
+    color: #fff;
+    background-color: $V;
+    border-color: $V;
+}
+
+//MP
+.btn-MP {
+    @extend .myButton;
+    color: $MP;
+    border-color: $MP;
+    &:active {
+        color: #fff;
+        background-color: $MP;
+        border-color: $MP;
+    }
+    &:focus {
+        box-shadow: none;
+    }
+    &:hover {
+        color: #fff;
+        background-color: rgba(83, 160, 69, 0.3);
+        border-color: rgba(83, 160, 69, 0.3);
+    }
+}
+
+.btn-MP.active {
+    transform: scale(1.1);
+    color: #fff;
+    background-color: $MP;
+    border-color: $MP;
+}
+
+//M
+.btn-M {
+    @extend .myButton;
+    color: $M;
+    border-color: $M;
+    &:active {
+        color: #fff;
+        background-color: $M;
+        border-color: $M;
+    }
+    &:focus {
+        box-shadow: none;
+    }
+    &:hover {
+        color: #fff;
+        background-color: rgba(82, 189, 236, 0.3);
+        border-color: rgba(82, 189, 236, 0.3);
+    }
+}
+
+.btn-M.active {
+    transform: scale(1.1);
+    color: #fff;
+    background-color: $M;
+    border-color: $M;
+}
+
+//L
+.btn-L {
+    @extend .myButton;
+    color: $L;
+    border-color: $L;
+    &:active {
+        color: #fff;
+        background-color: $L;
+        border-color: $L;
+    }
+    &:focus {
+        box-shadow: none;
+    }
+    &:hover {
+        color: #fff;
+        background-color: rgba(0, 105, 180, 0.3);
+        border-color: rgba(0, 105, 180, 0.3);
+    }
+}
+
+.btn-L.active {
+    transform: scale(1.1);
+    color: #fff;
+    background-color: $L;
+    border-color: $L;
+}
+
+//C
+.btn-C {
+    @extend .myButton;
+    color: $C;
+    border-color: $C;
+    &:active {
+        color: #fff;
+        background-color: $C;
+        border-color: $C;
+    }
+    &:focus {
+        box-shadow: none;
+    }
+    &:hover {
+        color: #fff;
+        background-color: rgba(1, 106, 58, 0.3);
+        border-color: rgba(1, 106, 58, 0.3);
+    }
+}
+
+.btn-C.active {
+    transform: scale(1.1);
+    color: #fff;
+    background-color: $C;
+    border-color: $C;
+}
+
+//KD
+.btn-KD {
+    @extend .myButton;
+    color: $KD;
+    border-color: $KD;
+    &:active {
+        color: #fff;
+        background-color: $KD;
+        border-color: $KD;
+    }
+    &:focus {
+        box-shadow: none;
+    }
+    &:hover {
+        color: #fff;
+        background-color: rgba(45, 51, 142, 0.3);
+        border-color: rgba(45, 51, 142, 0.3);
+    }
+}
+
+.btn-KD.active {
+    transform: scale(1.1);
+    color: #fff;
+    background-color: $KD;
+    border-color: $KD;
+}
+
+//SD
+.btn-SD {
+    @extend .myButton;
+    color: $SD;
+    border-color: $SD;
+    &:active {
+        color: #fff;
+        background-color: $SD;
+        border-color: $SD;
+    }
+    &:focus {
+        box-shadow: none;
+    }
+    &:hover {
+        color: #fff;
+        background-color: rgba(251, 199, 0, 0.3);
+        border-color: rgba(251, 199, 0, 0.3);
+    }
+}
+
+.btn-SD.active {
+    transform: scale(1.1);
+    color: #fff;
+    background-color: $SD;
+    border-color: $SD;
+}
+
+//WILD
+.btn-wild {
+    @extend .myButton;
+    color: $WILD;
+    border-color: $WILD;
+    &:active {
+        color: #fff;
+        background-color: $WILD;
+        border-color: $WILD;
+    }
+    &:focus {
+        box-shadow: none;
+    }
+    &:hover {
+        color: #fff;
+        background-color: rgba(221, 221, 221, 0.3);
+        border-color: rgba(221, 221, 221, 0.3);
+    }
+}
+
+.btn-wild.active {
+    transform: scale(1.1);
+    color: #fff;
+    background-color: $WILD;
+    border-color: $WILD;
+}
+
+.btn-gr {
+    display: flex;
+}

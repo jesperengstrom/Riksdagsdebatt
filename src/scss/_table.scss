@@ -1,8 +1,19 @@
 //toplist table
 td {
     position: relative;
+    //to make td:s larger to fit image
+    padding-bottom: 2rem !important;
+    padding-top: 2rem !important;
 }
 
 .td-right {
     text-align: right;
+}
+
+.border-right {
+    border-right: 1px solid #eceeef;
+}
+
+.td-img {
+    padding-right: 5rem !important;
 }

@@ -279,7 +279,8 @@ var CONTROLLER = function () {
          * Inits on page load. Triggers the loading-section
          */
         init: function init() {
-            VIEW.hideAllButMe('loading-section');
+
+            //VIEW.hideAllButMe('loading-section');
             MODEL.initMPObject();
         },
 
@@ -478,7 +479,7 @@ var VIEW = function () {
                 if (i >= 5) {
                     toplist = toplistRight;
                 }
-                toplist.innerHTML += '\n                <tr data-id="' + mps[i].id + '">\n                    <th scope="row">' + (i + 1) + '</th>\n                    <td>\n                        <div class="mp-img-container border-' + mps[i].party + '">\n                            <img src="' + mps[i].image + '" class="mp-img" alt="' + mps[i].firstname + ' ' + mps[i].lastname + '">\n                        </div>\n                    </td>\n                    <td>' + mps[i].firstname + ' ' + mps[i].lastname + ' (' + mps[i].party + ')</td>\n                    <td class="td-right">' + mps[i].numberofspeeches + '</td>\n                </tr>\n                ';
+                toplist.innerHTML += '\n                <tr data-id="' + mps[i].id + '">\n                    <th scope="row">' + (i + 1) + '</th>\n                    <td class="td-img">\n                        <div class="mp-img-container border-' + mps[i].party + '">\n                            <img src="' + mps[i].image + '" class="mp-img" alt="' + mps[i].firstname + ' ' + mps[i].lastname + '">\n                        </div>\n                    </td>\n                    <td>' + mps[i].firstname + ' ' + mps[i].lastname + ' (' + mps[i].party + ')</td>\n                    <td class="td-right">' + mps[i].numberofspeeches + '</td>\n                </tr>\n                ';
                 toplistArr.push(mps[i]);
             }
             listenersForToplist(toplistArr);

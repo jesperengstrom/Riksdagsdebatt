@@ -1,6 +1,6 @@
-//menu
+//navbar
 .dropdown-menu {
-    padding: 1rem;
+    padding: 0.5rem;
 }
 
 .em {
@@ -14,6 +14,11 @@
 }
 
 //jumbotron
+.jumbotron,
+.bg-pastel {
+    background-color: $pastel-blue-lighter;
+}
+
 @media (min-width: 576px) {
     .jumbotron {
         padding: 1rem 1rem;
