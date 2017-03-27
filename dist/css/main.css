@@ -11,6 +11,11 @@
   top: -25px;
   width: 150px; }
 
+#riksdag-logo {
+  width: 40px;
+  height: 30px;
+  margin-right: 1rem; }
+
 .border-M {
   border-color: #52BDEC; }
 
@@ -129,6 +134,10 @@ a {
 
 .modal-content {
   padding: 1rem; }
+
+@media (min-width: 576px) {
+  .jumbotron {
+    padding: 1rem 1rem; } }
 
 .ct-chart-bar {
   height: 75vh !important; }
