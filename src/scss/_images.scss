@@ -1,16 +1,18 @@
 .mp-img-container {
-    height: 150px;
-    width: 150px;
+    height: 80px;
+    width: 80px;
     overflow: hidden;
-    border: 5px solid;
+    border: 2px solid;
     border-radius: 50%;
     margin-top: 1rem;
+    position: absolute;
+    top: -30px;
 }
 
 .mp-img {
     position: relative;
-    top: -25px;
-    width: 150px;
+    top: -15px;
+    width: 80px;
 }
 
 #riksdag-logo {

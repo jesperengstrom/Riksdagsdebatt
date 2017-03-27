@@ -457,29 +457,38 @@ const VIEW = (function() {
     return {
 
         printTopList: function(mps) {
-            const toplist = document.getElementById('toplist');
-            let max = 10;
+            let toplist = document.getElementById("toplist");
+            const toplistRight = document.getElementById("toplist2");
+            const max = 10;
             // make a new arr of the items printed so I can add event listeners for them
             const toplistArr = [];
-            toplist.innerHTML = '';
+
+            toplist.innerHTML = "";
+            toplistRight.innerHTML = "";
+
             if (mps.length === 0) {
-                toplist.innerHTML = '<p>Oops, det finns ingen data att visa</p>';
+                toplist.innerHTML = "<p>Oops, det finns ingen data att visa</p>";
                 return;
             }
             // keep printing the toplist until you reach the end of arr OR max value.
             for (let i = 0; i < max && i < mps.length; i++) {
+
+                //append place 5-10 to the second table
+                if (i >= 5) {
+                    toplist = toplistRight;
+                }
                 toplist.innerHTML += `
-            <tr data-id="${mps[i].id}">
-                <td>${i + 1}</td>
-                <td>
-                    <div class="mp-img-container border-${mps[i].party}">
-                        <img src="${mps[i].image}" class="mp-img" alt="${mps[i].firstname} ${mps[i].lastname}">
-                    </div>
-                </td>
-                <td>${mps[i].firstname} ${mps[i].lastname} (${mps[i].party})</td>
-                <td>${mps[i].numberofspeeches} debattinlägg</td>
-            </tr>
-            `;
+                <tr data-id="${mps[i].id}">
+                    <th scope="row">${i + 1}</th>
+                    <td>
+                        <div class="mp-img-container border-${mps[i].party}">
+                            <img src="${mps[i].image}" class="mp-img" alt="${mps[i].firstname} ${mps[i].lastname}">
+                        </div>
+                    </td>
+                    <td>${mps[i].firstname} ${mps[i].lastname} (${mps[i].party})</td>
+                    <td class="td-right">${mps[i].numberofspeeches}</td>
+                </tr>
+                `;
                 toplistArr.push(mps[i]);
             }
             listenersForToplist(toplistArr);

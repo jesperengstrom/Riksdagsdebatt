@@ -1,15 +1,17 @@
 .mp-img-container {
-  height: 150px;
-  width: 150px;
+  height: 80px;
+  width: 80px;
   overflow: hidden;
-  border: 5px solid;
+  border: 2px solid;
   border-radius: 50%;
-  margin-top: 1rem; }
+  margin-top: 1rem;
+  position: absolute;
+  top: -30px; }
 
 .mp-img {
   position: relative;
-  top: -25px;
-  width: 150px; }
+  top: -15px;
+  width: 80px; }
 
 #riksdag-logo {
   width: 40px;
@@ -92,8 +94,7 @@
   display: none !important; }
 
 .visible {
-  display: -ms-flexbox !important;
-  display: flex !important; }
+  display: block !important; }
 
 .inline {
   display: inline; }
@@ -148,3 +149,9 @@ a {
 .ct-label {
   font-size: 0.75em !important;
   color: #292b2c !important; }
+
+td {
+  position: relative; }
+
+.td-right {
+  text-align: right; }
