@@ -477,7 +477,7 @@ const VIEW = (function() {
          * Chart itself is made in chart_animation.js
          */
         printChart: function(data, which) {
-            console.log(data);
+            console.log("print chart:", data);
 
             if (which === 'partyChart') {
                 CHART.makePartyChart(data);
@@ -517,7 +517,6 @@ const VIEW = (function() {
         printSpeech: function(speech, obj) {
             //hide the list
             VIEW.showModalSection("modal-speech-text");
-            console.log(obj)
 
             let speechElem = document.getElementById("modal-speech-text");
             //setting the speeches date
@@ -563,12 +562,12 @@ const VIEW = (function() {
          */
         init: (function() {
             // 1)
-            document.getElementById("getButton").addEventListener("click", CONTROLLER.init);
+            //document.getElementById("getButton").addEventListener("click", CONTROLLER.init);
             // 2
-            // document.getElementById('getButton').addEventListener('click', function() {
-            //     VIEW.hideAllButMe('toplist-section');
-            //     CONTROLLER.storeArray(testMPs, 'all');
-            // });
+            document.getElementById('getButton').addEventListener('click', function() {
+                VIEW.hideAllButMe('toplist-section');
+                CONTROLLER.storeArray(testMPs, 'all');
+            });
 
             /**
              * event listeners for my menu items, since nothing on the page is a hyperlink, just JS.

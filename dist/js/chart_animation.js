@@ -9,18 +9,31 @@
  * **/
 var CHART = function () {
 
-    var options = {
+    var pOptions = {
         low: 0,
         axisY: {
-            onlyInteger: true,
-            seriesBarDistance: 12
+            onlyInteger: true
         }
-
     };
+
+    var gOptions = {
+        low: 0,
+        axisY: {
+            onlyInteger: true
+        }
+    };
+
+    var pResponsiveOptions = [['screen and (min-width: 750px)', {
+        width: '700px'
+    }]];
+
+    var gResponsiveOptions = [['screen and (min-width: 400px)', {
+        width: '300px'
+    }]];
 
     return {
         makePartyChart: function makePartyChart(data) {
-            var pChart = new Chartist.Bar('#partyChart', data, options);
+            var pChart = new Chartist.Bar('#partyChart', data, pOptions, pResponsiveOptions);
 
             pChart.on('draw', function (data) {
                 if (data.type === 'bar') {
@@ -62,7 +75,7 @@ var CHART = function () {
         },
 
         makeGenderChart: function makeGenderChart(data) {
-            var gChart = new Chartist.Bar('#genderChart', data, options);
+            var gChart = new Chartist.Bar('#genderChart', data, gOptions, gResponsiveOptions);
 
             gChart.on('draw', function (data) {
                 if (data.type === 'bar') {
