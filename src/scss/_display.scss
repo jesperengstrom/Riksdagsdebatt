@@ -1,9 +1,9 @@
 .hidden {
-    display: none;
+    display: none !important;
 }
 
 .visible {
-    display: block;
+    display: flex !important;
 }
 
 .inline {

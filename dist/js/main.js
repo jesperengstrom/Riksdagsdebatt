@@ -8,6 +8,7 @@
 var MODEL = function () {
     var allMPs = [];
     var filteredMPs = [];
+    var loaded = 0;
 
     /**
      * Returns all MPs
@@ -84,7 +85,21 @@ var MODEL = function () {
         if (data.anforandelista['@antal'] !== '0') {
             allMPs[i].speeches = data.anforandelista.anforande;
             console.log('getting speeches');
+            loaded += 1;
+            increaseProgressbar();
         }
+    }
+
+    /**
+     * Translates the values of fetched speech-lists, translates them to percent and appends them to the 
+     * progress-bar on page. Should really be done in VIEW...
+     */
+    function increaseProgressbar() {
+        var percent = Math.round(loaded / 349 * 100);
+        var progress = document.querySelector(".progress-bar");
+        progress.innerHTML = percent + "%";
+        progress.style.width = percent + "%";
+        progress.setAttribute("aria-valuenow", percent);
     }
 
     /**
@@ -547,9 +562,9 @@ var VIEW = function () {
          */
         init: function () {
             // 1)
-            //document.getElementById("getButton").addEventListener("click", CONTROLLER.init);
+            // document.addEventListener("DOMContentLoaded", CONTROLLER.init);
             // 2
-            document.getElementById('getButton').addEventListener('click', function () {
+            document.addEventListener('DOMContentLoaded', function () {
                 VIEW.hideAllButMe('toplist-section');
                 CONTROLLER.storeArray(testMPs, 'all');
             });
