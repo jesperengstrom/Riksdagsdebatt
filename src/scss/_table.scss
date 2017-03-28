@@ -1,9 +1,12 @@
 //toplist table
+tr {}
+
 td {
     position: relative;
     //to make td:s larger to fit image
     padding-bottom: 2rem !important;
     padding-top: 2rem !important;
+    cursor: pointer;
 }
 
 .td-right {

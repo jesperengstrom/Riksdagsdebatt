@@ -82,31 +82,58 @@
   stroke: #DDDDDD; }
 
 .bg-S {
-  background: rgba(238, 32, 32, 0.1); }
+  background: rgba(238, 32, 32, 0.1);
+  transition: background 0.4s ease-in-out; }
+  .bg-S:hover {
+    background: rgba(238, 32, 32, 0.2); }
 
 .bg-V {
-  background: rgba(176, 0, 0, 0.1); }
+  background: rgba(176, 0, 0, 0.1);
+  transition: background 0.4s ease-in-out; }
+  .bg-V:hover {
+    background: rgba(176, 0, 0, 0.2); }
 
 .bg-MP {
-  background: rgba(83, 160, 69, 0.1); }
+  background: rgba(83, 160, 69, 0.1);
+  transition: background 0.4s ease-in-out; }
+  .bg-MP:hover {
+    background: rgba(83, 160, 69, 0.2); }
 
 .bg-M {
-  background: rgba(82, 189, 236, 0.1); }
+  background: rgba(82, 189, 236, 0.1);
+  transition: background 0.4s ease-in-out; }
+  .bg-M:hover {
+    background: rgba(82, 189, 236, 0.2); }
 
 .bg-C {
-  background: rgba(1, 106, 58, 0.1); }
+  background: rgba(1, 106, 58, 0.1);
+  transition: background 0.4s ease-in-out; }
+  .bg-C:hover {
+    background: rgba(1, 106, 58, 0.2); }
 
 .bg-L {
-  background: rgba(0, 105, 180, 0.1); }
+  background: rgba(0, 105, 180, 0.1);
+  transition: background 0.4s ease-in-out; }
+  .bg-L:hover {
+    background: rgba(0, 105, 180, 0.2); }
 
 .bg-KD {
-  background: rgba(45, 51, 142, 0.1); }
+  background: rgba(45, 51, 142, 0.1);
+  transition: background 0.4s ease-in-out; }
+  .bg-KD:hover {
+    background: rgba(45, 51, 142, 0.2); }
 
 .bg-SD {
-  background: rgba(251, 199, 0, 0.1); }
+  background: rgba(251, 199, 0, 0.1);
+  transition: background 0.4s ease-in-out; }
+  .bg-SD:hover {
+    background: rgba(251, 199, 0, 0.2); }
 
 .bg-- {
-  background: rgba(221, 221, 221, 0.1); }
+  background: rgba(221, 221, 221, 0.1);
+  transition: background 0.4s ease-in-out; }
+  .bg--:hover {
+    background: rgba(221, 221, 221, 0.2); }
 
 #loading-section {
   display: -ms-flexbox;
@@ -197,7 +224,8 @@ a {
 td {
   position: relative;
   padding-bottom: 2rem !important;
-  padding-top: 2rem !important; }
+  padding-top: 2rem !important;
+  cursor: pointer; }
 
 .td-right {
   text-align: right; }

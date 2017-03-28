@@ -85,36 +85,72 @@
 //backgrounds
 .bg-S {
     background: $bg-S;
+    transition: background 0.4s ease-in-out;
+    &:hover {
+        background: rgba($bg-S, .2);
+    }
 }
 
 .bg-V {
     background: $bg-V;
+    transition: background 0.4s ease-in-out;
+    &:hover {
+        background: rgba($bg-V, .2);
+    }
 }
 
 .bg-MP {
     background: $bg-MP;
+    transition: background 0.4s ease-in-out;
+    &:hover {
+        background: rgba($bg-MP, .2);
+    }
 }
 
 .bg-M {
     background: $bg-M;
+    transition: background 0.4s ease-in-out;
+    &:hover {
+        background: rgba($bg-M, .2);
+    }
 }
 
 .bg-C {
     background: $bg-C;
+    transition: background 0.4s ease-in-out;
+    &:hover {
+        background: rgba($bg-C, .2);
+    }
 }
 
 .bg-L {
     background: $bg-L;
+    transition: background 0.4s ease-in-out;
+    &:hover {
+        background: rgba($bg-L, .2);
+    }
 }
 
 .bg-KD {
     background: $bg-KD;
+    transition: background 0.4s ease-in-out;
+    &:hover {
+        background: rgba($bg-KD, .2);
+    }
 }
 
 .bg-SD {
     background: $bg-SD;
+    transition: background 0.4s ease-in-out;
+    &:hover {
+        background: rgba($bg-SD, .2);
+    }
 }
 
 .bg-- {
     background: $bg-WILD;
+    transition: background 0.4s ease-in-out;
+    &:hover {
+        background: rgba($bg-WILD, .2);
+    }
 }
