@@ -15,7 +15,7 @@ var MODEL = function () {
 
     /**
      * Returns all MPs
-     * Originally fetched from: http://data.riksdagen.se/personlista/?iid=&fnamn=&enamn=&f_ar=&kn=&parti=&valkrets=&rdlstatus=&org=&utformat=json&termlista=
+     * Originally fetched from: https://data.riksdagen.se/personlista/?iid=&fnamn=&enamn=&f_ar=&kn=&parti=&valkrets=&rdlstatus=&org=&utformat=json&termlista=
      * Currently fetched locally since it's very big and doesn't change very often.
      */
     function fetchAllMPs() {
@@ -65,7 +65,7 @@ var MODEL = function () {
         var countComebacks = 'Ja';
 
         var _loop = function _loop(i) {
-            fetchObj = fetch('http://data.riksdagen.se/anforandelista/?rm=2016%2F17&anftyp=' + countComebacks + '&d=' + fromDate + '&ts=&parti=&iid=' + mps[i].id + '&sz=200&utformat=json').then(handleFetchErrors).then(function (response) {
+            fetchObj = fetch('https://data.riksdagen.se/anforandelista/?rm=2016%2F17&anftyp=' + countComebacks + '&d=' + fromDate + '&ts=&parti=&iid=' + mps[i].id + '&sz=200&utformat=json').then(handleFetchErrors).then(function (response) {
                 return response.json();
             }).then(function (data) {
                 return addSpeechToArray(data, i);
@@ -247,7 +247,7 @@ var MODEL = function () {
          * * @param {function} callback - for returning the result to the caller function. 
          */
         getSpeech: function getSpeech(speechobj, callback) {
-            var req = new XMLHttpRequest();
+            var req = new XMLhttpsRequest();
             req.onreadystatechange = function () {
                 if (this.readyState == 4 && this.status == 200) {
                     var doc = req.responseXML;

@@ -13,7 +13,7 @@ const MODEL = (function() {
 
     /**
      * Returns all MPs
-     * Originally fetched from: http://data.riksdagen.se/personlista/?iid=&fnamn=&enamn=&f_ar=&kn=&parti=&valkrets=&rdlstatus=&org=&utformat=json&termlista=
+     * Originally fetched from: https://data.riksdagen.se/personlista/?iid=&fnamn=&enamn=&f_ar=&kn=&parti=&valkrets=&rdlstatus=&org=&utformat=json&termlista=
      * Currently fetched locally since it's very big and doesn't change very often.
      */
     function fetchAllMPs() {
@@ -62,7 +62,7 @@ const MODEL = (function() {
         let countComebacks = 'Ja';
 
         for (let i in mps) {
-            fetchObj = fetch(`http://data.riksdagen.se/anforandelista/?rm=2016%2F17&anftyp=${countComebacks}&d=${fromDate}&ts=&parti=&iid=${mps[i].id}&sz=200&utformat=json`)
+            fetchObj = fetch(`https://data.riksdagen.se/anforandelista/?rm=2016%2F17&anftyp=${countComebacks}&d=${fromDate}&ts=&parti=&iid=${mps[i].id}&sz=200&utformat=json`)
                 .then(handleFetchErrors)
                 .then(response => response.json())
                 .then(data => addSpeechToArray(data, i))
@@ -240,7 +240,7 @@ const MODEL = (function() {
          * * @param {function} callback - for returning the result to the caller function. 
          */
         getSpeech: function(speechobj, callback) {
-            var req = new XMLHttpRequest();
+            var req = new XMLhttpsRequest();
             req.onreadystatechange = function() {
                 if (this.readyState == 4 && this.status == 200) {
                     let doc = req.responseXML;
