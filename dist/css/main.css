@@ -9,15 +9,34 @@
   top: -25px;
   box-shadow: -4px -5px 10px 0px rgba(0, 0, 0, 0.04); }
 
+.mp-img-container-modal {
+  margin-top: 1rem;
+  position: absolute;
+  top: 13px;
+  right: 147px;
+  box-shadow: -4px -5px 10px 0px rgba(0, 0, 0, 0.04);
+  height: 100px;
+  width: 85px;
+  overflow: hidden; }
+
 .mp-img {
   position: relative;
   top: -15px;
-  width: 80px; }
+  width: 85px; }
 
 #riksdag-logo {
   width: 40px;
   height: 30px;
   margin-right: 1rem; }
+
+a {
+  color: #292b2c; }
+
+.own-debate {
+  background: #FFEE93; }
+
+.comeback-debate {
+  background: #FCF9DE; }
 
 .border-M {
   border-color: #52BDEC; }
@@ -154,27 +173,6 @@
 .inline {
   display: inline; }
 
-a {
-  color: #292b2c; }
-
-.own-debate {
-  background: yellow; }
-
-.comeback-debate {
-  background: lightyellow; }
-
-.debate-topic {
-  padding: 0 .5rem;
-  margin-right: .5rem; }
-
-.debate-context {
-  color: dimgray;
-  background: lightcyan;
-  font-size: .8rem; }
-
-.speech-header {
-  font-weight: bold; }
-
 .lead-smaller {
   font-size: 1rem;
   font-weight: 300;
@@ -190,6 +188,9 @@ a {
 .margin-left {
   margin-left: 5rem; }
 
+.speech-header {
+  margin-top: 1rem; }
+
 .dropdown-menu {
   padding: 0.5rem; }
 
@@ -201,7 +202,7 @@ a {
   width: 21px !important; }
 
 .modal-content {
-  padding: 1rem; }
+  padding: 2rem; }
 
 .jumbotron,
 .bg-pastel {
@@ -224,11 +225,28 @@ a {
   font-size: 0.75em !important;
   color: #292b2c !important; }
 
+table {
+  table-layout: fixed;
+  width: 100%; }
+
+.trow-rank {
+  width: 10%; }
+
+.trow-pic {
+  width: 20%; }
+
+.trow-name {
+  width: 50%; }
+
+.trow-count {
+  width: 20%; }
+
 td {
   position: relative;
   padding-bottom: 2rem !important;
   padding-top: 2rem !important;
-  cursor: pointer; }
+  cursor: pointer;
+  white-space: nowrap; }
 
 .td-right {
   text-align: right; }
@@ -242,7 +260,31 @@ td {
 .td-img {
   padding-right: 5rem !important; }
 
-.myButton, .btn-S, .btn-V, .btn-MP, .btn-M, .btn-L, .btn-C, .btn-KD, .btn-SD, .btn-wild {
+li {
+  list-style-type: none; }
+
+.em {
+  cursor: pointer; }
+
+.debate-topic {
+  padding: 0 .5rem;
+  cursor: pointer; }
+  .debate-topic:hover {
+    text-decoration: underline; }
+
+.debate-context {
+  padding: 0 .5rem;
+  color: dimgray;
+  background: lightcyan;
+  font-weight: 300; }
+
+.mod-footer .em {
+  cursor: default; }
+
+.mod-footer .debate-topic {
+  cursor: default; }
+
+.myButton, .btn-S, .btn-V, .btn-MP, .btn-M, .btn-L, .btn-C, .btn-KD, .btn-SD, #close-speech-btn, .btn-wild {
   width: 50px;
   height: 50px;
   padding: 0;
@@ -391,21 +433,21 @@ td {
   background-color: #2D338E;
   border-color: #2D338E; }
 
-.btn-SD {
+.btn-SD, #close-speech-btn {
   color: #FBC700;
   border-color: #FBC700; }
-  .btn-SD:active {
+  .btn-SD:active, #close-speech-btn:active {
     color: #fff;
     background-color: #FBC700;
     border-color: #FBC700; }
-  .btn-SD:focus {
+  .btn-SD:focus, #close-speech-btn:focus {
     box-shadow: none; }
-  .btn-SD:hover {
+  .btn-SD:hover, #close-speech-btn:hover {
     color: #fff;
     background-color: rgba(251, 199, 0, 0.3);
     border-color: rgba(251, 199, 0, 0.3); }
 
-.btn-SD.active {
+.btn-SD.active, .active#close-speech-btn {
   transform: scale(1.1);
   color: #fff;
   background-color: #FBC700;
@@ -434,3 +476,8 @@ td {
 .btn-gr {
   display: -ms-flexbox;
   display: flex; }
+
+#close-speech-btn {
+  width: 100px;
+  height: 40px;
+  float: right; }

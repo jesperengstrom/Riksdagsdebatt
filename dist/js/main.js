@@ -473,15 +473,17 @@ var VIEW = function () {
             var toplist = document.getElementById("toplist");
             var toplistRight = document.getElementById("toplist2");
             var max = 10;
+            var none = document.getElementById("none");
 
             // make a new arr of the items printed so I can add event listeners for them
             var toplistArr = [];
 
             toplist.innerHTML = "";
             toplistRight.innerHTML = "";
+            none.innerHTML = "";
 
             if (mps.length === 0) {
-                toplist.innerHTML = "<p>Oops, det finns ingen data att visa</p>";
+                none.innerHTML = "<p>Oops, det finns ingen data att visa.</p>";
                 return;
             }
             // keep printing the toplist until you reach the end of arr OR max value.
@@ -510,7 +512,7 @@ var VIEW = function () {
                 var last = data.labels[data.labels.length - 1];
                 if (last == "-") last = "de oberoende";
                 var conclusion = document.getElementById("party-chart-conclusion");
-                conclusion.innerHTML = 'Under perioden var ' + data.labels[0] + ':s ledam\xF6ter mest p\xE5 hugget (talade ' + data.series[0][0].value + ' g\xE5nger) \n                                        medan ' + last + ' var s\xE4mst p\xE5 att ta till orda (' + data.series[0][data.series[0].length - 1].value + ' g\xE5nger).';
+                conclusion.innerHTML = '<mark>Under perioden var ' + data.labels[0] + ':s ledam\xF6ter mest p\xE5 hugget (talade ' + data.series[0][0].value + ' g\xE5nger) \n                                        medan ' + last + ' var s\xE4mst p\xE5 att ta till orda (' + data.series[0][data.series[0].length - 1].value + ' g\xE5nger).</mark>';
             }
             if (which === 'genderChart') {
                 CHART.makeGenderChart(data);
@@ -524,16 +526,20 @@ var VIEW = function () {
          * Prints a modal that pop up when you click an MP.
          */
         printModal: function printModal() {
-            var modalHeading = this.firstname + ' ' + this.lastname + ' (' + this.party + ')';
+            //heading with pic & name
+            var modalHeading = this.firstname + ' ' + this.lastname + ' (' + this.party + ') ';
+            var modalPic = '<div class="mp-img-container-modal">\n                            <img src="' + this.image + '" class="mp-img" alt="' + this.firstname + ' ' + this.lastname + '"></div>';
 
             var hasSpeeches = this.speeches ? '<br>Nedan visas de senaste tillf\xE4llena. Klicka f\xF6r att l\xE4sa vad ' + (this.gender == 'man' ? 'han' : 'hon') + ' sade.</p>' : '<br>Därför finns det inget att visa här.</p>';
 
-            var modalFacts = '\n                <p>F\xF6dd: ' + this.born + '. Valkrets: ' + this.electorate + '.</p>\n                <p>' + this.firstname + ' har debatterat i Riksdagen ' + this.numberofspeeches + ' g\xE5nger sedan ' + MODEL.oneMonthBack() + '. \n                ' + hasSpeeches + '\n                ';
+            //some info bout the mp
+            var modalFacts = '\n                <p><strong>F\xF6dd:</strong> ' + this.born + '. <strong>Valkrets:</strong> ' + this.electorate + '.</p>\n                <p>' + this.firstname + ' har debatterat i Riksdagen ' + this.numberofspeeches + ' g\xE5nger sedan ' + MODEL.oneMonthBack() + '. \n                ' + hasSpeeches + '\n                ';
 
             document.getElementById("mpModalLabel").innerHTML = modalHeading;
+            document.getElementById("modal-pic").innerHTML = modalPic;
             document.getElementById("modal-facts").innerHTML = modalFacts;
 
-            // Print the speech list as last thing.
+            //... Print the speech list as last thing.
             printSpeechList.call(this);
         },
 
@@ -553,7 +559,7 @@ var VIEW = function () {
             //body
             speechElem.querySelector("#speech-body").innerHTML = speech;
             //footer
-            speechElem.querySelector("#speech-footer").innerHTML = '\n            L\xE4s hela debatten <a target="_blank" href="' + obj.protokoll_url_www + '">h\xE4r</a>';
+            speechElem.querySelector("#speech-footer").innerHTML = '\n            <mark><a target="_blank" href="' + obj.protokoll_url_www + '">L\xE4s hela debatten h\xE4r</a></mark>';
             //button
             speechElem.querySelector("button").addEventListener("click", function () {
                 return VIEW.showModalSection("modal-speech-list");

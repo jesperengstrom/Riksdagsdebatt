@@ -1,0 +1,80 @@
+//toplist table
+table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+.trow-rank {
+    width: 10%;
+}
+
+.trow-pic {
+    width: 20%
+}
+
+.trow-name {
+    width: 50%
+}
+
+.trow-count {
+    width: 20%;
+}
+
+td {
+    position: relative;
+    //to make td:s larger to fit image
+    padding-bottom: 2rem !important;
+    padding-top: 2rem !important;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.td-right {
+    text-align: right;
+}
+
+.border-right {
+    border-right: 1px solid #eceeef;
+}
+
+.border-left {
+    border-left: 1px solid #eceeef;
+}
+
+.td-img {
+    padding-right: 5rem !important;
+}
+
+//lists
+li {
+    list-style-type: none;
+}
+
+.em {
+    cursor: pointer;
+}
+
+.debate-topic {
+    padding: 0 .5rem;
+    cursor: pointer;
+    &:hover {
+        text-decoration: underline;
+    }
+}
+
+.debate-context {
+    padding: 0 .5rem;
+    color: dimgray;
+    background: lightcyan;
+    font-weight: 300;
+}
+
+.mod-footer .em,
+{
+    cursor: default;
+}
+
+.mod-footer .debate-topic,
+{
+    cursor: default;
+}

@@ -55,10 +55,10 @@
                         <table class="table">
                             <thead>
                                 <tr>
-                                    <th>#</th>
-                                    <th></th>
-                                    <th>Namn</th>
-                                    <th class="td-right">Debattinlägg*</th>
+                                    <th class="trow-rank">#</th>
+                                    <th class="trow-pic"></th>
+                                    <th class="trow-name">Namn</th>
+                                    <th class="td-right trow-count">Debattinlägg*</th>
                                 </tr>
                             </thead>
                             <tbody id="toplist">
@@ -69,10 +69,10 @@
                         <table class="table">
                             <thead>
                                 <tr>
-                                    <th>#</th>
-                                    <th></th>
-                                    <th>Namn</th>
-                                    <th class="td-right">Debattinlägg*</th>
+                                    <th class="trow-rank">#</th>
+                                    <th class="trow-pic"></th>
+                                    <th class="trow-name">Namn</th>
+                                    <th class="td-right trow-count">Debattinlägg*</th>
                                 </tr>
                             </thead>
                             <tbody id="toplist2">
@@ -80,7 +80,9 @@
                         </table>
                     </div>
                 </div>
+                <div id="none"></div>
             </div>
+
         </section>
         <!-- end toplist -->
 
@@ -96,7 +98,7 @@
                         <p class="lead">Partitoppen</p>
                         <p>Grafen visar det genomsnittliga antalet gånger en ledamot för ett visst parti har talat i Riksdagen under perioden*</p>
                         <p>Siffran är proportionell, dvs det sammanlagda antalet anföranden och repliker från ett parti är delat med partiets antal platser.</p>
-                        <p id="party-chart-conclusion"></p>
+                        <p class="mark" id="party-chart-conclusion"></p>
                     </div>
                 </div>
             </div>
@@ -106,15 +108,15 @@
         <!-- gender chart -->
         <section id="gender-chart-section" class="hidden">
             <div class="container">
-                <div class="row">
-                    <div class="col">
+                <div class="row justify-content-center">
+                    <div class="col-lg-4">
                         <div class="ct-chart ct-perfect-fourth ct-bar" id="genderChart">
                         </div>
                     </div>
-                    <div class="col border-left">
+                    <div class="col-lg-4 border-left">
                         <p class="lead">Könsfördelning</p>
                         <p>Grafen visar det genomsnittliga antalet gånger som en manlig respektive en kvinnlig ledamot har talat i riksdagen under perioden*.</p>
-                        <p id="gender-chart-conclusion"></p>
+                        <p class="mark" id="gender-chart-conclusion"></p>
                         <p>Siffran inkluderar både egna anföranden och repliker på andras anföranden.</p>
                     </div>
                 </div>
@@ -133,24 +135,21 @@
                 <div class="row">
                     <div class="col-lg-4 border-right">
                         <p><strong>Vad är Talartoppen?</strong></p>
-                        <p>Talartoppen är en sida som sammanställer vilka politiker och partier som varit mest aktiva i debatterna i Riksdagens kammare. Det går också att se vad vilka ämnen en ledamot har talat om och vad hen har sagt.</p>
+                        <p>Talartoppen är en sida som sammanställer vilka politiker och partier som varit mest aktiva i debatterna i Riksdagens kammare. Man kan också se vilka ämnen en ledamot har talat om och vad hen har sagt.</p>
                         <p><strong>Hur går uträkningen till?</strong></p>
-                        <p>Allt som sägs i Riksdagens kammare, från debatter till frågestunder, protokollförs. <mark><a href="https://data.riksdagen.se/data/anforanden/">Anföranden</a></mark> och repliker sparas i anförandelistor. Den här sidan söker igenom
-                            dessa listor för att se vilka ledamöter som förekommer oftast. Till ett "debattinlägg" räknas både anföranden och repliker.</p>
+                        <p>Allt som sägs i Riksdagens kammare, från debatter till frågestunder, protokollförs. Den här sidan söker igenom protokollen för att se vilka ledamöter som förekommer oftast. Till ett "debattinlägg" räknas både <mark><a href="https://data.riksdagen.se/data/anforanden/">anföranden</a></mark>                            och repliker.</p>
                     </div>
                     <div class="col-lg-4 border-right">
                         <p><strong>Varifrån kommer uppgifterna?</strong></p>
                         <p>Uppgifterna kommer från <mark><a href="https://data.riksdagen.se/">Riksdagens öppna data</a></mark> och sökningen sker i realtid. Längst upp i högra hörnet av sidan ser du hur långt tillbaka i tiden sökningen har skett.</p>
                         <p><strong>Ok, men vad är syftet med allt det här?</strong></p>
-                        <p>
-                            Sidan kom till som en skoluppgift i att använda öppna API:er med JavaScript. Men jag var också intresserad av hur offentlig data kan sammanställas för att berätta något nytt, till exempel hur akiva våra folkvalda politiker är i sitt uppdrag.
+                        <p>Sidan kom till som en skoluppgift i att använda öppna API:er med JavaScript. Det var också ett försök att vaska fram ny information ur offentlig data, i det här fallet aktiviteten hos våra högsta folkvalda politiker.
                         </p>
                     </div>
                     <div class="col-lg-4 border-right">
-                        <p><strong>Vad kan jag dra för slutsatser av siffrorna på sidan?</strong></p>
-                        <p>Som med all statistik ska man nog vara försiktig. På den här sidan räknas en kort replik och ett långt igenomtänkt anförande båda som ett inlägg i debatten. Det finns dessutom många andra sätt för en riksdagsledamot att vara aktiv
-                            på, som den här sidan inte mäter. Allra viktigast för att bedöma politisk duglighet såklart <em>vad</em> hen har sagt.</p>
-                        <p>Alla sätt syna riksdagsarbetet tycker jag är bra.
+                        <p><strong>Vad kan jag dra för slutsatser av siffrorna?</strong></p>
+                        <p>Inte jättestora. Sidan räknar både en kort replik och ett långt igenomtänkt anförande som ett inlägg i debatten. Som Riksdagsledamot kan man dessutom vara aktiv på många andra sätt, och den politiska komptensen beror ju i slutändan
+                            på <em>vad</em> man säger och levererar. Men kanske kan detta vara ett underlag <mark><a href="http://wwww.riksdagsskolket.se">bland många</a></mark> nästa gång det är dags att kryssa på valsedeln.
                         </p>
                     </div>
                 </div>
@@ -210,7 +209,9 @@
             <div class="modal-dialog modal-lg" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="mpModalLabel"></h5>
+                        <h5 class="modal-title lead" id="mpModalLabel"></h5>
+                        <div id="modal-pic">
+                        </div>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -226,19 +227,21 @@
                             <button type="button" class="btn btn-primary" id="close-speech-btn">Tillbaka</button>
                             <div>
                                 <p class="debate-context inline"></p>
-                                <p class="speech-header"></p>
+                                <small><strong><p class="speech-header"></p></strong></small>
                             </div>
-                            <div id="speech-body">
+                            <div id="speech-body" class="small">
                             </div>
                             <p id="speech-footer">
                             </p>
                         </div>
                         <!-- end modal speech text -->
                         <hr>
-                        <span class="own-debate debate-topic">     </span> = Eget anförande
-                        <span class="comeback-debate debate-topic">     </span> = Replik på någon annan <br>
-                        <i class="em em-mega"></i>
-                        <i class="em em-speech_balloon"></i> = Ytterligare anföranden/repliker i samma debatt.
+                        <div class="mod-footer">
+                            <span class="own-debate debate-topic">     </span> = Eget anförande
+                            <span class="comeback-debate debate-topic">     </span> = Replik på någon annan <br>
+                            <i class="em em-mega"></i>
+                            <i class="em em-speech_balloon"></i> = Ytterligare anföranden/repliker i samma debatt.
+                        </div>
                     </div>
                 </div>
             </div>

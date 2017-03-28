@@ -10,10 +10,21 @@
     box-shadow: -4px -5px 10px 0px rgba(0, 0, 0, 0.04);
 }
 
+.mp-img-container-modal {
+    margin-top: 1rem;
+    position: absolute;
+    top: 13px;
+    right: 147px;
+    box-shadow: -4px -5px 10px 0px rgba(0, 0, 0, 0.04);
+    height: 100px;
+    width: 85px;
+    overflow: hidden;
+}
+
 .mp-img {
     position: relative;
     top: -15px;
-    width: 80px;
+    width: 85px;
 }
 
 #riksdag-logo {

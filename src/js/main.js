@@ -473,15 +473,17 @@ const VIEW = (function() {
             let toplist = document.getElementById("toplist");
             const toplistRight = document.getElementById("toplist2");
             const max = 10;
+            let none = document.getElementById("none");
 
             // make a new arr of the items printed so I can add event listeners for them
             const toplistArr = [];
 
             toplist.innerHTML = "";
             toplistRight.innerHTML = "";
+            none.innerHTML = "";
 
             if (mps.length === 0) {
-                toplist.innerHTML = "<p>Oops, det finns ingen data att visa</p>";
+                none.innerHTML = "<p>Oops, det finns ingen data att visa.</p>";
                 return;
             }
             // keep printing the toplist until you reach the end of arr OR max value.
@@ -521,8 +523,8 @@ const VIEW = (function() {
                 let last = data.labels[data.labels.length - 1];
                 if (last == "-") last = "de oberoende";
                 let conclusion = document.getElementById("party-chart-conclusion");
-                conclusion.innerHTML = `Under perioden var ${data.labels[0]}:s ledamöter mest på hugget (talade ${data.series[0][0].value} gånger) 
-                                        medan ${last} var sämst på att ta till orda (${data.series[0][data.series[0].length -1].value} gånger).`;
+                conclusion.innerHTML = `<mark>Under perioden var ${data.labels[0]}:s ledamöter mest på hugget (talade ${data.series[0][0].value} gånger) 
+                                        medan ${last} var sämst på att ta till orda (${data.series[0][data.series[0].length -1].value} gånger).</mark>`;
             }
             if (which === 'genderChart') {
                 CHART.makeGenderChart(data);
@@ -537,22 +539,27 @@ const VIEW = (function() {
          * Prints a modal that pop up when you click an MP.
          */
         printModal: function() {
-            let modalHeading = `${this.firstname} ${this.lastname} (${this.party})`;
+            //heading with pic & name
+            let modalHeading = `${this.firstname} ${this.lastname} (${this.party}) `;
+            let modalPic = `<div class="mp-img-container-modal">
+                            <img src="${this.image}" class="mp-img" alt="${this.firstname} ${this.lastname}"></div>`;
 
             let hasSpeeches = this.speeches ?
                 `<br>Nedan visas de senaste tillfällena. Klicka för att läsa vad ${this.gender == 'man' ? 'han' : 'hon'} sade.</p>` :
                 '<br>Därför finns det inget att visa här.</p>';
 
+            //some info bout the mp
             let modalFacts = `
-                <p>Född: ${this.born}. Valkrets: ${this.electorate}.</p>
+                <p><strong>Född:</strong> ${this.born}. <strong>Valkrets:</strong> ${this.electorate}.</p>
                 <p>${this.firstname} har debatterat i Riksdagen ${this.numberofspeeches} gånger sedan ${MODEL.oneMonthBack()}. 
                 ${hasSpeeches}
                 `;
 
             document.getElementById("mpModalLabel").innerHTML = modalHeading;
+            document.getElementById("modal-pic").innerHTML = modalPic;
             document.getElementById("modal-facts").innerHTML = modalFacts;
 
-            // Print the speech list as last thing.
+            //... Print the speech list as last thing.
             printSpeechList.call(this);
         },
 
@@ -573,7 +580,7 @@ const VIEW = (function() {
             speechElem.querySelector("#speech-body").innerHTML = speech;
             //footer
             speechElem.querySelector("#speech-footer").innerHTML = `
-            Läs hela debatten <a target="_blank" href="${obj.protokoll_url_www}">här</a>`;
+            <mark><a target="_blank" href="${obj.protokoll_url_www}">Läs hela debatten här</a></mark>`;
             //button
             speechElem.querySelector("button").addEventListener("click", () => VIEW.showModalSection("modal-speech-list"));
         },
