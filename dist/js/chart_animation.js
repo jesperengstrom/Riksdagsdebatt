@@ -24,7 +24,7 @@ var CHART = function () {
     };
 
     var pResponsiveOptions = [['screen and (min-width: 750px)', {
-        width: '700px'
+        width: '600px'
     }]];
 
     var gResponsiveOptions = [['screen and (min-width: 400px)', {

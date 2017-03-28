@@ -217,6 +217,9 @@ a {
 .ct-perfect-fourth:before {
   padding-bottom: 0 !important; }
 
+.ct-perfect-fourth > svg {
+  position: relative !important; }
+
 .ct-label {
   font-size: 0.75em !important;
   color: #292b2c !important; }
@@ -232,6 +235,9 @@ td {
 
 .border-right {
   border-right: 1px solid #eceeef; }
+
+.border-left {
+  border-left: 1px solid #eceeef; }
 
 .td-img {
   padding-right: 5rem !important; }

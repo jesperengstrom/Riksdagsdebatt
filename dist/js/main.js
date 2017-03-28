@@ -507,9 +507,16 @@ var VIEW = function () {
 
             if (which === 'partyChart') {
                 CHART.makePartyChart(data);
+                var last = data.labels[data.labels.length - 1];
+                if (last == "-") last = "de oberoende";
+                var conclusion = document.getElementById("party-chart-conclusion");
+                conclusion.innerHTML = 'Under perioden var ' + data.labels[0] + ':s ledam\xF6ter mest p\xE5 hugget (talade ' + data.series[0][0].value + ' g\xE5nger) \n                                        medan ' + last + ' var s\xE4mst p\xE5 att ta till orda (' + data.series[0][data.series[0].length - 1].value + ' g\xE5nger).';
             }
             if (which === 'genderChart') {
                 CHART.makeGenderChart(data);
+                var percent = Math.round((data.series[0][0].value - data.series[0][1].value) / data.series[0][1].value * 100);
+                var _conclusion = document.getElementById("gender-chart-conclusion");
+                _conclusion.innerHTML = 'Under perioden talade en ' + data.labels[0] + ' i Riksdagen ' + percent + '% oftare (' + data.series[0][0].value + ' g\xE5nger) \xE4n en ' + data.labels[1] + ' (' + data.series[0][1].value + ' g\xE5nger).';
             }
         },
 
