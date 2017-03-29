@@ -4,6 +4,7 @@
  * MODEL module - handles app logic & data
  */
 const MODEL = (function() {
+    //arr where lists of mp:s are stored
     var allMPs = [];
     var filteredMPs = [];
     //counts fetches for the progress bar
@@ -32,9 +33,8 @@ const MODEL = (function() {
     }
 
     /**
-     * CAN BE DONE WITH MAP, DUMMY
      * Returns a slimmer array of MP:s with the props i need
-     * @param {array} mps - original raw array of MP:s
+     * * @param {array} mps - original raw array of MP:s
      */
     function slimArray(mps) {
         let mp = mps.personlista.person;
@@ -53,14 +53,20 @@ const MODEL = (function() {
         fetchDebates(allMPs);
     }
 
+    //changes http to https to avoid browser blocking requests
     function httpsIfy(url) {
         return "https" + url.substring(4, url.length);
     }
 
+    /**
+     * Monster function that fetches speeches for all mp:s in a loop.
+     * * @param {array} mps - the new slimmer array of mps:s
+     */
     function fetchDebates(mps) {
         var fetchObj;
+        //If I want to search one month back.
         //let fromDate = MODEL.oneMonthBack();
-        //If I want all of Riksmöte 16/17
+        //If I want the whole Riksmöte 16/17
         let fromDate = "";
         let countComebacks = 'Ja';
 
@@ -72,12 +78,17 @@ const MODEL = (function() {
                 .catch(error => console.log(error));
         }
         // Fetch is done, we're ready to store array and send to print
-        fetchObj.then(function() {
+        fetchObj.then(() => {
             CONTROLLER.storeArray(allMPs, 'all', fromDate);
             searchDate = fromDate;
         });
     }
 
+    /**
+     * pushes speeches to mp-array using the index
+     ** @param {promise} data - the promise recently fetched
+     ** @param {string} i - current index
+     */
     function addSpeechToArray(data, i) {
         allMPs[i].numberofspeeches = parseInt(data.anforandelista['@antal']);
         if (data.anforandelista['@antal'] !== '0') {
@@ -89,7 +100,7 @@ const MODEL = (function() {
     }
 
     /**
-     * Translates the values of fetched speech-lists, translates them to percent and appends them to the 
+     * Takes number of fetched speeches and converts to % for the
      * progress-bar on page. Should really be done in VIEW...
      */
     function increaseProgressbar() {
@@ -101,12 +112,13 @@ const MODEL = (function() {
     }
 
     /**
-     * Sorts the array passed in by value of the given prop. To sort toplist + chart.
+     * Sorts the values of a certain prop in an array of objects. To sort toplist + chart.
      * * @param {array} arr - array to be sorted
      * * @param {string} prop - property to sort
      */
     function sortNumberOfSpeeches(arr, prop) {
-        return arr.filter(function(val) {
+        return arr.filter((val) => {
+
             //Ajax async sometimes cause undefined values to turn up on the toplist. As for now i am simply removing that mp + logging it.
             //Better than to set their speech rate to 0 as that effects the party stats negatively.
             if (isNaN(val[prop])) console.log("filter removed an undefined", val);
@@ -115,7 +127,8 @@ const MODEL = (function() {
     }
 
     /**
-     * calcs the total number of speeches in the array recieved and returns the number.
+     * calcs the total number of speeches an array and returns the number.
+     * Used by the charts.
      */
     function totalSpeeches(mps) {
         //for safety, filters out any "undefined" values from the array to avoid a NaN total.
@@ -124,7 +137,6 @@ const MODEL = (function() {
 
         }).reduce((total, cur) => {
             return total + cur.numberofspeeches;
-
         }, 0);
     }
 
@@ -141,8 +153,8 @@ const MODEL = (function() {
             ]
         };
         // since Chartist don't support setting bar colors via the API, Im adding a meta tag and append
-        // the corresponding class to the SVG element later on draw..phew
-        indata.forEach(function(element) {
+        // the corresponding class to the SVG element later on draw... phew
+        indata.forEach((element) => {
             data.labels.push(element.label);
             data.series[0].push({ value: element.quota, className: 'bar-' + element.label });
         }, this);
@@ -153,16 +165,16 @@ const MODEL = (function() {
 
         /**
          * Retrieves the array of MP:s from the model.
-         *  * @param {string} which - Either all or a current selection depending on request.
+         *  * @param {string} which - Either all or a current selection
          */
         getArray: function(which) {
             return which === 'all' ? allMPs : filteredMPs;
         },
 
         /**
-         * Sorts and stores the array of MP: in the model.
+         * Sorts and stores the array of MPs in the model.
          * * @param {array} mps - array of mp:s to store.
-         * * @param {string} which - store all or current selection depending on request.
+         * * @param {string} which - store all or current selection
          */
         setArray: function(mps, which) {
             let sorted = sortNumberOfSpeeches(mps, 'numberofspeeches');
@@ -178,7 +190,7 @@ const MODEL = (function() {
         },
 
         /**
-         * REVERTS CURRENT DATE ONE MONTH. NEEDS REMAKE (DEC BECOMES -1 INST OF 12)
+         * Reverts the current date one month. NEEDS REMAKE (DEC BECOMES -1 INST OF 12)
          */
         oneMonthBack: function() {
             let date = new Date();
@@ -186,9 +198,9 @@ const MODEL = (function() {
         },
 
         /**
-         * I have to filter out my huge array on the basis of another array of selections.
+         * Filters AllMPs on basis of another array of selections by user.
          * Array.Some is helpful here since it looks for any occurance in the other array.
-         * * @param {array} lookingfor - array of strings that I want to filter
+         * * @param {array} lookingfor - array of strings
          * * @param {string} prop - the property that i want to target
          */
         filterMPs: function(lookingfor, prop) {
@@ -202,8 +214,9 @@ const MODEL = (function() {
         },
 
         /**
-         * Returns an array of objects with the total number of speeches by a certain category (party/gender).
-         * Also the number of members in that category and the quota of the two.
+         * Returns an array of objects with the total number of speeches by a certain category,
+         * the number of members in that category and (sorted by) the quota of the two.
+         * For charts.
          * * @param {string} prop - I want to sum the values in this property
          */
         sumSpeechesBy: function(prop) {
@@ -216,11 +229,11 @@ const MODEL = (function() {
             if (prop == 'gender') {
                 categories = ['man', 'kvinna'];
             }
-            // no need to count the total?
+            // If i need to count all speeches...
             // let all = MODEL.getArray("all");
             // let total = totalSpeeches(all);
 
-            categories.forEach(function(category) {
+            categories.forEach((category) => {
                 let numMps = MODEL.filterMPs([category], prop).length;
                 let numSpeeches = totalSpeeches(MODEL.filterMPs([category], prop));
 
@@ -244,8 +257,8 @@ const MODEL = (function() {
          */
         getSpeech: function(speechobj, callback) {
             let url = httpsIfy(speechobj.anforande_url_xml);
-            console.log(url);
             var req = new XMLHttpRequest();
+
             req.onreadystatechange = function() {
                 if (this.readyState == 4 && this.status == 200) {
                     let doc = req.responseXML;
@@ -267,7 +280,7 @@ const CONTROLLER = (function() {
     /**
      * gets the right (type) of array and then sends it to print.
      * Hides all other sections. Cause it's kind of a hub, it also console.logs some stuff.
-     * @param {string} type - what to print all or filtered list
+     * * @param {string} type - what to print, all or filtered list
      */
     function prepareToPrintToplist(type) {
         let toPrint = MODEL.getArray(type);
@@ -280,12 +293,7 @@ const CONTROLLER = (function() {
 
     return {
 
-        /**
-         * Inits on page load. Triggers the loading-section
-         */
         init: function() {
-
-            //VIEW.hideAllButMe('loading-section');
             MODEL.initMPObject();
         },
 
@@ -304,27 +312,33 @@ const CONTROLLER = (function() {
          * Depening on which one, the right function runs and all other sections are hidden.
          */
         navClick: function() {
-            // switch case could be used here
             let clicked = this.firstChild.nodeValue;
 
-            if (clicked == 'Topplistan') {
-                prepareToPrintToplist('all');
-            }
-
-            if (clicked == 'Om') {
-                VIEW.hideAllButMe('about-section');
-            }
-
-            if (clicked == 'Partitoppen') {
-                let votesbyParty = MODEL.sumSpeechesBy('party');
-                // adding a string as caller id. both charts use the same method, but I need to create separate charts.
-                VIEW.printChart(votesbyParty, 'partyChart');
-                VIEW.hideAllButMe('party-chart-section');
-            }
-            if (clicked == 'Könsfördelning') {
-                let votesByGender = MODEL.sumSpeechesBy('gender');
-                VIEW.printChart(votesByGender, 'genderChart');
-                VIEW.hideAllButMe('gender-chart-section');
+            switch (clicked) {
+                case "Topplistan":
+                    prepareToPrintToplist('all');
+                    break;
+                case "Om":
+                    VIEW.hideAllButMe('about-section');
+                    break;
+                case "Partitoppen":
+                    {
+                        let votesbyParty = MODEL.sumSpeechesBy('party');
+                        // adding a string as caller id. both charts use the same method, but I need to create separate charts.
+                        VIEW.printChart(votesbyParty, 'partyChart');
+                        VIEW.hideAllButMe('party-chart-section');
+                        break;
+                    }
+                case "Könsfördelning":
+                    {
+                        let votesByGender = MODEL.sumSpeechesBy('gender');
+                        VIEW.printChart(votesByGender, 'genderChart');
+                        VIEW.hideAllButMe('gender-chart-section');
+                        break;
+                    }
+                default:
+                    prepareToPrintToplist("all");
+                    break;
             }
         },
 
@@ -346,7 +360,8 @@ const CONTROLLER = (function() {
         },
 
         /**
-         * Triggers a modal window for the MP klicked. Sudden jQuery-syntax comes from Bootstrap documentation.
+         * Triggers a modal window for the MP klicked. 
+         * Sudden jQuery-syntax comes from Bootstrap documentation.
          */
         openModal: function(event, mp) {
             VIEW.printModal.call(mp);
@@ -355,7 +370,8 @@ const CONTROLLER = (function() {
         },
 
         /**
-         * gets the speech text from ajax/model function and sends it back for display along with the right object
+         * Passes getSpeech an object and calls back a speech text. Sends it back to view
+         * along with the object. 
          */
         openSpeech: function(event, speechObj) {
             MODEL.getSpeech(speechObj, function(xml) {
@@ -372,11 +388,12 @@ const CONTROLLER = (function() {
  * VIEW module - Handles everything u see & interact with
  */
 const VIEW = (function() {
+
     /**
-     * It was a nightmare to figure out how to append event listerners to all the toplist items. I tried every possible closure to get
-     * not only the last one to stick. Turns out the problem was probably the DOM selector operating in the same
-     * loop as the template literal? As soon as i made ANOTHER loop everything just worked :/
-     * @param {array} mps
+     * Had to make this loop to attach event listeners for the toplist. 
+     * Tried every possible closure in the 'main' loop but none would stick. Maybe because the template literal was creating the elements
+     * at the same time?
+     * * @param {array} mps - mp object
      */
     function listenersForToplist(mps) {
         for (let i in mps) {
@@ -397,7 +414,7 @@ const VIEW = (function() {
     }
 
     /**
-     * You can often remove a lot of things in these topic descriptions. For ex "svar på interpellation 1235 om..." after the "om" follows
+     * You often need to remove stuff in the topic descriptions. For ex "svar på interpellation 1235 om..." after the "om" follows
      * the real issue, so i extract everything after the "om", capitalize the first letter and return.
      * @param {string} string - topic of the speech
      */
@@ -412,9 +429,6 @@ const VIEW = (function() {
         return newString;
     }
 
-    /**
-     * capital first letter of a string
-     */
     function capitalizeFirst(str) {
         if (str) {
             str = str[0].toUpperCase() + str.substring(1, str.length);
@@ -424,7 +438,7 @@ const VIEW = (function() {
 
     /**
      * Makes a template literal string of speeches and append it to <ul> in the modal.
-     * The pass these speeches along to make event listerners for them
+     * Then pass these speeches along to make event listerners for them.
      */
     function printSpeechList() {
         let ul = document.getElementById('modal-speech-list'),
@@ -440,7 +454,7 @@ const VIEW = (function() {
 
         for (let i in sp) {
             // if the previous debate was the same as this one, then skip it...
-            // the loose compare is important since it accepts "0".
+            // the loose compare is important since it accepts string "0".
             if (i == 0 || sp[i].avsnittsrubrik !== sp[i - 1].avsnittsrubrik) {
                 string += `<li> 
                             <span class="${sp[i].replik == 'Y' ? 'comeback' : 'own'}-debate debate-topic" id="${sp[i].anforande_id}">
@@ -463,29 +477,28 @@ const VIEW = (function() {
         listenersForSpeeches(speechArr);
     }
 
-    /**
-     * HTML-page consists of 3 sections that corresponds to three
-     * features of the page: to print a toplist, to display a chart and to display an about-text (+loading).
-     * Following three functions print these sections using helper methods.
-     */
-
     return {
 
+        /**
+         * prints the toplist
+         * * @param {array} mps - mps to print (the 10 first)
+         */
         printTopList: function(mps) {
-            //print search date
+
+            // make a new arr of the items actually printed so I can add event listeners for them
+            const toplistArr = [];
+            const max = 10;
+
+            //print search date in nav bar/hero (depending on screen size)
             let datelines = document.querySelectorAll(".lead-smaller");
             datelines.forEach((elem) => elem.innerHTML = `* ${MODEL.getSearchDate() || "Under riksmötet 2016/17"}`);
 
-
-
-
+            //I found no way to split a table in sections, so I had to make two
             let toplist = document.getElementById("toplist");
             const toplistRight = document.getElementById("toplist2");
-            const max = 10;
-            let none = document.getElementById("none");
 
-            // make a new arr of the items printed so I can add event listeners for them
-            const toplistArr = [];
+            //div for nothing-to-print
+            let none = document.getElementById("none");
 
             toplist.innerHTML = "";
             toplistRight.innerHTML = "";
@@ -529,14 +542,18 @@ const VIEW = (function() {
 
             if (which === 'partyChart') {
                 CHART.makePartyChart(data);
+
+                //text for the box beside the chart
                 let last = data.labels[data.labels.length - 1];
                 if (last == "-") last = "de oberoende";
+
                 let conclusion = document.getElementById("party-chart-conclusion");
                 conclusion.innerHTML = `<mark>Under perioden var ${data.labels[0]}:s ledamöter mest på hugget (talade ${data.series[0][0].value} gånger) 
                                         medan ${last} var sämst på att ta till orda (${data.series[0][data.series[0].length -1].value} gånger).</mark>`;
             }
             if (which === 'genderChart') {
                 CHART.makeGenderChart(data);
+
                 let percent = Math.round((((data.series[0][0].value) - (data.series[0][1].value)) / data.series[0][1].value) * 100);
                 let conclusion = document.getElementById("gender-chart-conclusion");
                 conclusion.innerHTML =
@@ -545,10 +562,10 @@ const VIEW = (function() {
         },
 
         /**
-         * Prints a modal that pop up when you click an MP.
+         * Prints the modal head.
          */
         printModal: function() {
-            //heading with pic & name
+            //Heading with pic & name
             let modalHeading = `${this.firstname} ${this.lastname} (${this.party}) `;
             let modalPic = `<div class="mp-img-container-modal">
                             <img src="${this.image}" class="mp-img" alt="${this.firstname} ${this.lastname}"></div>`;
@@ -557,7 +574,7 @@ const VIEW = (function() {
                 `<br>Nedan visas de senaste tillfällena. Klicka för att läsa vad ${this.gender == 'man' ? 'han' : 'hon'} sade.</p>` :
                 '<br>Därför finns det inget att visa här.</p>';
 
-            //some info bout the mp
+            //Some info bout the mp
             let modalFacts = `
                 <p><strong>Född:</strong> ${this.born}. <strong>Valkrets:</strong> ${this.electorate}.</p>
                 <p>${this.firstname} har debatterat i Riksdagen ${this.numberofspeeches} gånger sedan ${MODEL.getSearchDate() || "riksmötet 2016/17 öppnade"}. 
@@ -573,6 +590,7 @@ const VIEW = (function() {
         },
 
         /**
+         * Renders the actual speech text when you clicked a list item
          * @param {string} speech - an html string of the speech
          * @param {string} obj - speech meta obj
          */
@@ -594,6 +612,7 @@ const VIEW = (function() {
             speechElem.querySelector("button").addEventListener("click", () => VIEW.showModalSection("modal-speech-list"));
         },
 
+        //toggles the modal sections visibility
         showModalSection: function(section) {
             let listElem = document.getElementById("modal-speech-list").className = "hidden";
             let speechElem = document.getElementById("modal-speech-text").className = "hidden";
@@ -602,15 +621,14 @@ const VIEW = (function() {
         },
 
         /**
-         * CAN BE MADE BETTER WITH FOREACH
-         * First hides all the main sections except 
+         * Hide all the main sections, then show 
          ** @param {string} me
          */
         hideAllButMe: function(me) {
             let sections = ["loading-section", "toplist-section", "gender-chart-section", "party-chart-section", "about-section"];
-            for (let i in sections) {
-                document.getElementById(sections[i]).className = 'hidden';
-            }
+            sections.forEach((element) => {
+                document.getElementById(element).className = "hidden";
+            });
 
             document.getElementById(me).className = 'visible';
         },
@@ -624,12 +642,12 @@ const VIEW = (function() {
          */
         init: (function() {
             // 1)
-            // document.addEventListener("DOMContentLoaded", CONTROLLER.init);
+            document.addEventListener("DOMContentLoaded", CONTROLLER.init);
             // 2
-            document.addEventListener('DOMContentLoaded', function() {
-                VIEW.hideAllButMe('toplist-section');
-                CONTROLLER.storeArray(testMPs, 'all');
-            });
+            // document.addEventListener('DOMContentLoaded', function() {
+            //     VIEW.hideAllButMe('toplist-section');
+            //     CONTROLLER.storeArray(testMPs, 'all');
+            // });
 
             /**
              * event listeners for my menu items, since nothing on the page is a hyperlink, just JS.
@@ -644,6 +662,7 @@ const VIEW = (function() {
              * which ones are 'active', ie selected.
              */
             const partyBtns = document.querySelectorAll('.partyBtn');
+
             partyBtns.forEach(function(element) {
                 element.addEventListener('click', function() {
                     this.classList.toggle('activeParty');
