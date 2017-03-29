@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 // MP = Member of Parliament
 
@@ -51,10 +51,14 @@ var MODEL = function () {
                 gender: mp[i].kon,
                 born: mp[i].fodd_ar,
                 electorate: mp[i].valkrets,
-                image: mp[i].bild_url_192
+                image: httpsIfy(mp[i].bild_url_192)
             });
         }
         fetchDebates(allMPs);
+    }
+
+    function httpsIfy(url) {
+        return "https" + url.substring(4, url.length);
     }
 
     function fetchDebates(mps) {
@@ -65,7 +69,7 @@ var MODEL = function () {
         var countComebacks = 'Ja';
 
         var _loop = function _loop(i) {
-            fetchObj = fetch('http://data.riksdagen.se/anforandelista/?rm=2016%2F17&anftyp=' + countComebacks + '&d=' + fromDate + '&ts=&parti=&iid=' + mps[i].id + '&sz=200&utformat=json').then(handleFetchErrors).then(function (response) {
+            fetchObj = fetch("https://data.riksdagen.se/anforandelista/?rm=2016%2F17&anftyp=" + countComebacks + "&d=" + fromDate + "&ts=&parti=&iid=" + mps[i].id + "&sz=200&utformat=json").then(handleFetchErrors).then(function (response) {
                 return response.json();
             }).then(function (data) {
                 return addSpeechToArray(data, i);
@@ -247,6 +251,8 @@ var MODEL = function () {
          * * @param {function} callback - for returning the result to the caller function. 
          */
         getSpeech: function getSpeech(speechobj, callback) {
+            var url = httpsIfy(speechobj.anforande_url_xml);
+            console.log(url);
             var req = new XMLHttpRequest();
             req.onreadystatechange = function () {
                 if (this.readyState == 4 && this.status == 200) {
@@ -381,7 +387,7 @@ var VIEW = function () {
      */
     function listenersForToplist(mps) {
         for (var i in mps) {
-            document.querySelector('tr[data-id="' + mps[i].id + '"]').addEventListener('click', CONTROLLER.openModal.bind(null, event, mps[i]));
+            document.querySelector("tr[data-id=\"" + mps[i].id + "\"]").addEventListener('click', CONTROLLER.openModal.bind(null, event, mps[i]));
         }
     }
 
@@ -441,14 +447,14 @@ var VIEW = function () {
             // if the previous debate was the same as this one, then skip it...
             // the loose compare is important since it accepts "0".
             if (i == 0 || sp[i].avsnittsrubrik !== sp[i - 1].avsnittsrubrik) {
-                string += '<li> \n                            <span class="' + (sp[i].replik == 'Y' ? 'comeback' : 'own') + '-debate debate-topic" id="' + sp[i].anforande_id + '">\n                            ' + trimString(sp[i].avsnittsrubrik) + '</span>\n                            <span class="debate-context">' + (capitalizeFirst(sp[i].kammaraktivitet) || '') + ' ' + sp[i].dok_datum + '.</span> \n                            ';
+                string += "<li> \n                            <span class=\"" + (sp[i].replik == 'Y' ? 'comeback' : 'own') + "-debate debate-topic\" id=\"" + sp[i].anforande_id + "\">\n                            " + trimString(sp[i].avsnittsrubrik) + "</span>\n                            <span class=\"debate-context\">" + (capitalizeFirst(sp[i].kammaraktivitet) || '') + " " + sp[i].dok_datum + ".</span> \n                            ";
                 count++;
 
                 // If the next topic will be a new one, close the list item.
                 if (i > sp.length - 1 && sp[i].avsnittsrubrik !== sp[i + 1].avsnittsrubrik) string += '</li>';
 
                 // ... instead print out an emoji
-            } else string += '<i id="' + sp[i].anforande_id + '" class="em em-' + (sp[i].replik == 'Y' ? 'speech_balloon' : 'mega') + '"></i>';
+            } else string += "<i id=\"" + sp[i].anforande_id + "\" class=\"em em-" + (sp[i].replik == 'Y' ? 'speech_balloon' : 'mega') + "\"></i>";
 
             speechArr.push(sp[i]);
             if (count === 10) break;
@@ -468,7 +474,7 @@ var VIEW = function () {
 
         printTopList: function printTopList(mps) {
             //print search date
-            document.getElementById("dateline").innerHTML = '* ' + (MODEL.getSearchDate() || "Under riksmötet 2016/17");
+            document.getElementById("dateline").innerHTML = "* " + (MODEL.getSearchDate() || "Under riksmötet 2016/17");
 
             var toplist = document.getElementById("toplist");
             var toplistRight = document.getElementById("toplist2");
@@ -493,7 +499,7 @@ var VIEW = function () {
                 if (i >= 5) {
                     toplist = toplistRight;
                 }
-                toplist.innerHTML += '\n                <tr data-id="' + mps[i].id + '" class="bg-' + mps[i].party + '">\n                    <th scope="row">' + (i + 1) + '</th>\n                    <td class="td-img">\n                        <div class="mp-img-container border-' + mps[i].party + '">\n                            <img src="' + mps[i].image + '" class="mp-img" alt="' + mps[i].firstname + ' ' + mps[i].lastname + '">\n                        </div>\n                    </td>\n                    <td>' + mps[i].firstname + ' ' + mps[i].lastname + ' (' + mps[i].party + ')</td>\n                    <td class="td-right">' + mps[i].numberofspeeches + '</td>\n                </tr>\n                ';
+                toplist.innerHTML += "\n                <tr data-id=\"" + mps[i].id + "\" class=\"bg-" + mps[i].party + "\">\n                    <th scope=\"row\">" + (i + 1) + "</th>\n                    <td class=\"td-img\">\n                        <div class=\"mp-img-container border-" + mps[i].party + "\">\n                            <img src=\"" + mps[i].image + "\" class=\"mp-img\" alt=\"" + mps[i].firstname + " " + mps[i].lastname + "\">\n                        </div>\n                    </td>\n                    <td>" + mps[i].firstname + " " + mps[i].lastname + " (" + mps[i].party + ")</td>\n                    <td class=\"td-right\">" + mps[i].numberofspeeches + "</td>\n                </tr>\n                ";
                 toplistArr.push(mps[i]);
             }
             listenersForToplist(toplistArr);
@@ -512,13 +518,13 @@ var VIEW = function () {
                 var last = data.labels[data.labels.length - 1];
                 if (last == "-") last = "de oberoende";
                 var conclusion = document.getElementById("party-chart-conclusion");
-                conclusion.innerHTML = '<mark>Under perioden var ' + data.labels[0] + ':s ledam\xF6ter mest p\xE5 hugget (talade ' + data.series[0][0].value + ' g\xE5nger) \n                                        medan ' + last + ' var s\xE4mst p\xE5 att ta till orda (' + data.series[0][data.series[0].length - 1].value + ' g\xE5nger).</mark>';
+                conclusion.innerHTML = "<mark>Under perioden var " + data.labels[0] + ":s ledam\xF6ter mest p\xE5 hugget (talade " + data.series[0][0].value + " g\xE5nger) \n                                        medan " + last + " var s\xE4mst p\xE5 att ta till orda (" + data.series[0][data.series[0].length - 1].value + " g\xE5nger).</mark>";
             }
             if (which === 'genderChart') {
                 CHART.makeGenderChart(data);
                 var percent = Math.round((data.series[0][0].value - data.series[0][1].value) / data.series[0][1].value * 100);
                 var _conclusion = document.getElementById("gender-chart-conclusion");
-                _conclusion.innerHTML = 'Under perioden talade en ' + data.labels[0] + ' i Riksdagen ' + percent + '% oftare (' + data.series[0][0].value + ' g\xE5nger) \xE4n en ' + data.labels[1] + ' (' + data.series[0][1].value + ' g\xE5nger).';
+                _conclusion.innerHTML = "Under perioden talade en " + data.labels[0] + " i Riksdagen " + percent + "% oftare (" + data.series[0][0].value + " g\xE5nger) \xE4n en " + data.labels[1] + " (" + data.series[0][1].value + " g\xE5nger).";
             }
         },
 
@@ -527,13 +533,13 @@ var VIEW = function () {
          */
         printModal: function printModal() {
             //heading with pic & name
-            var modalHeading = this.firstname + ' ' + this.lastname + ' (' + this.party + ') ';
-            var modalPic = '<div class="mp-img-container-modal">\n                            <img src="' + this.image + '" class="mp-img" alt="' + this.firstname + ' ' + this.lastname + '"></div>';
+            var modalHeading = this.firstname + " " + this.lastname + " (" + this.party + ") ";
+            var modalPic = "<div class=\"mp-img-container-modal\">\n                            <img src=\"" + this.image + "\" class=\"mp-img\" alt=\"" + this.firstname + " " + this.lastname + "\"></div>";
 
-            var hasSpeeches = this.speeches ? '<br>Nedan visas de senaste tillf\xE4llena. Klicka f\xF6r att l\xE4sa vad ' + (this.gender == 'man' ? 'han' : 'hon') + ' sade.</p>' : '<br>Därför finns det inget att visa här.</p>';
+            var hasSpeeches = this.speeches ? "<br>Nedan visas de senaste tillf\xE4llena. Klicka f\xF6r att l\xE4sa vad " + (this.gender == 'man' ? 'han' : 'hon') + " sade.</p>" : '<br>Därför finns det inget att visa här.</p>';
 
             //some info bout the mp
-            var modalFacts = '\n                <p><strong>F\xF6dd:</strong> ' + this.born + '. <strong>Valkrets:</strong> ' + this.electorate + '.</p>\n                <p>' + this.firstname + ' har debatterat i Riksdagen ' + this.numberofspeeches + ' g\xE5nger sedan ' + MODEL.oneMonthBack() + '. \n                ' + hasSpeeches + '\n                ';
+            var modalFacts = "\n                <p><strong>F\xF6dd:</strong> " + this.born + ". <strong>Valkrets:</strong> " + this.electorate + ".</p>\n                <p>" + this.firstname + " har debatterat i Riksdagen " + this.numberofspeeches + " g\xE5nger sedan " + (MODEL.getSearchDate() || "riksmötet 2016/17 öppnade") + ". \n                " + hasSpeeches + "\n                ";
 
             document.getElementById("mpModalLabel").innerHTML = modalHeading;
             document.getElementById("modal-pic").innerHTML = modalPic;
@@ -559,7 +565,7 @@ var VIEW = function () {
             //body
             speechElem.querySelector("#speech-body").innerHTML = speech;
             //footer
-            speechElem.querySelector("#speech-footer").innerHTML = '\n            <mark><a target="_blank" href="' + obj.protokoll_url_www + '">L\xE4s hela debatten h\xE4r</a></mark>';
+            speechElem.querySelector("#speech-footer").innerHTML = "\n            <mark><a target=\"_blank\" href=\"" + obj.protokoll_url_www + "\">L\xE4s hela debatten h\xE4r</a></mark>";
             //button
             speechElem.querySelector("button").addEventListener("click", function () {
                 return VIEW.showModalSection("modal-speech-list");
@@ -596,12 +602,12 @@ var VIEW = function () {
          */
         init: function () {
             // 1)
-            // document.addEventListener("DOMContentLoaded", CONTROLLER.init);
+            document.addEventListener("DOMContentLoaded", CONTROLLER.init);
             // 2
-            document.addEventListener('DOMContentLoaded', function () {
-                VIEW.hideAllButMe('toplist-section');
-                CONTROLLER.storeArray(testMPs, 'all');
-            });
+            // document.addEventListener('DOMContentLoaded', function() {
+            //     VIEW.hideAllButMe('toplist-section');
+            //     CONTROLLER.storeArray(testMPs, 'all');
+            // });
 
             /**
              * event listeners for my menu items, since nothing on the page is a hyperlink, just JS.

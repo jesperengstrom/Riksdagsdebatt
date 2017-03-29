@@ -1,6 +1,9 @@
-## riksdagens debattörer ##
+## Talartoppen ##
+Uppgoft i Ajax, JSON oc Fetch.
 
-ditt namn, kurs och utbildning
+Jesper Engström, FEND16, Nackademin kurs JavaScript 2.
+
+
 länk till projektet live
 kort beskrivning av applikationen, dess syfte och funktionalitet.
 punktlista med vilka teknologier du använt.

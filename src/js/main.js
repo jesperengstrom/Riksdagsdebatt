@@ -47,12 +47,15 @@ const MODEL = (function() {
                 gender: mp[i].kon,
                 born: mp[i].fodd_ar,
                 electorate: mp[i].valkrets,
-                image: mp[i].bild_url_192
+                image: httpsIfy(mp[i].bild_url_192)
             });
         }
         fetchDebates(allMPs);
     }
 
+    function httpsIfy(url) {
+        return "https" + url.substring(4, url.length);
+    }
 
     function fetchDebates(mps) {
         var fetchObj;
@@ -62,7 +65,7 @@ const MODEL = (function() {
         let countComebacks = 'Ja';
 
         for (let i in mps) {
-            fetchObj = fetch(`http://data.riksdagen.se/anforandelista/?rm=2016%2F17&anftyp=${countComebacks}&d=${fromDate}&ts=&parti=&iid=${mps[i].id}&sz=200&utformat=json`)
+            fetchObj = fetch(`https://data.riksdagen.se/anforandelista/?rm=2016%2F17&anftyp=${countComebacks}&d=${fromDate}&ts=&parti=&iid=${mps[i].id}&sz=200&utformat=json`)
                 .then(handleFetchErrors)
                 .then(response => response.json())
                 .then(data => addSpeechToArray(data, i))
@@ -240,6 +243,8 @@ const MODEL = (function() {
          * * @param {function} callback - for returning the result to the caller function. 
          */
         getSpeech: function(speechobj, callback) {
+            let url = httpsIfy(speechobj.anforande_url_xml);
+            console.log(url);
             var req = new XMLHttpRequest();
             req.onreadystatechange = function() {
                 if (this.readyState == 4 && this.status == 200) {
@@ -551,7 +556,7 @@ const VIEW = (function() {
             //some info bout the mp
             let modalFacts = `
                 <p><strong>Född:</strong> ${this.born}. <strong>Valkrets:</strong> ${this.electorate}.</p>
-                <p>${this.firstname} har debatterat i Riksdagen ${this.numberofspeeches} gånger sedan ${MODEL.oneMonthBack()}. 
+                <p>${this.firstname} har debatterat i Riksdagen ${this.numberofspeeches} gånger sedan ${MODEL.getSearchDate() || "riksmötet 2016/17 öppnade"}. 
                 ${hasSpeeches}
                 `;
 
@@ -615,12 +620,12 @@ const VIEW = (function() {
          */
         init: (function() {
             // 1)
-            // document.addEventListener("DOMContentLoaded", CONTROLLER.init);
+            document.addEventListener("DOMContentLoaded", CONTROLLER.init);
             // 2
-            document.addEventListener('DOMContentLoaded', function() {
-                VIEW.hideAllButMe('toplist-section');
-                CONTROLLER.storeArray(testMPs, 'all');
-            });
+            // document.addEventListener('DOMContentLoaded', function() {
+            //     VIEW.hideAllButMe('toplist-section');
+            //     CONTROLLER.storeArray(testMPs, 'all');
+            // });
 
             /**
              * event listeners for my menu items, since nothing on the page is a hyperlink, just JS.
