@@ -15,7 +15,7 @@ var MODEL = function () {
 
     /**
      * Returns all MPs
-     * Originally fetched from: http://data.riksdagen.se/personlista/?iid=&fnamn=&enamn=&f_ar=&kn=&parti=&valkrets=&rdlstatus=&org=&utformat=json&termlista=
+     * Originally fetched from: https://data.riksdagen.se/personlista/?iid=&fnamn=&enamn=&f_ar=&kn=&parti=&valkrets=&rdlstatus=&org=&utformat=json&termlista=
      * Currently fetched locally since it's very big and doesn't change very often.
      */
     function fetchAllMPs() {
