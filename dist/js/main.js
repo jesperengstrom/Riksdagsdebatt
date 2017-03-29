@@ -261,7 +261,7 @@ var MODEL = function () {
                     callback(speech);
                 }
             };
-            req.open("GET", speechobj.anforande_url_xml, true);
+            req.open("GET", url, true);
             req.send();
             req.addEventListener("error", function () {
                 return console.log("Fel när anförandet skulle hämtas", req.statusText);
