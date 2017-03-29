@@ -1,0 +1,103 @@
+//over: navbar text
+@media screen and (min-width: 991px) {
+    //hides the dateline tag from the nav bar
+    #dateline-sm {
+        display: none;
+    }
+}
+
+@media screen and (max-width: 992px) {
+    //hides the dateline tag from the hero
+    #dateline-lg {
+        display: none;
+    }
+}
+
+//under: navbar popup
+@media screen and (max-width: 991px) {
+    //hides second tables header row
+    #second-trow {
+        visibility: hidden;
+    }
+    //..and moves the rest up to hide gap
+    #second-table {
+        position: relative;
+        top: -65px;
+        margin-bottom: 0;
+    }
+    //take away the nav-compensating margin when toplist move up
+    #page-wrap {
+        margin-bottom: 0;
+    }
+    //and compensate on other pages...
+    #about-section,
+    #gender-chart-section,
+    #party-chart-section {
+        padding-bottom: 56px;
+    }
+    //prevents the nav items from breaking line
+    .margin-left {
+        margin-left: 1;
+    }
+    //no separator when only one column
+    .border-right {
+        border: none;
+    }
+    //removes image from modal 
+    .mp-img-container-modal {
+        display: none;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    //fills entire width
+    .container {
+        width: 100%;
+        max-width: 100%;
+    }
+    .container-fluid {
+        padding-right: 0;
+        padding-left: 0;
+    }
+    .col-lg-6,
+    col-sm-12 {
+        padding-right: 0;
+        padding-left: 0;
+    }
+    //giving pic more place so not crammed with name
+    .trow-pic {
+        width: 40%;
+    }
+}
+
+@media screen and (max-width:576px) {
+    //changes from "debattinlägg" to "inlägg"
+    .count-long {
+        display: none;
+    }
+    .count-short {
+        display: table-cell;
+    }
+    //ok to row wrap
+    td {
+        word-wrap: break-word;
+        white-space: normal;
+    }
+}
+
+@media (max-width: 384px) {
+    //removing logo on small screen
+    #riksdag-logo {
+        display: none;
+    }
+}
+
+@media (max-width: 260px) {
+    //removing mp-pic on tiny screen
+    .mp-img-container {
+        display: none;
+    }
+    .trow-pic {
+        width: 0%;
+    }
+}

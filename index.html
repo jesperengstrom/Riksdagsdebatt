@@ -39,7 +39,7 @@
             <div>
                 <h4 class="display-6">Talartoppen <span class="lead">- Politikerna som snackar mest i Riksdagen</span></h4>
             </div>
-            <div id="dateline" class="lead-smaller ml-auto">* Sedan 2017-02-28</div>
+            <div id="dateline-lg" class="lead-smaller ml-auto">* Sedan 2017-02-28</div>
         </div>
     </div>
     <!-- end hero -->
@@ -51,28 +51,30 @@
         <section id="toplist-section" class="hidden">
             <div class="container">
                 <div class="row">
-                    <div class="col border-right">
+                    <div class="col-lg-6 col-sm-12 border-right">
                         <table class="table">
                             <thead>
                                 <tr>
                                     <th class="trow-rank">#</th>
                                     <th class="trow-pic"></th>
                                     <th class="trow-name">Namn</th>
-                                    <th class="td-right trow-count">Debattinlägg*</th>
+                                    <th class="td-right trow-count count-long">Debattinlägg*</th>
+                                    <th class="td-right trow-count count-short">Inlägg*</th>
                                 </tr>
                             </thead>
                             <tbody id="toplist">
                             </tbody>
                         </table>
                     </div>
-                    <div class="col">
-                        <table class="table">
+                    <div class="col-lg-6 col-sm-12">
+                        <table id="second-table" class="table">
                             <thead>
-                                <tr>
+                                <tr id="second-trow">
                                     <th class="trow-rank">#</th>
                                     <th class="trow-pic"></th>
                                     <th class="trow-name">Namn</th>
-                                    <th class="td-right trow-count">Debattinlägg*</th>
+                                    <th class="td-right trow-count count-long">Debattinlägg*</th>
+                                    <th class="td-right trow-count count-short">Inlägg*</th>
                                 </tr>
                             </thead>
                             <tbody id="toplist2">
@@ -89,12 +91,12 @@
         <!--  party chart -->
         <section id="party-chart-section" class="hidden">
             <div class="container">
-                <div class="row">
-                    <div class="col">
+                <div class="row justify-space-between">
+                    <div class="col-lg-4">
                         <div class="ct-chart ct-perfect-fourth" id="partyChart">
                         </div>
                     </div>
-                    <div class="col border-left d-flex flex-column">
+                    <div class="col-lg-4 border-left">
                         <p class="lead">Partitoppen</p>
                         <p>Grafen visar det genomsnittliga antalet gånger en ledamot för ett visst parti har talat i Riksdagen under perioden*</p>
                         <p>Siffran är proportionell, dvs det sammanlagda antalet anföranden och repliker från ett parti är delat med partiets antal platser.</p>
@@ -108,7 +110,7 @@
         <!-- gender chart -->
         <section id="gender-chart-section" class="hidden">
             <div class="container">
-                <div class="row justify-content-center">
+                <div class="row justify-space-between">
                     <div class="col-lg-4">
                         <div class="ct-chart ct-perfect-fourth ct-bar" id="genderChart">
                         </div>
@@ -198,9 +200,10 @@
                     </li>
                 </ul>
                 <div class="navbar-nav navbar-right">
-                    <a class="nav-item nav-link launch-nav-event" href="#">Om</a>
+                    <a class="nav-item nav-link launch-nav-event margin-left" href="#">Om</a>
                 </div>
             </div>
+            <div id="dateline-sm" class="navbar-text lead-smaller ml-auto">Sedan bla bla</div>
         </nav>
         <!-- end nav -->
 

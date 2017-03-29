@@ -474,7 +474,10 @@ var VIEW = function () {
 
         printTopList: function printTopList(mps) {
             //print search date
-            document.getElementById("dateline").innerHTML = "* " + (MODEL.getSearchDate() || "Under riksmötet 2016/17");
+            var datelines = document.querySelectorAll(".lead-smaller");
+            datelines.forEach(function (elem) {
+                return elem.innerHTML = "* " + (MODEL.getSearchDate() || "Under riksmötet 2016/17");
+            });
 
             var toplist = document.getElementById("toplist");
             var toplistRight = document.getElementById("toplist2");
@@ -602,12 +605,12 @@ var VIEW = function () {
          */
         init: function () {
             // 1)
-            document.addEventListener("DOMContentLoaded", CONTROLLER.init);
+            // document.addEventListener("DOMContentLoaded", CONTROLLER.init);
             // 2
-            // document.addEventListener('DOMContentLoaded', function() {
-            //     VIEW.hideAllButMe('toplist-section');
-            //     CONTROLLER.storeArray(testMPs, 'all');
-            // });
+            document.addEventListener('DOMContentLoaded', function () {
+                VIEW.hideAllButMe('toplist-section');
+                CONTROLLER.storeArray(testMPs, 'all');
+            });
 
             /**
              * event listeners for my menu items, since nothing on the page is a hyperlink, just JS.

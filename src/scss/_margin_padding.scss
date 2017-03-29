@@ -8,6 +8,10 @@
 
 .margin-left {
     margin-left: 5rem;
+    //prevents the nav items from breaking line
+    @media screen and (max-width: 992px) {
+        margin-left: 1rem;
+    }
 }
 
 //modal speech header

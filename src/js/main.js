@@ -473,7 +473,11 @@ const VIEW = (function() {
 
         printTopList: function(mps) {
             //print search date
-            document.getElementById("dateline").innerHTML = `* ${MODEL.getSearchDate() || "Under riksmötet 2016/17"}`;
+            let datelines = document.querySelectorAll(".lead-smaller");
+            datelines.forEach((elem) => elem.innerHTML = `* ${MODEL.getSearchDate() || "Under riksmötet 2016/17"}`);
+
+
+
 
             let toplist = document.getElementById("toplist");
             const toplistRight = document.getElementById("toplist2");
@@ -620,12 +624,12 @@ const VIEW = (function() {
          */
         init: (function() {
             // 1)
-            document.addEventListener("DOMContentLoaded", CONTROLLER.init);
+            // document.addEventListener("DOMContentLoaded", CONTROLLER.init);
             // 2
-            // document.addEventListener('DOMContentLoaded', function() {
-            //     VIEW.hideAllButMe('toplist-section');
-            //     CONTROLLER.storeArray(testMPs, 'all');
-            // });
+            document.addEventListener('DOMContentLoaded', function() {
+                VIEW.hideAllButMe('toplist-section');
+                CONTROLLER.storeArray(testMPs, 'all');
+            });
 
             /**
              * event listeners for my menu items, since nothing on the page is a hyperlink, just JS.

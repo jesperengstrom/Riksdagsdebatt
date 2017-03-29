@@ -13,11 +13,11 @@ table {
 }
 
 .trow-name {
-    width: 50%
+    width: 45%
 }
 
 .trow-count {
-    width: 20%;
+    width: 25%;
 }
 
 td {
@@ -43,6 +43,11 @@ td {
 
 .td-img {
     padding-right: 5rem !important;
+}
+
+//"Inlägg" insstead of "Debattinlägg"
+.count-short {
+    display: none;
 }
 
 //lists

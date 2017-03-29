@@ -1,4 +1,8 @@
 //navbar
+.navbar {
+    flex-direction: row;
+}
+
 .dropdown-menu {
     padding: 0.5rem;
 }
@@ -23,8 +27,14 @@
     background-color: $pastel-blue-lighter;
 }
 
-@media (min-width: 576px) {
-    .jumbotron {
-        padding: 1rem 1rem;
+.jumbotron {
+    padding: 1rem;
+    @media screen and (max-width: 992px) {
+        margin-bottom: 0;
     }
+}
+
+//flexbox
+.justify-space-between {
+    justify-content: space-between;
 }
