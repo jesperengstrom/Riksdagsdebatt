@@ -177,6 +177,10 @@ a {
   -ms-flex-pack: justify;
       justify-content: space-between; }
 
+.justify-space-around {
+  -ms-flex-pack: distribute;
+      justify-content: space-around; }
+
 .lead-smaller {
   font-size: 1rem;
   font-weight: 300;
@@ -197,6 +201,10 @@ a {
 
 .speech-header {
   margin-top: 1rem; }
+
+.container,
+.container-fluid {
+  transition: all 0.5s ease; }
 
 .navbar {
   -ms-flex-direction: row;
@@ -220,14 +228,11 @@ a {
   background-color: #D8E3E7; }
 
 .jumbotron {
+  transition: all .5s ease;
   padding: 1rem; }
   @media screen and (max-width: 992px) {
     .jumbotron {
       margin-bottom: 0; } }
-
-.justify-space-between {
-  -ms-flex-pack: justify;
-      justify-content: space-between; }
 
 .ct-chart-bar {
   height: 75vh !important; }
@@ -241,6 +246,12 @@ a {
 .ct-label {
   font-size: 0.75em !important;
   color: #292b2c !important; }
+
+.half {
+  width: 50%; }
+  @media screen and (max-width: 617px) {
+    .half {
+      width: 80%; } }
 
 table {
   table-layout: fixed;
@@ -522,7 +533,8 @@ li {
   #about-section,
   #gender-chart-section,
   #party-chart-section {
-    padding-bottom: 56px; }
+    padding-bottom: 56px;
+    margin-top: 2rem; }
   .margin-left {
     margin-left: 1; }
   .border-right {

@@ -1,3 +1,8 @@
+.container,
+.container-fluid {
+    transition: all 0.5s ease;
+}
+
 //navbar
 .navbar {
     flex-direction: row;
@@ -28,13 +33,9 @@
 }
 
 .jumbotron {
+    transition: all .5s ease;
     padding: 1rem;
     @media screen and (max-width: 992px) {
         margin-bottom: 0;
     }
-}
-
-//flexbox
-.justify-space-between {
-    justify-content: space-between;
 }
