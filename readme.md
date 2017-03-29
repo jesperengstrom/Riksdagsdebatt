@@ -1,10 +1,10 @@
 # Talartoppen
-###Uppgift i Ajax, JSON och Fetch###
+### Uppgift i Ajax, JSON och Fetch
 
 **Jesper Engström, FEND16, Nackademin kurs JavaScript 2**
 
 ## Projektlänkar
-https://jesperengstrom.github.io/Talartoppen/
+https://jesperengstrom.github.io/Talartoppen/  
 https://github.com/jesperengstrom/Talartoppen
 
 ## Beskrivning av applikationen
