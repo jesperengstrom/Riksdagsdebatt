@@ -21,3 +21,11 @@
         width: 80%;
     }
 }
+
+#party-chart-section .ct-series line {
+    stroke-width: 50px !important;
+}
+
+#gender-chart-section .ct-series line {
+    stroke-width: 100px !important;
+}

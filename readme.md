@@ -19,6 +19,7 @@ Syftet är att skaffa sig någon slags koll på vilka politiker och partier som 
 * Möjlighet att klicka på debattrubriker och symbolerna för att få fram vad ledamoten sade, samt en länk till hela debatten.
 * Graf som visar vilka partier som debatterar mest i förhållande till antalet ledamöter.
 * Graf som visar på skillnaden i hur mycket män/kvinnor talar.
+* Supports: Chrome, Firefox, Edge
 
 ## Teknologier
 * VS Code med diverse plugins (JSHint mm)

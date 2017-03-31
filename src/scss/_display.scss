@@ -3,11 +3,27 @@
 }
 
 .visible {
-    display: block !important;
+    //display: block !important;
+    animation: show .5s ease-in-out;
 }
 
 .inline {
     display: inline;
+}
+
+//keyframe for fade
+@keyframes show {
+    0% {
+        display: none;
+        opacity: 0;
+    }
+    1% {
+        display: block;
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
 }
 
 //flexbox

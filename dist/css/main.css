@@ -168,10 +168,20 @@ a {
   display: none !important; }
 
 .visible {
-  display: block !important; }
+  animation: show .5s ease-in-out; }
 
 .inline {
   display: inline; }
+
+@keyframes show {
+  0% {
+    display: none;
+    opacity: 0; }
+  1% {
+    display: block;
+    opacity: 0; }
+  100% {
+    opacity: 1; } }
 
 .justify-space-between {
   -ms-flex-pack: justify;
@@ -253,6 +263,12 @@ a {
     .half {
       width: 80%; } }
 
+#party-chart-section .ct-series line {
+  stroke-width: 50px !important; }
+
+#gender-chart-section .ct-series line {
+  stroke-width: 100px !important; }
+
 table {
   table-layout: fixed;
   width: 100%; }
@@ -275,6 +291,13 @@ td {
   padding-top: 2rem !important;
   cursor: pointer;
   white-space: nowrap; }
+
+.table td,
+.table th {
+  border-top: 1px solid #ccc; }
+
+.table thead th {
+  border-bottom: 2px solid #ccc; }
 
 .td-right {
   text-align: right; }
@@ -509,6 +532,7 @@ li {
   display: flex; }
 
 #close-speech-btn {
+  border-radius: 10px;
   width: 100px;
   height: 40px;
   float: right; }

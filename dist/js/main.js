@@ -373,7 +373,7 @@ var CONTROLLER = function () {
          * Triggers a modal window for the MP klicked. 
          * Sudden jQuery-syntax comes from Bootstrap documentation.
          */
-        openModal: function openModal(event, mp) {
+        openModal: function openModal(mp) {
             VIEW.printModal.call(mp);
             VIEW.showModalSection("modal-speech-list");
             $('#mpModal').modal();
@@ -383,7 +383,7 @@ var CONTROLLER = function () {
          * Passes getSpeech an object and calls back a speech text. Sends it back to view
          * along with the object. 
          */
-        openSpeech: function openSpeech(event, speechObj) {
+        openSpeech: function openSpeech(speechObj) {
             MODEL.getSpeech(speechObj, function (xml) {
                 var result = xml;
                 VIEW.printSpeech(result, speechObj);
@@ -405,7 +405,7 @@ var VIEW = function () {
      */
     function listenersForToplist(mps) {
         for (var i in mps) {
-            document.querySelector("tr[data-id=\"" + mps[i].id + "\"]").addEventListener('click', CONTROLLER.openModal.bind(null, event, mps[i]));
+            document.querySelector("tr[data-id=\"" + mps[i].id + "\"]").addEventListener('click', CONTROLLER.openModal.bind(null, mps[i]));
         }
     }
 
@@ -415,7 +415,7 @@ var VIEW = function () {
      */
     function listenersForSpeeches(speeches) {
         for (var i in speeches) {
-            document.getElementById(speeches[i].anforande_id).addEventListener('click', CONTROLLER.openSpeech.bind(null, event, speeches[i]));
+            document.getElementById(speeches[i].anforande_id).addEventListener('click', CONTROLLER.openSpeech.bind(null, speeches[i]));
         }
     }
 
@@ -492,7 +492,7 @@ var VIEW = function () {
             var max = 10;
 
             //print search date in nav bar/hero (depending on screen size)
-            var datelines = document.querySelectorAll(".lead-smaller");
+            var datelines = Array.from(document.querySelectorAll(".lead-smaller"));
             datelines.forEach(function (elem) {
                 return elem.innerHTML = "* " + (MODEL.getSearchDate() || "Under riksmötet 2016/17");
             });
@@ -637,8 +637,10 @@ var VIEW = function () {
             /**
              * event listeners for my menu items, since nothing on the page is a hyperlink, just JS.
              * Sends all of the nav-element to a controller function which then decides which one was clicked via 'this'.
+             * 
+             * Some browers support forEach with NodeLists, but some (Edge) do not. That's why the're converted to proper arrays first.
              */
-            document.querySelectorAll('.launch-nav-event').forEach(function (element) {
+            Array.from(document.querySelectorAll('.launch-nav-event')).forEach(function (element) {
                 element.addEventListener('click', CONTROLLER.navClick);
             }, this);
 
@@ -646,7 +648,7 @@ var VIEW = function () {
              * Same concept with my listeners for party filtering, except I toggle a class and lets the controller function check
              * which ones are 'active', ie selected.
              */
-            var partyBtns = document.querySelectorAll('.partyBtn');
+            var partyBtns = Array.from(document.querySelectorAll('.partyBtn'));
 
             partyBtns.forEach(function (element) {
                 element.addEventListener('click', function () {
