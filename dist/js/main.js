@@ -373,7 +373,7 @@ var CONTROLLER = function () {
          * Triggers a modal window for the MP klicked. 
          * Sudden jQuery-syntax comes from Bootstrap documentation.
          */
-        openModal: function openModal(event, mp) {
+        openModal: function openModal(mp) {
             VIEW.printModal.call(mp);
             VIEW.showModalSection("modal-speech-list");
             $('#mpModal').modal();
@@ -383,7 +383,7 @@ var CONTROLLER = function () {
          * Passes getSpeech an object and calls back a speech text. Sends it back to view
          * along with the object. 
          */
-        openSpeech: function openSpeech(event, speechObj) {
+        openSpeech: function openSpeech(speechObj) {
             MODEL.getSpeech(speechObj, function (xml) {
                 var result = xml;
                 VIEW.printSpeech(result, speechObj);
@@ -405,7 +405,7 @@ var VIEW = function () {
      */
     function listenersForToplist(mps) {
         for (var i in mps) {
-            document.querySelector("tr[data-id=\"" + mps[i].id + "\"]").addEventListener('click', CONTROLLER.openModal.bind(null, event, mps[i]));
+            document.querySelector("tr[data-id=\"" + mps[i].id + "\"]").addEventListener('click', CONTROLLER.openModal.bind(null, mps[i]));
         }
     }
 
@@ -415,7 +415,7 @@ var VIEW = function () {
      */
     function listenersForSpeeches(speeches) {
         for (var i in speeches) {
-            document.getElementById(speeches[i].anforande_id).addEventListener('click', CONTROLLER.openSpeech.bind(null, event, speeches[i]));
+            document.getElementById(speeches[i].anforande_id).addEventListener('click', CONTROLLER.openSpeech.bind(null, speeches[i]));
         }
     }
 
@@ -627,12 +627,12 @@ var VIEW = function () {
          */
         init: function () {
             // 1)
-            document.addEventListener("DOMContentLoaded", CONTROLLER.init);
+            // document.addEventListener("DOMContentLoaded", CONTROLLER.init);
             // 2
-            // document.addEventListener('DOMContentLoaded', function() {
-            //     VIEW.hideAllButMe('toplist-section');
-            //     CONTROLLER.storeArray(testMPs, 'all');
-            // });
+            document.addEventListener('DOMContentLoaded', function () {
+                VIEW.hideAllButMe('toplist-section');
+                CONTROLLER.storeArray(testMPs, 'all');
+            });
 
             /**
              * event listeners for my menu items, since nothing on the page is a hyperlink, just JS.
