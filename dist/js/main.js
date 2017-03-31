@@ -492,7 +492,7 @@ var VIEW = function () {
             var max = 10;
 
             //print search date in nav bar/hero (depending on screen size)
-            var datelines = document.querySelectorAll(".lead-smaller");
+            var datelines = Array.from(document.querySelectorAll(".lead-smaller"));
             datelines.forEach(function (elem) {
                 return elem.innerHTML = "* " + (MODEL.getSearchDate() || "Under riksmötet 2016/17");
             });
@@ -627,18 +627,20 @@ var VIEW = function () {
          */
         init: function () {
             // 1)
-            // document.addEventListener("DOMContentLoaded", CONTROLLER.init);
+            document.addEventListener("DOMContentLoaded", CONTROLLER.init);
             // 2
-            document.addEventListener('DOMContentLoaded', function () {
-                VIEW.hideAllButMe('toplist-section');
-                CONTROLLER.storeArray(testMPs, 'all');
-            });
+            // document.addEventListener('DOMContentLoaded', function() {
+            //     VIEW.hideAllButMe('toplist-section');
+            //     CONTROLLER.storeArray(testMPs, 'all');
+            // });
 
             /**
              * event listeners for my menu items, since nothing on the page is a hyperlink, just JS.
              * Sends all of the nav-element to a controller function which then decides which one was clicked via 'this'.
+             * 
+             * Some browers support forEach with NodeLists, but some (Edge) do not. That's why the're converted to proper arrays first.
              */
-            document.querySelectorAll('.launch-nav-event').forEach(function (element) {
+            Array.from(document.querySelectorAll('.launch-nav-event')).forEach(function (element) {
                 element.addEventListener('click', CONTROLLER.navClick);
             }, this);
 
@@ -646,7 +648,7 @@ var VIEW = function () {
              * Same concept with my listeners for party filtering, except I toggle a class and lets the controller function check
              * which ones are 'active', ie selected.
              */
-            var partyBtns = document.querySelectorAll('.partyBtn');
+            var partyBtns = Array.from(document.querySelectorAll('.partyBtn'));
 
             partyBtns.forEach(function (element) {
                 element.addEventListener('click', function () {
