@@ -253,6 +253,12 @@ a {
     .half {
       width: 80%; } }
 
+#party-chart-section .ct-series line {
+  stroke-width: 50px !important; }
+
+#gender-chart-section .ct-series line {
+  stroke-width: 100px !important; }
+
 table {
   table-layout: fixed;
   width: 100%; }
@@ -275,6 +281,13 @@ td {
   padding-top: 2rem !important;
   cursor: pointer;
   white-space: nowrap; }
+
+.table td,
+.table th {
+  border-top: 1px solid #ccc; }
+
+.table thead th {
+  border-bottom: 2px solid #ccc; }
 
 .td-right {
   text-align: right; }

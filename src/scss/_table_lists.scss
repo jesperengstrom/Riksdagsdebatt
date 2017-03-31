@@ -29,6 +29,15 @@ td {
     white-space: nowrap;
 }
 
+.table td,
+.table th {
+    border-top: 1px solid #ccc;
+}
+
+.table thead th {
+    border-bottom: 2px solid #ccc;
+}
+
 .td-right {
     text-align: right;
 }
