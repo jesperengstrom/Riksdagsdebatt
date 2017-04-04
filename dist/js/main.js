@@ -19,15 +19,13 @@ var MODEL = function () {
      * Originally fetched from: https://data.riksdagen.se/personlista/?iid=&fnamn=&enamn=&f_ar=&kn=&parti=&valkrets=&rdlstatus=&org=&utformat=json&termlista=
      * Currently fetched locally since it's very big and doesn't change very often.
      */
-    function fetchAllMPs() {
-        return fetch('json/rawMPs.json').then(handleFetchErrors).then(function (response) {
-            return response.json();
-        }).then(function (data) {
-            return slimArray(data);
-        }).catch(function (error) {
-            return console.log(error);
-        });
-    }
+    // function fetchAllMPs() {
+    //     return fetch('json/rawMPs.json')
+    //         .then(handleFetchErrors)
+    //         .then(response => response.json())
+    //         .then(data => slimArray(data))
+    //         .catch(error => console.log(error));
+    // }
 
     function handleFetchErrors(response) {
         if (!response.ok) {
@@ -40,22 +38,22 @@ var MODEL = function () {
      * Returns a slimmer array of MP:s with the props i need
      * * @param {array} mps - original raw array of MP:s
      */
-    function slimArray(mps) {
-        var mp = mps.personlista.person;
-        for (var i in mp) {
-            allMPs.push({
-                id: mp[i].intressent_id,
-                firstname: mp[i].tilltalsnamn,
-                lastname: mp[i].efternamn,
-                party: mp[i].parti,
-                gender: mp[i].kon,
-                born: mp[i].fodd_ar,
-                electorate: mp[i].valkrets,
-                image: httpsIfy(mp[i].bild_url_192)
-            });
-        }
-        fetchDebates(allMPs);
-    }
+    // function slimArray(mps) {
+    //     let mp = mps.personlista.person;
+    //     for (let i in mp) {
+    //         allMPs.push({
+    //             id: mp[i].intressent_id,
+    //             firstname: mp[i].tilltalsnamn,
+    //             lastname: mp[i].efternamn,
+    //             party: mp[i].parti,
+    //             gender: mp[i].kon,
+    //             born: mp[i].fodd_ar,
+    //             electorate: mp[i].valkrets,
+    //             image: httpsIfy(mp[i].bild_url_192)
+    //         });
+    //     }
+    //     fetchDebates(allMPs);
+    // }
 
     //changes http to https to avoid browser blocking requests
     function httpsIfy(url) {
@@ -66,32 +64,53 @@ var MODEL = function () {
      * Monster function that fetches speeches for all mp:s in a loop.
      * * @param {array} mps - the new slimmer array of mps:s
      */
-    function fetchDebates(mps) {
+    // function fetchDebates(mps) {
+    //     var fetchObj;
+    //     //If I want to search one month back.
+    //     //let fromDate = MODEL.oneMonthBack();
+    //     //If I want the whole Riksmöte 16/17
+    //     let fromDate = "";
+    //     let countComebacks = 'Ja';
+
+    //     for (let i in mps) {
+    //         fetchObj = fetch(`https://data.riksdagen.se/anforandelista/?rm=2016%2F17&anftyp=${countComebacks}&d=${fromDate}&ts=&parti=&iid=${mps[i].id}&sz=200&utformat=json`)
+    //             .then(handleFetchErrors)
+    //             .then(response => response.json())
+    //             .then(data => addSpeechToArray(data, i))
+    //             .catch(error => console.log(error));
+    //     }
+    //     // Fetch is done, we're ready to store array and send to print
+    //     fetchObj.then(() => {
+    //         CONTROLLER.storeArray(allMPs, 'all', fromDate);
+    //         searchDate = fromDate;
+    //     });
+    // }
+
+    function herokuServer() {
         var fetchObj;
-        //If I want to search one month back.
-        //let fromDate = MODEL.oneMonthBack();
-        //If I want the whole Riksmöte 16/17
         var fromDate = "";
-        var countComebacks = 'Ja';
+        fetchObj = fetch("https://riksdagen-server.herokuapp.com/all").then(handleFetchErrors).then(function (response) {
+            increaseProgressbar();
+            return response.json();
+        }).catch(function (error) {
+            return console.log(error);
+        });
 
-        var _loop = function _loop(i) {
-            fetchObj = fetch("https://data.riksdagen.se/anforandelista/?rm=2016%2F17&anftyp=" + countComebacks + "&d=" + fromDate + "&ts=&parti=&iid=" + mps[i].id + "&sz=200&utformat=json").then(handleFetchErrors).then(function (response) {
-                return response.json();
-            }).then(function (data) {
-                return addSpeechToArray(data, i);
-            }).catch(function (error) {
-                return console.log(error);
-            });
-        };
-
-        for (var i in mps) {
-            _loop(i);
-        }
-        // Fetch is done, we're ready to store array and send to print
-        fetchObj.then(function () {
-            CONTROLLER.storeArray(allMPs, 'all', fromDate);
+        fetchObj.then(function (data) {
+            var readyArr = formatHerokuArr(data);
+            CONTROLLER.storeArray(readyArr, 'all');
             searchDate = fromDate;
         });
+    }
+
+    function formatHerokuArr(arr) {
+        var formatArr = arr.map(function (obj) {
+            var newObj = obj;
+            newObj.numberofspeeches = parseInt(obj.numberOfSpeeches);
+            delete newObj.numberOfSpeeches;
+            return newObj;
+        });
+        return formatArr;
     }
 
     /**
@@ -99,22 +118,23 @@ var MODEL = function () {
      ** @param {promise} data - the promise recently fetched
      ** @param {string} i - current index
      */
-    function addSpeechToArray(data, i) {
-        allMPs[i].numberofspeeches = parseInt(data.anforandelista['@antal']);
-        if (data.anforandelista['@antal'] !== '0') {
-            allMPs[i].speeches = data.anforandelista.anforande;
-            console.log('getting speeches');
-            loaded += 1;
-            increaseProgressbar();
-        }
-    }
+    // function addSpeechToArray(data, i) {
+    //     allMPs[i].numberofspeeches = parseInt(data.anforandelista['@antal']);
+    //     if (data.anforandelista['@antal'] !== '0') {
+    //         allMPs[i].speeches = data.anforandelista.anforande;
+    //         console.log('getting speeches');
+    //         loaded += 1;
+    //         increaseProgressbar();
+    //     }
+    // }
 
     /**
      * Takes number of fetched speeches and converts to % for the
      * progress-bar on page. Should really be done in VIEW...
      */
     function increaseProgressbar() {
-        var percent = Math.round(loaded / 349 * 100);
+        //let percent = Math.round((loaded / 349) * 100);
+        var percent = 100;
         var progress = document.querySelector(".progress-bar");
         progress.innerHTML = percent + "%";
         progress.style.width = percent + "%";
@@ -195,7 +215,9 @@ var MODEL = function () {
         },
 
         initMPObject: function initMPObject() {
-            fetchAllMPs();
+            //old setup
+            //fetchAllMPs();
+            herokuServer();
         },
 
         /**
