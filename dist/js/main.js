@@ -94,6 +94,35 @@ var MODEL = function () {
         });
     }
 
+    // function herokuServer() {
+    //     var fetchObj;
+    //     let fromDate = "";
+    //     fetchObj = fetch(`https://riksy.herokuapp.com/all`)
+    //         .then(handleFetchErrors)
+    //         .then(response => {
+    //             increaseProgressbar();
+    //             return response.json();
+    //         })
+    //         .catch(error => console.log(error));
+
+    //     fetchObj.then((data) => {
+    //         let readyArr = formatHerokuArr(data);
+    //         CONTROLLER.storeArray(readyArr, 'all');
+    //         searchDate = fromDate;
+    //     });
+
+    // }
+
+    // function formatHerokuArr(arr) {
+    //     let formatArr = arr.map(function(obj) {
+    //         let newObj = obj;
+    //         newObj.numberofspeeches = parseInt(obj.numberOfSpeeches);
+    //         delete newObj.numberOfSpeeches;
+    //         return newObj;
+    //     });
+    //     return formatArr;
+    // }
+
     /**
      * pushes speeches to mp-array using the index
      ** @param {promise} data - the promise recently fetched
@@ -115,6 +144,7 @@ var MODEL = function () {
      */
     function increaseProgressbar() {
         var percent = Math.round(loaded / 349 * 100);
+        // let percent = 100;
         var progress = document.querySelector(".progress-bar");
         progress.innerHTML = percent + "%";
         progress.style.width = percent + "%";
@@ -195,7 +225,9 @@ var MODEL = function () {
         },
 
         initMPObject: function initMPObject() {
+            //old setup
             fetchAllMPs();
+            // herokuServer();
         },
 
         /**
