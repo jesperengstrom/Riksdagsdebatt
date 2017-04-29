@@ -89,7 +89,8 @@ var MODEL = function () {
     function herokuServer() {
         var fetchObj;
         var fromDate = "";
-        fetchObj = fetch("https://riksdagen-server.herokuapp.com/all").then(handleFetchErrors).then(function (response) {
+        // fetchObj = fetch(`https://riksy.herokuapp.com/all`)
+        fetchObj = fetch("http://talartoppen.azurewebsites.net/all").then(handleFetchErrors).then(function (response) {
             increaseProgressbar();
             return response.json();
         }).catch(function (error) {
@@ -133,7 +134,7 @@ var MODEL = function () {
      * progress-bar on page. Should really be done in VIEW...
      */
     function increaseProgressbar() {
-        //let percent = Math.round((loaded / 349) * 100);
+        // let percent = Math.round((loaded / 349) * 100);
         var percent = 100;
         var progress = document.querySelector(".progress-bar");
         progress.innerHTML = percent + "%";
@@ -216,7 +217,7 @@ var MODEL = function () {
 
         initMPObject: function initMPObject() {
             //old setup
-            //fetchAllMPs();
+            // fetchAllMPs();
             herokuServer();
         },
 
