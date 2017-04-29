@@ -65,3 +65,10 @@ _Den stora förbättringen_ som också är en **todo**, är att sätta upp en eg
 * Snyggare transitions mellan de olika skärmarna.
 * En bottenlista - ledamöterna som talar minst.
 * Möjlighet för användaren att ställa in tidsramen för sökningen.
+
+---
+**UPDATE**
+
+Master branch makes lots-o-calls to Riksdagen
+
+Gh-pages branch runs node server on Azure (but refuses to update)
