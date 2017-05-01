@@ -197,6 +197,9 @@ a {
   margin-top: .3rem;
   float: right; }
 
+.bigger {
+  transform: scale(1.1); }
+
 #page-wrap {
   margin-bottom: 56px; }
 
@@ -229,6 +232,9 @@ a {
 .em {
   height: 21px !important;
   width: 21px !important; }
+
+.nav-item {
+  transition: all 0.5s ease; }
 
 .modal-content {
   padding: 2rem; }

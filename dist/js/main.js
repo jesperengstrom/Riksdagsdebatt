@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 // MP = Member of Parliament
 
@@ -13,6 +13,7 @@ var MODEL = function () {
     var loaded = 0;
     //stores from when the last search was made
     var searchDate;
+    var sortOrder = 'desc';
 
     /**
      * Returns all MPs
@@ -75,7 +76,7 @@ var MODEL = function () {
         var countComebacks = 'Ja';
 
         var _loop = function _loop(i) {
-            fetchObj = fetch("https://data.riksdagen.se/anforandelista/?rm=2016%2F17&anftyp=" + countComebacks + "&d=" + fromDate + "&ts=&parti=&iid=" + mps[i].id + "&sz=200&utformat=json").then(handleFetchErrors).then(function (response) {
+            fetchObj = fetch('https://data.riksdagen.se/anforandelista/?rm=2016%2F17&anftyp=' + countComebacks + '&d=' + fromDate + '&ts=&parti=&iid=' + mps[i].id + '&sz=200&utformat=json').then(handleFetchErrors).then(function (response) {
                 return response.json();
             }).then(function (data) {
                 return addSpeechToArray(data, i);
@@ -131,7 +132,11 @@ var MODEL = function () {
     function addSpeechToArray(data, i) {
         allMPs[i].numberofspeeches = parseInt(data.anforandelista['@antal']);
         if (data.anforandelista['@antal'] !== '0') {
-            allMPs[i].speeches = data.anforandelista.anforande;
+            //in case of only one speech, have to make it an array manually
+            if (allMPs[i].numberofspeeches === 1) {
+                allMPs[i].speeches = [];
+                allMPs[i].speeches.push(data.anforandelista.anforande);
+            } else allMPs[i].speeches = data.anforandelista.anforande;
             console.log('getting speeches');
             loaded += 1;
             increaseProgressbar();
@@ -157,15 +162,19 @@ var MODEL = function () {
      * * @param {string} prop - property to sort
      */
     function sortNumberOfSpeeches(arr, prop) {
-        return arr.filter(function (val) {
+        var filtered = arr.filter(function (val) {
 
             //Ajax async sometimes cause undefined values to turn up on the toplist. As for now i am simply removing that mp + logging it.
             //Better than to set their speech rate to 0 as that effects the party stats negatively.
             if (isNaN(val[prop])) console.log("filter removed an undefined", val);
             return !isNaN(val[prop]);
-        }).sort(function (a, b) {
+        });
+        if (sortOrder === 'desc') return filtered.sort(function (a, b) {
             return a[prop] > b[prop] ? -1 : 1;
         });
+        if (sortOrder === 'asc') return filtered.sort(function (a, b) {
+            return a[prop] < b[prop] ? -1 : 1;
+        });else console.log("error!!");
     }
 
     /**
@@ -207,7 +216,8 @@ var MODEL = function () {
          *  * @param {string} which - Either all or a current selection
          */
         getArray: function getArray(which) {
-            return which === 'all' ? allMPs : filteredMPs;
+            // let sorted = sortNumberOfSpeeches(mps, 'numberofspeeches');
+            return which === 'all' ? sortNumberOfSpeeches(allMPs, 'numberofspeeches') : sortNumberOfSpeeches(filteredMPs, 'numberofspeeches');
         },
 
         /**
@@ -216,8 +226,11 @@ var MODEL = function () {
          * * @param {string} which - store all or current selection
          */
         setArray: function setArray(mps, which) {
-            var sorted = sortNumberOfSpeeches(mps, 'numberofspeeches');
-            return which === 'all' ? allMPs = sorted : filteredMPs = sorted;
+            return which === 'all' ? allMPs = mps : filteredMPs = mps;
+        },
+
+        setSortOrder: function setSortOrder(order) {
+            sortOrder = order;
         },
 
         getSearchDate: function getSearchDate() {
@@ -354,10 +367,28 @@ var CONTROLLER = function () {
          * Depening on which one, the right function runs and all other sections are hidden.
          */
         navClick: function navClick() {
+            document.querySelectorAll(".main-lists").forEach(function (el) {
+                el.classList.remove("active", "bigger");
+            });
+
+            //reset all party filters
+            document.querySelectorAll('.partyBtn').forEach(function (el) {
+                el.classList.remove('active', 'activeParty');
+            });
+
+            //Default sort order for every case except Bottenlistan
+            MODEL.setSortOrder('desc');
+
             var clicked = this.firstChild.nodeValue;
 
             switch (clicked) {
                 case "Topplistan":
+                    this.parentElement.classList.add("active", "bigger");
+                    prepareToPrintToplist('all');
+                    break;
+                case "Bottenlistan":
+                    this.parentElement.classList.add("active", "bigger");
+                    MODEL.setSortOrder('asc');
                     prepareToPrintToplist('all');
                     break;
                 case "Om":
@@ -437,7 +468,7 @@ var VIEW = function () {
      */
     function listenersForToplist(mps) {
         for (var i in mps) {
-            document.querySelector("tr[data-id=\"" + mps[i].id + "\"]").addEventListener('click', CONTROLLER.openModal.bind(null, mps[i]));
+            document.querySelector('tr[data-id="' + mps[i].id + '"]').addEventListener('click', CONTROLLER.openModal.bind(null, mps[i]));
         }
     }
 
@@ -486,22 +517,23 @@ var VIEW = function () {
         var sp = this.speeches,
             eMega = '<i class="em em-mega"> </i>',
             eSpeech = '<i class="em em-speech_balloon"> </i>';
+        ul.innerHTML = "";
 
         // no speeches
         if (!sp) return '<i class="em em-disappointed"></i>';
-
+        console.log(sp.length);
         for (var i in sp) {
             // if the previous debate was the same as this one, then skip it...
             // the loose compare is important since it accepts string "0".
             if (i == 0 || sp[i].avsnittsrubrik !== sp[i - 1].avsnittsrubrik) {
-                string += "<li> \n                            <span class=\"" + (sp[i].replik == 'Y' ? 'comeback' : 'own') + "-debate debate-topic\" id=\"" + sp[i].anforande_id + "\">\n                            " + trimString(sp[i].avsnittsrubrik) + "</span>\n                            <span class=\"debate-context\">" + (capitalizeFirst(sp[i].kammaraktivitet) || '') + " " + sp[i].dok_datum + ".</span> \n                            ";
+                string += '<li> \n                            <span class="' + (sp[i].replik == 'Y' ? 'comeback' : 'own') + '-debate debate-topic" id="' + sp[i].anforande_id + '">\n                            ' + trimString(sp[i].avsnittsrubrik) + '</span>\n                            <span class="debate-context">' + (capitalizeFirst(sp[i].kammaraktivitet) || '') + ' ' + sp[i].dok_datum + '.</span> \n                            ';
                 count++;
 
                 // If the next topic will be a new one, close the list item.
                 if (i > sp.length - 1 && sp[i].avsnittsrubrik !== sp[i + 1].avsnittsrubrik) string += '</li>';
 
                 // ... instead print out an emoji
-            } else string += "<i id=\"" + sp[i].anforande_id + "\" class=\"em em-" + (sp[i].replik == 'Y' ? 'speech_balloon' : 'mega') + "\"></i>";
+            } else string += '<i id="' + sp[i].anforande_id + '" class="em em-' + (sp[i].replik == 'Y' ? 'speech_balloon' : 'mega') + '"></i>';
 
             speechArr.push(sp[i]);
             if (count === 10) break;
@@ -526,7 +558,7 @@ var VIEW = function () {
             //print search date in nav bar/hero (depending on screen size)
             var datelines = Array.from(document.querySelectorAll(".lead-smaller"));
             datelines.forEach(function (elem) {
-                return elem.innerHTML = "* " + (MODEL.getSearchDate() || "Under riksmötet 2016/17");
+                return elem.innerHTML = '* ' + (MODEL.getSearchDate() || "Under riksmötet 2016/17");
             });
 
             //I found no way to split a table in sections, so I had to make two
@@ -551,7 +583,7 @@ var VIEW = function () {
                 if (i >= 5) {
                     toplist = toplistRight;
                 }
-                toplist.innerHTML += "\n                <tr data-id=\"" + mps[i].id + "\" class=\"bg-" + mps[i].party + "\">\n                    <th scope=\"row\">" + (i + 1) + "</th>\n                    <td class=\"td-img\">\n                        <div class=\"mp-img-container border-" + mps[i].party + "\">\n                            <img src=\"" + mps[i].image + "\" class=\"mp-img\" alt=\"" + mps[i].firstname + " " + mps[i].lastname + "\">\n                        </div>\n                    </td>\n                    <td>" + mps[i].firstname + " " + mps[i].lastname + " (" + mps[i].party + ")</td>\n                    <td class=\"td-right\">" + mps[i].numberofspeeches + "</td>\n                </tr>\n                ";
+                toplist.innerHTML += '\n                <tr data-id="' + mps[i].id + '" class="bg-' + mps[i].party + '">\n                    <th scope="row">' + (i + 1) + '</th>\n                    <td class="td-img">\n                        <div class="mp-img-container border-' + mps[i].party + '">\n                            <img src="' + mps[i].image + '" class="mp-img" alt="' + mps[i].firstname + ' ' + mps[i].lastname + '">\n                        </div>\n                    </td>\n                    <td>' + mps[i].firstname + ' ' + mps[i].lastname + ' (' + mps[i].party + ')</td>\n                    <td class="td-right">' + mps[i].numberofspeeches + '</td>\n                </tr>\n                ';
                 toplistArr.push(mps[i]);
             }
             listenersForToplist(toplistArr);
@@ -573,14 +605,14 @@ var VIEW = function () {
                 if (last == "-") last = "de oberoende";
 
                 var conclusion = document.getElementById("party-chart-conclusion");
-                conclusion.innerHTML = "<mark>Under perioden var " + data.labels[0] + ":s ledam\xF6ter mest p\xE5 hugget (talade " + data.series[0][0].value + " g\xE5nger) \n                                        medan " + last + " var s\xE4mst p\xE5 att ta till orda (" + data.series[0][data.series[0].length - 1].value + " g\xE5nger).</mark>";
+                conclusion.innerHTML = '<mark>Under perioden var ' + data.labels[0] + ':s ledam\xF6ter mest p\xE5 hugget (talade ' + data.series[0][0].value + ' g\xE5nger) \n                                        medan ' + last + ' var s\xE4mst p\xE5 att ta till orda (' + data.series[0][data.series[0].length - 1].value + ' g\xE5nger).</mark>';
             }
             if (which === 'genderChart') {
                 CHART.makeGenderChart(data);
 
                 var percent = Math.round((data.series[0][0].value - data.series[0][1].value) / data.series[0][1].value * 100);
                 var _conclusion = document.getElementById("gender-chart-conclusion");
-                _conclusion.innerHTML = "Under perioden talade en " + data.labels[0] + " i Riksdagen " + percent + "% oftare (" + data.series[0][0].value + " g\xE5nger) \xE4n en " + data.labels[1] + " (" + data.series[0][1].value + " g\xE5nger).";
+                _conclusion.innerHTML = 'Under perioden talade en ' + data.labels[0] + ' i Riksdagen ' + percent + '% oftare (' + data.series[0][0].value + ' g\xE5nger) \xE4n en ' + data.labels[1] + ' (' + data.series[0][1].value + ' g\xE5nger).';
             }
         },
 
@@ -589,13 +621,13 @@ var VIEW = function () {
          */
         printModal: function printModal() {
             //Heading with pic & name
-            var modalHeading = this.firstname + " " + this.lastname + " (" + this.party + ") ";
-            var modalPic = "<div class=\"mp-img-container-modal\">\n                            <img src=\"" + this.image + "\" class=\"mp-img\" alt=\"" + this.firstname + " " + this.lastname + "\"></div>";
+            var modalHeading = this.firstname + ' ' + this.lastname + ' (' + this.party + ') ';
+            var modalPic = '<div class="mp-img-container-modal">\n                            <img src="' + this.image + '" class="mp-img" alt="' + this.firstname + ' ' + this.lastname + '"></div>';
 
-            var hasSpeeches = this.speeches ? "<br>Nedan visas de senaste tillf\xE4llena. Klicka f\xF6r att l\xE4sa vad " + (this.gender == 'man' ? 'han' : 'hon') + " sade.</p>" : '<br>Därför finns det inget att visa här.</p>';
+            var hasSpeeches = this.speeches ? '<br>Nedan visas de senaste tillf\xE4llena. Klicka f\xF6r att l\xE4sa vad ' + (this.gender == 'man' ? 'han' : 'hon') + ' sade.</p>' : '<br>Därför finns det inget att visa här.</p>';
 
             //Some info bout the mp
-            var modalFacts = "\n                <p><strong>F\xF6dd:</strong> " + this.born + ". <strong>Valkrets:</strong> " + this.electorate + ".</p>\n                <p>" + this.firstname + " har debatterat i Riksdagen " + this.numberofspeeches + " g\xE5nger sedan " + (MODEL.getSearchDate() || "riksmötet 2016/17 öppnade") + ". \n                " + hasSpeeches + "\n                ";
+            var modalFacts = '\n                <p><strong>F\xF6dd:</strong> ' + this.born + '. <strong>Valkrets:</strong> ' + this.electorate + '.</p>\n                <p>' + this.firstname + ' har debatterat i Riksdagen ' + this.numberofspeeches + ' g\xE5nger sedan ' + (MODEL.getSearchDate() || "riksmötet 2016/17 öppnade") + '. \n                ' + hasSpeeches + '\n                ';
 
             document.getElementById("mpModalLabel").innerHTML = modalHeading;
             document.getElementById("modal-pic").innerHTML = modalPic;
@@ -622,7 +654,7 @@ var VIEW = function () {
             //body
             speechElem.querySelector("#speech-body").innerHTML = speech;
             //footer
-            speechElem.querySelector("#speech-footer").innerHTML = "\n            <mark><a target=\"_blank\" href=\"" + obj.protokoll_url_www + "\">L\xE4s hela debatten h\xE4r</a></mark>";
+            speechElem.querySelector("#speech-footer").innerHTML = '\n            <mark><a target="_blank" href="' + obj.protokoll_url_www + '">L\xE4s hela debatten h\xE4r</a></mark>';
             //button
             speechElem.querySelector("button").addEventListener("click", function () {
                 return VIEW.showModalSection("modal-speech-list");
@@ -631,8 +663,8 @@ var VIEW = function () {
 
         //toggles the modal sections visibility
         showModalSection: function showModalSection(section) {
-            var listElem = document.getElementById("modal-speech-list").className = "hidden";
-            var speechElem = document.getElementById("modal-speech-text").className = "hidden";
+            document.getElementById("modal-speech-list").className = "hidden";
+            document.getElementById("modal-speech-text").className = "hidden";
 
             document.getElementById(section).className = "visible";
         },

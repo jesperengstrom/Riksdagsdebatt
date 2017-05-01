@@ -11,6 +11,7 @@ const MODEL = (function() {
     var loaded = 0;
     //stores from when the last search was made
     var searchDate;
+    var sortOrder = 'desc';
 
     /**
      * Returns all MPs
@@ -121,7 +122,11 @@ const MODEL = (function() {
     function addSpeechToArray(data, i) {
         allMPs[i].numberofspeeches = parseInt(data.anforandelista['@antal']);
         if (data.anforandelista['@antal'] !== '0') {
-            allMPs[i].speeches = data.anforandelista.anforande;
+            //in case of only one speech, have to make it an array manually
+            if (allMPs[i].numberofspeeches === 1) {
+                allMPs[i].speeches = [];
+                allMPs[i].speeches.push(data.anforandelista.anforande);
+            } else allMPs[i].speeches = data.anforandelista.anforande;
             console.log('getting speeches');
             loaded += 1;
             increaseProgressbar();
@@ -147,13 +152,16 @@ const MODEL = (function() {
      * * @param {string} prop - property to sort
      */
     function sortNumberOfSpeeches(arr, prop) {
-        return arr.filter((val) => {
+        let filtered = arr.filter((val) => {
 
             //Ajax async sometimes cause undefined values to turn up on the toplist. As for now i am simply removing that mp + logging it.
             //Better than to set their speech rate to 0 as that effects the party stats negatively.
             if (isNaN(val[prop])) console.log("filter removed an undefined", val);
             return (!isNaN(val[prop]));
-        }).sort((a, b) => a[prop] > b[prop] ? -1 : 1);
+        });
+        if (sortOrder === 'desc') return filtered.sort((a, b) => a[prop] > b[prop] ? -1 : 1);
+        if (sortOrder === 'asc') return filtered.sort((a, b) => a[prop] < b[prop] ? -1 : 1);
+        else console.log("error!!")
     }
 
     /**
@@ -198,7 +206,8 @@ const MODEL = (function() {
          *  * @param {string} which - Either all or a current selection
          */
         getArray: function(which) {
-            return which === 'all' ? allMPs : filteredMPs;
+            // let sorted = sortNumberOfSpeeches(mps, 'numberofspeeches');
+            return which === 'all' ? sortNumberOfSpeeches(allMPs, 'numberofspeeches') : sortNumberOfSpeeches(filteredMPs, 'numberofspeeches');
         },
 
         /**
@@ -207,8 +216,11 @@ const MODEL = (function() {
          * * @param {string} which - store all or current selection
          */
         setArray: function(mps, which) {
-            let sorted = sortNumberOfSpeeches(mps, 'numberofspeeches');
-            return which === 'all' ? allMPs = sorted : filteredMPs = sorted;
+            return which === 'all' ? allMPs = mps : filteredMPs = mps;
+        },
+
+        setSortOrder: function(order) {
+            sortOrder = order;
         },
 
         getSearchDate: function() {
@@ -344,10 +356,28 @@ const CONTROLLER = (function() {
          * Depening on which one, the right function runs and all other sections are hidden.
          */
         navClick: function() {
+            document.querySelectorAll(".main-lists").forEach((el) => {
+                el.classList.remove("active", "bigger");
+            });
+
+            //reset all party filters
+            document.querySelectorAll('.partyBtn').forEach((el) => {
+                el.classList.remove('active', 'activeParty');
+            });
+
+            //Default sort order for every case except Bottenlistan
+            MODEL.setSortOrder('desc');
+
             let clicked = this.firstChild.nodeValue;
 
             switch (clicked) {
                 case "Topplistan":
+                    this.parentElement.classList.add("active", "bigger");
+                    prepareToPrintToplist('all');
+                    break;
+                case "Bottenlistan":
+                    this.parentElement.classList.add("active", "bigger");
+                    MODEL.setSortOrder('asc');
                     prepareToPrintToplist('all');
                     break;
                 case "Om":
@@ -480,10 +510,11 @@ const VIEW = (function() {
         const sp = this.speeches,
             eMega = '<i class="em em-mega"> </i>',
             eSpeech = '<i class="em em-speech_balloon"> </i>';
+        ul.innerHTML = "";
 
         // no speeches
         if (!sp) return '<i class="em em-disappointed"></i>';
-
+        console.log(sp.length);
         for (let i in sp) {
             // if the previous debate was the same as this one, then skip it...
             // the loose compare is important since it accepts string "0".
@@ -646,8 +677,8 @@ const VIEW = (function() {
 
         //toggles the modal sections visibility
         showModalSection: function(section) {
-            let listElem = document.getElementById("modal-speech-list").className = "hidden";
-            let speechElem = document.getElementById("modal-speech-text").className = "hidden";
+            document.getElementById("modal-speech-list").className = "hidden";
+            document.getElementById("modal-speech-text").className = "hidden";
 
             document.getElementById(section).className = "visible";
         },
