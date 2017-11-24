@@ -38,7 +38,7 @@ gulp.task('sass', () => {
 gulp.task('babel', () => {
     return gulp.src('./src/js/*.js')
         .pipe(babel({
-            presets: ['latest']
+            presets: ['env']
         }))
         .pipe(gulp.dest('dist/js'));
 });
